@@ -1,157 +1,144 @@
 import React from "react";
-import WriterProfile from "@/components/WriterProfile";
-import {
-  baseExperienceQuery,
-  baseGenreQuery,
-  baseProfileQuery,
-  baseProjectQuery,
-  baseTagQuery,
-  baseUserQuery,
-} from "@/utils/queries";
-import { kys } from "@/utils/kysely/server";
-import { auth } from "@/auth";
-import { LoaderFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import invariant from "tiny-invariant";
-import {prisma} from "~/.server/prisma";
+import { prisma } from "~/.server/prisma";
+import {
+  Outlet,
+  useLoaderData,
+  useNavigate,
+  useOutlet,
+} from "@remix-run/react";
+import Modal from "react-modal";
+import { WriterProfileItem } from "~/routes/user.$userId.profile/WriterProfileItem";
+import { WriterProfileStoryCard } from "~/routes/user.$userId.profile/WriterProfileStoryCard";
+import {Button} from "~/components/ui/button";
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, context }: LoaderFunctionArgs) {
   invariant(params.userId, "userId is required");
   const { userId } = params;
-  const session = await auth();
 
-  prisma.users
+  const user = await prisma.user.findFirstOrThrow({
+    where: {
+      id: Number(userId),
+    },
+  });
+  const profile = await prisma.user_profile.findFirstOrThrow({
+    where: {
+      user_id: Number(userId),
+    },
+  });
+  const projects = await prisma.user_profile_project.findMany({
+    where: {
+      profile_id: profile.id,
+    },
+    include: { project_projectgenre: true, project_projecttag: true },
+  });
+  const experiences = await prisma.user_profile_experience.findMany({
+    where: {
+      profile_id: profile.id,
+    },
+  });
 
-  const user = await baseUserQuery
-    .where("id", "=", Number(userId))
-    .executeTakeFirstOrThrow();
-  const profile = await baseProfileQuery
-    .where("user_id", "=", Number(userId))
-    .executeTakeFirstOrThrow();
-  const projects = await baseProjectQuery
-    .where("profile_id", "=", profile.id)
-    .execute();
-  const experiences = await baseExperienceQuery
-    .where("profile_id", "=", profile.id)
-    .execute();
-  const tags = await baseTagQuery.execute();
-  const genres = await baseGenreQuery.execute();
+  const isUsersProfile = Number(context?.user?.id) === Number(userId);
 
   return {
     user,
     profile,
     projects,
     experiences,
-    tags,
-    genres,
+    isUsersProfile,
   };
 }
 
-export default async function WritersPage({
-  params,
-}: {
-  params: { userId: string };
-}) {
-  const { userId } = params;
-  const session = await auth();
-
-  const user = await baseUserQuery
-    .where("id", "=", Number(userId))
-    .executeTakeFirstOrThrow();
-  const profile = await baseProfileQuery
-    .where("user_id", "=", Number(userId))
-    .executeTakeFirstOrThrow();
-  const projects = await baseProjectQuery
-    .where("profile_id", "=", profile.id)
-    .execute();
-  const experiences = await baseExperienceQuery
-    .where("profile_id", "=", profile.id)
-    .execute();
-  const tags = await baseTagQuery.execute();
-  const genres = await baseGenreQuery.execute();
-  const isUsersProfile = Number(session?.user?.id) === Number(userId);
-
-  async function createProfile(formData: FormData & { plot_title: string }) {
-    "use server";
-    const plot_title = formData.get("plot_title");
-    const synopsis = formData.get("synopsis") as string;
-    const type = formData.get("type") as string;
-    const logline = formData.get("logline") as string;
-    const hook = formData.get("hook") as string;
-    const similar_works = formData.get("similar_works") as string;
-    const tags = formData.getAll("tags") as string[];
-    const genres = formData.getAll("genres") as string[];
-    const project = await kys
-      .insertInto("user_profile_project")
-      .values({
-        plot_title,
-        synopsis,
-        profile_id: profile.id,
-        type,
-        logline,
-        hook,
-        similar_works,
-      })
-      .returningAll()
-      .executeTakeFirstOrThrow();
-    await kys
-      .insertInto("project_projecttag")
-      .values(
-        tags.map((tag) => ({
-          project_tag_id: Number(tag),
-          project_id: project.id,
-        }))
-      )
-      .execute();
-    await kys
-      .insertInto("project_projectgenre")
-      .values(
-        genres.map((genre) => ({
-          project_genre_id: Number(genre),
-          project_id: project.id,
-        }))
-      )
-      .execute();
-  }
-
-  async function createExperience(formData: FormData) {
-    "use server";
-    await kys
-      .insertInto("user_profile_experience")
-      .values({
-        location: formData.get("location") as string,
-        start_date: new Date(formData.get("start_date") as string),
-        end_date: new Date(formData.get("end_date") as string),
-        description: formData.get("description") as string,
-        title: formData.get("title") as string,
-        profile_id: profile.id,
-        company_name: formData.get("company_name") as string,
-      })
-      .execute();
-  }
-
-  async function updateAbout(formData: FormData) {
-    "use server";
-    await kys
-      .updateTable("user_profile")
-      .where("id", "=", profile.id)
-      .set({
-        about: formData.get("about") as string,
-      })
-      .execute();
-  }
+export default async function WritersPage() {
+  const { user, profile, projects, experiences, isUsersProfile } =
+    useLoaderData<typeof loader>();
+  const inOutlet = !!useOutlet();
+  const navigate = useNavigate();
 
   return (
-    <WriterProfile
-      profile={profile}
-      user={user}
-      projects={projects}
-      experiences={experiences}
-      mutateProfileAction={createProfile}
-      mutateExperienceAction={createExperience}
-      tags={tags}
-      genres={genres}
-      isUsersProfile={isUsersProfile}
-      mutateAboutAction={updateAbout}
-    />
+    <div>
+      <div className={""}>
+        <img
+          src={
+            profile.background_image ||
+            "https://cdn.yazarodasi.com/profile-background-placeholder.png"
+          }
+          alt={"Background"}
+          width={1920}
+          height={400}
+          className={"w-full h-48 object-cover"}
+        />
+      </div>
+
+      <div className={"container mx-auto"}>
+        <div className={"xl:mx-96"}>
+          <div className={""}>
+            <img
+              src={
+                user.image ||
+                "https://cdn.yazarodasi.com/profile-photo-placeholder.webp"
+              }
+              alt={"Avatar"}
+              width={150}
+              height={150}
+              className={"rounded-full -translate-y-1/2"}
+            />
+          </div>
+          <div className={"flex flex-row"}>
+            <div className={"flex flex-col min-w-full"}>
+              <p className={"text-5xl font-bold mb-10"}>{user.name}</p>
+              {isUsersProfile && (
+                <Button className={"w-20 h-8 m mb-2"}>Düzenle</Button>
+              )}
+              <div className={"min-w-full p-5 bg-[#F9F9FA]"}>
+                <p className={"text-2xl inline mb-5 "}>{profile.about}</p>
+              </div>
+            </div>
+          </div>
+          <div className={"flex flex-row text-sm"}>
+            <p className={"text-3xl mb-3 font-bold "}>Projelerim</p>
+            {isUsersProfile && (
+              <Button
+                onClick={() => navigate("/project")}
+                className={"w-20 h-8 ml-5"}
+              >
+                Proje ekle
+              </Button>
+            )}
+          </div>
+          <div className={"mb-5 grid grid-cols-3 gap-4"}>
+            {projects.map((experience, index) => (
+              <WriterProfileStoryCard
+                {...experience}
+                className={"h-72"}
+                key={index}
+              />
+            ))}
+          </div>
+          <div className={"flex flex-row text-sm"}>
+            <p className={"text-3xl mb-3 font-bold"}>İşler</p>
+            {isUsersProfile && (
+              <Button
+                onClick={() => {
+                  navigate("/experience");
+                }}
+                className={"w-20 h-8 ml-5"}
+              >
+                İş ekle
+              </Button>
+            )}
+          </div>
+          <div className={"flex flex-col gap-8 mb-36"}>
+            {experiences.map((experience, index) => (
+              <WriterProfileItem {...experience} key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <Modal isOpen={inOutlet}>
+        <Outlet />
+      </Modal>
+    </div>
   );
 }
