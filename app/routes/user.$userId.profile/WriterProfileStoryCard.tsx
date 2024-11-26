@@ -1,6 +1,5 @@
 import React from 'react';
-import Image from "next/image";
-import {cn} from "@/utils/classname/cn";
+import {cn} from "~/utils";
 
 
 export type WriterProfileStoryCardProps = {
@@ -27,9 +26,8 @@ export const WriterProfileStoryCard: React.FC<WriterProfileStoryCardProps> = (
     return (
         <div className={cn(className, 'border border-yo-orange rounded')}>
             <div className={'h-1/2 relative'}>
-                <Image src={''} alt={'Story Thumbnail'}
-                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                       fill/>
+                <img src={''} alt={'Story Thumbnail'}
+                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"/>
             </div>
             <div className={" text-xs  p-2"}>
                 <h1 className={"font-extrabold mb-1 underline-offset-4 underline overflow-ellipsis"}>{plot_title}</h1>

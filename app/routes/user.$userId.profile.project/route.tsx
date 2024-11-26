@@ -1,9 +1,9 @@
 import { ActionFunctionArgs } from "@remix-run/node";
 import {
-  createProjectSchema,
   profileProjectUpdateSchema,
 } from "~/.server/schemas/profile-project-update.schema";
 import { prisma } from "~/.server/prisma";
+import {profileProjectCreateSchema} from "~/.server/schemas/profile-project-create.schema";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const method = request.method;
@@ -28,7 +28,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       data: payload,
     });
   } else if (method === "POST") {
-    const payload = createProjectSchema.parse(body);
+    const payload = profileProjectCreateSchema.parse(body);
     const profile = await prisma.user_profile.findFirstOrThrow({
       where: {
         user_id: Number(currentUser.id),
