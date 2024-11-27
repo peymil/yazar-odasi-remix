@@ -25,3 +25,4 @@ export function useOptionalUser(): user | undefined {
     }
     return data.user;
 }
+

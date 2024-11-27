@@ -11,6 +11,8 @@ import { createReadableStreamFromReadable } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+import { authTokenCookie } from "~/.server/cookies";
+import { prisma } from "~/.server/prisma";
 
 const ABORT_DELAY = 5_000;
 
@@ -95,8 +97,24 @@ function handleBrowserRequest(
   responseHeaders: Headers,
   remixContext: EntryContext
 ) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     let shellRendered = false;
+    const accessToken = (await authTokenCookie.parse(
+      request.headers.get("Cookie") || ""
+    )) as string | null;
+    if (accessToken) {
+      const user = await prisma.session.findFirst({
+        where: {
+          id: accessToken,
+        },
+        include: {
+          user: true,
+        },
+      });
+      if (user) {
+        remixContext.user = user.user;
+      }
+    }
     const { pipe, abort } = renderToPipeableStream(
       <RemixServer
         context={remixContext}
