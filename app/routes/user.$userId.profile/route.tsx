@@ -99,7 +99,7 @@ export default function Layout() {
             <p className={"text-3xl mb-3 font-bold "}>Projelerim</p>
             {isUsersProfile && (
               <Button
-                onClick={() => navigate("/project")}
+                onClick={() => navigate("./project")}
                 className={"w-20 h-8 ml-5"}
               >
                 Proje ekle

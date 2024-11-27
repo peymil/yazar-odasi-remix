@@ -1,9 +1,10 @@
 import { ActionFunctionArgs } from "@remix-run/node";
-import {
-  profileProjectUpdateSchema,
-} from "~/.server/schemas/profile-project-update.schema";
+import { profileProjectUpdateSchema } from "~/.server/schemas/profile-project-update.schema";
 import { prisma } from "~/.server/prisma";
-import {profileProjectCreateSchema} from "~/.server/schemas/profile-project-create.schema";
+import { profileProjectCreateSchema } from "~/.server/schemas/profile-project-create.schema";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const method = request.method;
@@ -40,4 +41,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
   } else {
     throw new Error("Method not allowed");
   }
+}
+
+export default function Layout() {
+  return (
+    <form className={"flex flex-col"}>
+      <Label htmlFor="title">Title:</Label>
+      <Input name="title" type="text" required className={"mb-8"} />
+      <Label htmlFor="description">Description:</Label>
+      <Input name="description" type="text" required className={"mb-8"} />
+      <Label htmlFor="link">Link:</Label>
+      <Input name="link" type="text" required className={"mb-8"} />
+      <Button>Save</Button>
+    </form>
+  );
 }
