@@ -3,17 +3,17 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { prisma } from "~/.server/prisma";
 
-import { ActionFunctionArgs, redirect } from "@remix-run/node";
+import { ActionFunctionArgs } from "@remix-run/node";
 import { authSignInSchema } from "~/.server/schemas/auth-sign-in.schema";
-import { verifyPassword } from "~/.server/auth";
 import { Form } from "@remix-run/react";
+import { verifyPassowrd } from "~/.server/auth";
 
 export async function action({ request }: ActionFunctionArgs) {
   const payload = authSignInSchema.parse(request.body);
   const user = await prisma.user.findFirstOrThrow({
     where: { email: payload.email },
   });
-  if (!verifyPassword(payload.password, user.password)) {
+  if (!(await verifyPassowrd(payload.password, user.password))) {
     throw new Error("User password is incorrect");
   }
 }

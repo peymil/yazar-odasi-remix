@@ -9,6 +9,13 @@ export const profileProjectCreateSchema = z.strictObject({
   similar_works: z.string(),
   tags: z.array(z.string()),
   genres: z.array(z.string()),
+  setting: z.string(),
+  user_profile_project_characters: z.array(
+    z.strictObject({
+      name: z.string(),
+      description: z.string(),
+    })
+  ),
 });
 
 export type ProfileProjectCreatePayload = z.infer<

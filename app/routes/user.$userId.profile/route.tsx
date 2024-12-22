@@ -12,12 +12,12 @@ import { WriterProfileItem } from "~/routes/user.$userId.profile/WriterProfileIt
 import { WriterProfileStoryCard } from "~/routes/user.$userId.profile/WriterProfileStoryCard";
 import { Button } from "~/components/ui/button";
 import { getProject } from "./service.server";
-import { getUserWithRequest } from "~/.server/auth";
+import { getSessionFromRequest } from "~/.server/auth";
 
-export async function loader({ params, context, request }: LoaderFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
   invariant(params.userId, "userId is required");
   const { userId } = params;
-
+  const currentUser = await getSessionFromRequest(request);
   const user = await prisma.user.findFirstOrThrow({
     where: {
       id: Number(userId),
@@ -36,9 +36,8 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
       profile_id: profile.id,
     },
   });
-  const requestUser = await getUserWithRequest(request);
-  console.log(requestUser);
-  const isUsersProfile = Number(requestUser?.id) === Number(userId);
+
+  const isUsersProfile = currentUser?.user?.id === user.id;
 
   return {
     user,

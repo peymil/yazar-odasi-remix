@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { Link } from "@remix-run/react";
 import { useOptionalUser } from "~/lib/authUtils";
-import React from "react";
 // background: #FAFBFF;
 // text-color: #9197B3;;
 const Navbar = () => {
