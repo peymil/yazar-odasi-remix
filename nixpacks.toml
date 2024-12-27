@@ -1,0 +1,6 @@
+[start]
+cmd = 'pnpm run start'
+
+[phases.build]
+cmds = ['pnpm run prisma:generate', 'pnpm run build']
+
