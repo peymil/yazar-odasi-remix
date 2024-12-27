@@ -6,7 +6,7 @@ export default {
     theme: {
         extend: {
             colors: {
-                'yo-orange': '#E16259',
+                'yo-orange': '#FF6D2B',
                 'yo-sub-title': '#6D7175',
                 background: 'hsl(var(--background))',
                 foreground: 'hsl(var(--foreground))',

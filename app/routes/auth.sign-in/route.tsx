@@ -28,8 +28,7 @@ export async function action({request}: ActionFunctionArgs) {
 
 export default function Layout() {
     return (
-        <div>
-            <h1>Sign In</h1>
+        <div className={"container mx-auto flex items-center justify-center"}>
             <SignIn/>
         </div>
     );

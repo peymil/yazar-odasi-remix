@@ -35,11 +35,18 @@ export default function Layout() {
     return (
         <div className={'container mx-auto'}>
             <h2 className={'font-bold'}>{user.name}</h2>
-            <div className={"grid grid-rows-3 grid-flow-col gap-4 mb-3"}>
-                <div>
-                    <h3 className={'text-lg font-bold'}>Logline</h3>
-                    <p className={'text-sm'}>{project.logline}</p>
+            <div className={"flex flex-col gap-5"}>
+                <div className={'flex gap-4'}>
+                    <div>
+                        <h3 className={'text-lg font-bold'}>Logline</h3>
+                        <p className={'text-sm'}>{project.logline}</p>
+                    </div>
+                    <div>
+                        <h3 className={'text-lg font-bold'}>Zaman/Mekan</h3>
+                        <p className={'text-sm'}>{project.setting}</p>
+                    </div>
                 </div>
+
                 <div>
                     <h3 className={'text-lg font-bold'}>Hook</h3>
                     <p className={'text-sm'}>{project.hook}</p>
@@ -48,18 +55,18 @@ export default function Layout() {
                     <h3 className={'text-lg font-bold'}>Synopsis</h3>
                     <p className={'text-sm'}>{project.synopsis}</p>
                 </div>
+
                 <div>
-                    <h3 className={'text-lg font-bold'}>Zaman/Mekan</h3>
-                    <p className={'text-sm'}>{project.setting}</p>
+                    <h3 className={'mb-2 text-lg flex font-bold'}>Karakterler</h3>
+                    <div className={'grid grid-cols-3 gap-1'}>
+                        {project.user_profile_project_characters.map((character) =>
+                            <p key={character.id} className={'text-sm block'}><span
+                                className={'text-yo-sub-title'}>{character.name}</span>: {character.description}</p>
+                        )}
+                    </div>
                 </div>
             </div>
-            <h3 className={'mb-2 text-lg flex font-bold'}>Karakterler</h3>
-            <div className={'grid grid-cols-2 gap-1'}>
-                {project.user_profile_project_characters.map((character) =>
-                    <p key={character.id} className={'text-sm block'}><span
-                        className={'text-yo-sub-title'}>{character.name}</span>: {character.description}</p>
-                )}
-            </div>
+
 
         </div>
     )
