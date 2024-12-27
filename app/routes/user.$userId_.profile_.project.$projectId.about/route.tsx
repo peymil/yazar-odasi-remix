@@ -37,11 +37,11 @@ export default function Layout() {
             <h2 className={'font-bold'}>{user.name}</h2>
             <div className={"flex flex-col gap-5"}>
                 <div className={'flex gap-4'}>
-                    <div>
+                    <div className={'flex-1'}>
                         <h3 className={'text-lg font-bold'}>Logline</h3>
                         <p className={'text-sm'}>{project.logline}</p>
                     </div>
-                    <div>
+                    <div className={'flex-1'}>
                         <h3 className={'text-lg font-bold'}>Zaman/Mekan</h3>
                         <p className={'text-sm'}>{project.setting}</p>
                     </div>
