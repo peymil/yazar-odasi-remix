@@ -7,6 +7,7 @@ export default {
         extend: {
             colors: {
                 'yo-orange': '#E16259',
+                'yo-sub-title': '#6D7175',
                 background: 'hsl(var(--background))',
                 foreground: 'hsl(var(--foreground))',
                 card: {

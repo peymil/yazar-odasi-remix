@@ -1,16 +1,17 @@
 import {
+    Link,
     Links,
     Meta,
     Outlet,
     Scripts,
-    ScrollRestoration,
+    ScrollRestoration, useLoaderData,
 } from "@remix-run/react";
 import type {LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 
 import "./tailwind.css";
-import {prisma} from "~/.server/prisma";
 import {authTokenCookie} from "~/.server/cookies";
-import Navbar from "~/components/Navbar";
+import {Box, Key, LogIn, LogOut, MessageCircleQuestion, Percent, User, UserRoundPlus, Wallet} from "lucide-react";
+import {validateSessionToken} from "~/.server/auth";
 
 export const links: LinksFunction = () => [
     {rel: "preconnect", href: "https://fonts.googleapis.com"},
@@ -25,16 +26,16 @@ export const links: LinksFunction = () => [
     },
 ];
 
+export async function shouldRevalidate() {
+    return false;
+}
+
 export async function loader({request}: LoaderFunctionArgs) {
     const cookieHeader = request.headers.get("Cookie");
     const sessionToken =
         (await authTokenCookie.parse(cookieHeader));
     if (sessionToken) {
-        const session = await prisma.session.findUnique({
-            where: {id: sessionToken},
-            include: {user: true},
-        });
-
+        const session = await validateSessionToken(sessionToken);
         return {
             user: session?.user,
         };
@@ -45,7 +46,9 @@ export async function loader({request}: LoaderFunctionArgs) {
     }
 }
 
+
 export function Layout({children}: { children: React.ReactNode }) {
+    const data = useLoaderData<typeof loader>();
     return (
         <html lang="en">
         <head>
@@ -55,7 +58,93 @@ export function Layout({children}: { children: React.ReactNode }) {
             <Links/>
         </head>
         <body>
-        <Navbar/>
+        <nav className=" h-36 sticky flex items-center justify-evenly text-[#9197B3]">
+            <Link to='/' className={"relative w-32 h-32"}>
+                <img
+                    src={"https://cdn.yazarodasi.com/yazar_odasi_logo.svg"}
+                    alt={"yazar odasi logo"}
+                    sizes={"10vv"}
+                />
+            </Link>
+            <Link to="/" className={"flex gap-2"}>
+                <Key size={24}/>
+                <p>Anasayfa</p>
+            </Link>
+            <Link to="/services" className={"flex gap-2"}>
+                <Box/>
+                <p>Öne Çıkanlar</p>
+            </Link>
+            <Link to="/contacts" className={"flex gap-2"}>
+                <Percent/>
+                <p>Proje Keşfet</p>
+            </Link>
+            <Link to="/contacts" className={"flex gap-2"}>
+                <Wallet/>
+                <p>Yazar Keşfet</p>
+            </Link>
+            <Link to="/contacts" className={"flex gap-2"}>
+                <MessageCircleQuestion/>
+                <p>Açık Çağrılar</p>
+            </Link>
+            <form className="">
+                <label
+                    htmlFor="default-search"
+                    className="mb-2 text-sm font-medium text-gray-900 sr-only"
+                >
+                    Search
+                </label>
+                <div className="relative">
+                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg
+                            className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 20"
+                        >
+                            <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                            />
+                        </svg>
+                    </div>
+                    <input
+                        type="search"
+                        id="default-search"
+                        className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg "
+                        placeholder="Yazar, Proje ya da Çağrı "
+                        required
+                    />
+                </div>
+            </form>
+
+            {data?.user ? (
+                <>
+                    <Link to={`/user/${data.user.id}/profile`} className={"flex gap-2"}>
+                        <User/>
+                        <p>Profil</p>
+                    </Link>
+                    <Link to="/auth/sign-out" className={"flex gap-2"}>
+                        <LogOut/>
+                        <p>Çıkış Yap</p>
+                    </Link>
+                </>
+            ) : (
+                <>
+                    <Link to="/auth/sign-in" className={"flex gap-2"}>
+                        <LogIn/>
+                        <p>Giriş Yap</p>
+                    </Link>
+                    <Link to="/auth/sign-up" className={"flex gap-2"}>
+                        <UserRoundPlus/>
+                        <p> Üye ol</p>
+                    </Link>
+                </>
+            )}
+        </nav>
         {children}
         <ScrollRestoration/>
         <Scripts/>
