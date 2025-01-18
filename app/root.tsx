@@ -74,15 +74,15 @@ export function Layout({children}: { children: React.ReactNode }) {
                 <Box/>
                 <p>Öne Çıkanlar</p>
             </Link>
-            <Link to="/contacts" className={"flex gap-2"}>
+            <Link to="/user/project" className={"flex gap-2"}>
                 <Percent/>
                 <p>Proje Keşfet</p>
             </Link>
-            <Link to="/contacts" className={"flex gap-2"}>
+            <Link to="/user/profile" className={"flex gap-2"}>
                 <Wallet/>
                 <p>Yazar Keşfet</p>
             </Link>
-            <Link to="/contacts" className={"flex gap-2"}>
+            <Link to="/competition" className={"flex gap-2"}>
                 <MessageCircleQuestion/>
                 <p>Açık Çağrılar</p>
             </Link>
