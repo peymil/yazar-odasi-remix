@@ -86,7 +86,7 @@ export default function Layout() {
                     </div>
                     <div className={"flex flex-row"}>
                         <div className={"flex flex-col min-w-full"}>
-                            <p className={"text-5xl font-bold mb-10"}>{user.name}</p>
+                            <p className={"text-5xl font-bold mb-10"}>{profile.name}</p>
                             {isUsersProfile && (
                                 <Button className={"w-20 h-8 m mb-2"}>Düzenle</Button>
                             )}
@@ -119,14 +119,24 @@ export default function Layout() {
                     <div className={"flex flex-row text-sm"}>
                         <p className={"text-3xl mb-3 font-bold"}>İşler</p>
                         {isUsersProfile && (
-                            <Button
-                                onClick={() => {
-                                    navigate("./experience");
-                                }}
-                                className={"w-20 h-8 ml-5"}
-                            >
-                                İş ekle
-                            </Button>
+                            <>
+                                <Button
+                                    onClick={() => {
+                                        navigate("./experience");
+                                    }}
+                                    className={"w-20 h-8 ml-5"}
+                                >
+                                    İş ekle
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        navigate("/company");
+                                    }}
+                                    className={"w-32 h-8 ml-5"}
+                                >
+                                    Şirket Oluştur
+                                </Button>
+                            </>
                         )}
                     </div>
                     <div className={"flex flex-col gap-8 mb-36"}>

@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["typedSql"]
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -14,6 +14,7 @@ model company {
   name            String
   avatar          String?
   company_profile company_profile[]
+  company_users   company_user[]
   post            post[]
 }
 
@@ -27,9 +28,11 @@ model company_profile {
 }
 
 model company_user {
-  id      Int  @id @default(autoincrement())
-  user_id Int
-  user    user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id         Int     @id @default(autoincrement())
+  user_id    Int
+  company_id Int
+  user       user    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  company    company @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model competition {
@@ -39,6 +42,7 @@ model competition {
   start_date  DateTime @db.Date
   end_date    DateTime @db.Date
   avatar      String?
+
 }
 
 model competition_application {
@@ -114,6 +118,7 @@ model user_profile {
   contact_email           String?
   about                   String?
   current_title           String?
+  name                    String
   user_id                 Int
   background_image        String?
   user                    user                      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -173,7 +178,6 @@ model user {
   post_like    post_like[]
   user_profile user_profile[]
   image        String?
-  name         String
   email        String         @unique
   password     String
 }

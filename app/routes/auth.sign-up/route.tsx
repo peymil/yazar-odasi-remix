@@ -17,7 +17,6 @@ export async function action({request}: ActionFunctionArgs) {
     const user = await prisma.user.create({
         data: {
             email,
-            name,
             password: await hashPassword(password),
         },
     });
@@ -25,6 +24,7 @@ export async function action({request}: ActionFunctionArgs) {
     await prisma.user_profile.create({
         data: {
             user_id: user.id,
+            name,
             about: "About me.",
         },
     });

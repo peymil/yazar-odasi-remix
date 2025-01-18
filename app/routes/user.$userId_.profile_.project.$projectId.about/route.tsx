@@ -14,27 +14,17 @@ export async function loader({params}: LoaderFunctionArgs) {
         },
     });
 
-    const {user} = await prisma.user_profile.findFirstOrThrow({
-        where: {
-            id: project.profile_id!,
-        },
-        select: {
-            user: true,
-        },
-    });
-
     return {
         project,
-        user,
     };
 }
 
 export default function Layout() {
-    const {project, user} = useLoaderData<typeof loader>();
+    const {project} = useLoaderData<typeof loader>();
 
     return (
         <div className={'container mx-auto'}>
-            <h2 className={'font-bold'}>{user.name}</h2>
+            <h2 className={'font-bold'}>{project.plot_title}</h2>
             <div className={"flex flex-col gap-5"}>
                 <div className={'flex gap-4'}>
                     <div className={'flex-1'}>
