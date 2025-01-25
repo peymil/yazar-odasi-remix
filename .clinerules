@@ -1,6 +1,4 @@
 Colors you need to use in this map is defined in tailwind.config.ts
 
-Generate a history for every task you accomplished inside a file named .clinehistory. Use best practices of prompt engineering.
-
-
-
+Read .clienhistory file.
+Generate a history for every task you accomplished inside a file named .clinehistory. Use gmt0 timestamp.

@@ -5,22 +5,23 @@ import { UserProfileItem } from "~/components/UserProfileItem";
 import { prisma } from "~/.server/prisma";
 import type { user_profile } from "@prisma/client";
 import { profileSearch } from "@prisma/client/sql";
+import { Pagination } from "~/components/ui/pagination";
 
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const url = new URL(request.url);
     const searchQuery = url.searchParams.get("q");
-    const pageParam = url.searchParams.get("page");
-    const page = pageParam ? parseInt(pageParam) : 1;
-    const limit = 50;
-    const skip = (page - 1) * limit;
+    const limitParam = url.searchParams.get("limit");
+    const takeParam = url.searchParams.get("take");
+    const limit = limitParam ? parseInt(limitParam) : 50;
+    const take = takeParam ? parseInt(takeParam) : 0;
 
     if (!searchQuery || searchQuery.length < 2) {
         return json({ profiles: [], total: 0 });
     }
 
     const results = await prisma.$queryRawTyped(
-        profileSearch(searchQuery, limit, skip)
+        profileSearch(searchQuery, limit, take)
     )
 
     const profiles = results.map(row => ({
@@ -45,12 +46,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function UserProfileSearchRoute() {
     const { profiles, total } = useLoaderData<typeof loader>();
     const [searchParams] = useSearchParams();
-    const pageParam = searchParams.get("page");
-    const currentPage = pageParam ? parseInt(pageParam) : 1;
+    const limitParam = searchParams.get("limit");
+    const takeParam = searchParams.get("take");
+    const limit = limitParam ? parseInt(limitParam) : 50;
+    const take = takeParam ? parseInt(takeParam) : 0;
     const searchQuery = searchParams.get("q");
     const hasSearchQuery = Boolean(searchQuery && searchQuery.length >= 2);
 
-    const totalPages = Math.ceil(total / 50);
+    const hasMore = profiles.length === limit;
 
     return (
         <div className="max-w-4xl mx-auto p-4">
@@ -90,26 +93,12 @@ export default function UserProfileSearchRoute() {
                 )}
             </div>
 
-            {totalPages > 1 && (
-                <div className="mt-4 flex justify-center gap-2">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                        <a
-                            key={pageNum}
-                            href={`?${new URLSearchParams({
-                                ...Object.fromEntries(searchParams.entries()),
-                                page: pageNum.toString(),
-                            })}`}
-                            className={`px-3 py-1 rounded ${
-                                pageNum === currentPage
-                                    ? "bg-yo-orange text-white"
-                                    : "bg-white text-gray-700 hover:bg-gray-100"
-                            }`}
-                        >
-                            {pageNum}
-                        </a>
-                    ))}
-                </div>
-            )}
+            <Pagination 
+                hasMore={hasMore}
+                take={take}
+                limit={limit}
+                className="mt-4"
+            />
         </div>
     );
 }

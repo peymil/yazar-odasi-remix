@@ -1,0 +1,33 @@
+# Task: Change pagination from page-based to limit/take approach in user.project and user.profile routes
+
+Date: 1/25/2025, 5:39 PM (Europe/Istanbul)
+
+Changes made:
+1. Updated user.profile/route.tsx:
+   - Removed page-based pagination
+   - Added limit/take query parameters
+   - Updated loader to use limit/take for offset pagination
+   - Added pagination UI with Previous/Next buttons and items per page selector
+   - Added total count display
+
+2. Updated user.project/route.tsx:
+   - Implemented similar limit/take pagination
+   - Added pagination UI matching user.profile
+   - Added total count display
+   - Used projectSearch SQL with limit/take parameters
+
+3. Enhanced SearchBar component:
+   - Added placeholder prop support
+   - Made placeholder text configurable
+   - Maintained default "Search users..." placeholder
+
+Best Practices Applied:
+- Maintained consistent UI patterns across routes
+- Used semantic variable names (limit, take) for clarity
+- Added proper TypeScript types
+- Implemented progressive enhancement (works without JS)
+- Added user feedback (result counts, empty states)
+- Used proper error handling for invalid inputs
+- Maintained existing styling patterns (yo-orange theme)
+- Created reusable Pagination component for better maintainability
+- Unified design patterns between project and profile search pages

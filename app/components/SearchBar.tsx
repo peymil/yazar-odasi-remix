@@ -4,7 +4,7 @@ import { cn } from "~/utils";
 import { useEffect, useState } from "react";
 import { useSubmit, useSearchParams } from "@remix-run/react";
 
-export function SearchBar({ className }: { className?: string }) {
+export function SearchBar({ className, placeholder = "Search users..." }: { className?: string, placeholder?: string }) {
     const [searchParams] = useSearchParams();
     const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
     const submit = useSubmit();
@@ -26,7 +26,7 @@ export function SearchBar({ className }: { className?: string }) {
                     name="q"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search users..."
+                    placeholder={placeholder}
                     className="w-full pl-4 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-yo-orange"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">

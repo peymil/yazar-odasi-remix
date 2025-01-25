@@ -1,36 +1,59 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { prisma } from "~/.server/prisma";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { SearchBar } from "~/components/SearchBar";
 import { projectSearch } from "@prisma/client/sql";
 import { project_genre, project_tag } from "@prisma/client";
-
+import { Pagination } from "~/components/ui/pagination";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const url = new URL(request.url);
     const searchQuery = url.searchParams.get("q");
+    const limitParam = url.searchParams.get("limit");
+    const takeParam = url.searchParams.get("take");
+    const limit = limitParam ? parseInt(limitParam) : 50;
+    const take = takeParam ? parseInt(takeParam) : 0;
 
     if (!searchQuery || searchQuery.length < 2) {
         return {
             projects: [] as projectSearch.Result[],
+            total: 0
         };
     }
 
-    // Using raw query to search only plot_title
-    const projects = await prisma.$queryRawTyped(projectSearch(searchQuery,50,0));
+    const projects = await prisma.$queryRawTyped(projectSearch(searchQuery, limit, take));
+    const total = projects.length;
+
     return {
         projects,
+        total
     };
 }
 
 export default function ProjectSearch() {
-    const { projects } = useLoaderData<typeof loader>();
+    const { projects, total } = useLoaderData<typeof loader>();
+    const [searchParams] = useSearchParams();
+    const limitParam = searchParams.get("limit");
+    const takeParam = searchParams.get("take");
+    const limit = limitParam ? parseInt(limitParam) : 50;
+    const take = takeParam ? parseInt(takeParam) : 0;
+    const searchQuery = searchParams.get("q");
+    const hasSearchQuery = Boolean(searchQuery && searchQuery.length >= 2);
+
+    const hasMore = projects.length === limit;
 
     return (
-        <div className="container mx-auto py-8">
-            <h1 className="text-3xl font-bold mb-8 text-center">Project Search</h1>
+        <div className="max-w-4xl mx-auto p-4">
+            <h1 className="text-2xl font-bold mb-6 text-center">Project Search</h1>
             <SearchBar className="mb-8" placeholder="Search projects by title..." />
-            <div className="space-y-4">
+            
+            {hasSearchQuery && (
+                <div className="mb-4 text-sm text-gray-600">
+                    Found {total} project{total !== 1 ? 's' : ''}
+                </div>
+            )}
+
+            <div className="bg-white rounded-lg shadow space-y-4 p-4">
                 {projects.map((project) => (
                     <Link
                         key={project.id}
@@ -64,12 +87,24 @@ export default function ProjectSearch() {
                         </div>
                     </Link>
                 ))}
-                {projects.length === 0 && (
+                {hasSearchQuery && projects.length === 0 && (
                     <p className="text-center text-gray-500">
                         No projects found. Try a different search term.
                     </p>
                 )}
+                {!hasSearchQuery && (
+                    <p className="text-center text-gray-500">
+                        Enter at least 2 characters to search
+                    </p>
+                )}
             </div>
+
+            <Pagination 
+                hasMore={hasMore}
+                take={take}
+                limit={limit}
+                className="mt-4"
+            />
         </div>
     );
 }
