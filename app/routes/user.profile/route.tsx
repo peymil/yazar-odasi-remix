@@ -4,29 +4,8 @@ import { SearchBar } from "~/components/SearchBar";
 import { UserProfileItem } from "~/components/UserProfileItem";
 import { prisma } from "~/.server/prisma";
 import type { user_profile } from "@prisma/client";
+import { profileSearch } from "@prisma/client/sql";
 
-type SearchResult = {
-    id: number;
-    user_id: number;
-    current_title: string | null;
-    about: string | null;
-    email: string;
-    image: string | null;
-    rank: number;
-    total_count: number;
-    name: string;
-};
-
-type LoaderData = {
-    profiles: Array<user_profile & {
-        name:string;
-        user: {
-            email: string;
-            image: string | null;
-        };
-    }>;
-    total: number;
-};
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const url = new URL(request.url);
@@ -37,32 +16,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const skip = (page - 1) * limit;
 
     if (!searchQuery || searchQuery.length < 2) {
-        return json<LoaderData>({ profiles: [], total: 0 });
+        return json({ profiles: [], total: 0 });
     }
 
-    const searchSQL = `
-        SELECT 
-            up.id,
-            up.user_id,
-            up.current_title,
-            up.about,
-            u.email,
-            u.image,
-            up.name,
-            COUNT(*) OVER() as total_count
-        FROM user_profile up
-        INNER JOIN "user" u ON up.user_id = u.id
-        WHERE up.name ILIKE '%' || $1 || '%'
-        LIMIT $2 
-        OFFSET $3
-    `;
-
-    const results = await prisma.$queryRawUnsafe<SearchResult[]>(
-        searchSQL,
-        searchQuery,
-        limit,
-        skip
-    );
+    const results = await prisma.$queryRawTyped(
+        profileSearch(searchQuery, limit, skip)
+    )
 
     const profiles = results.map(row => ({
         id: row.id,
@@ -80,7 +39,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     const total = results.length > 0 ? Number(results[0].total_count) : 0;
 
-    return json<LoaderData>({ profiles, total });
+    return json({ profiles, total });
 }
 
 export default function UserProfileSearchRoute() {
