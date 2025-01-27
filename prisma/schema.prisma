@@ -16,6 +16,7 @@ model company {
   company_profile company_profile[]
   company_users   company_user[]
   post            post[]
+  competitions    competition[]
 }
 
 model company_profile {
@@ -36,23 +37,27 @@ model company_user {
 }
 
 model competition {
-  id          Int      @id @default(autoincrement())
-  name        String
+  id          Int                  @id @default(autoincrement())
+  title       String
   description String
-  start_date  DateTime @db.Date
-  end_date    DateTime @db.Date
+  start_date  DateTime             @db.Date
+  end_date    DateTime             @db.Date
   avatar      String?
-
+  company_id  Int
+  company     company              @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  deliveries  competition_delivery[]
 }
 
-model competition_application {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  start_date  DateTime @db.Date
-  end_date    DateTime @db.Date
-  avatar      String?
+model competition_delivery {
+  id             Int         @id @default(autoincrement())
+  competition_id Int
+  user_id        Int
+  links          String[]
+  created_at     DateTime    @default(now())
+  competition    competition @relation(fields: [competition_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user           user        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
+
 
 model post {
   id         Int         @id @default(autoincrement())
@@ -171,15 +176,16 @@ model verification_token {
 }
 
 model user {
-  id           Int            @id @default(autoincrement())
-  sessions     session[]
-  company_user company_user[]
-  post         post[]
-  post_like    post_like[]
-  user_profile user_profile[]
-  image        String?
-  email        String         @unique
-  password     String
+  id                   Int                    @id @default(autoincrement())
+  sessions             session[]
+  company_user         company_user[]
+  post                 post[]
+  post_like           post_like[]
+  user_profile        user_profile[]
+  competition_delivery competition_delivery[]
+  image               String?
+  email               String                  @unique
+  password            String
 }
 
 model session {

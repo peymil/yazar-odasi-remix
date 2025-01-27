@@ -1,4 +1,4 @@
-import type {user, session} from "@prisma/client";
+import type {user, session, company_user, company} from "@prisma/client";
 import {prisma} from "~/.server/prisma";
 import bcrypt from "bcryptjs";
 import {createHash} from "node:crypto";
@@ -51,7 +51,15 @@ export async function validateSessionToken(
             id: sessionId,
         },
         include: {
-            user: true,
+            user: {
+                include: {
+                    company_user: {
+                        include: {
+                            company: true
+                        }
+                    }
+                }
+            }
         },
     });
     if (result === null) {
@@ -93,5 +101,5 @@ export function hashPassword(password: string): Promise<string> {
 }
 
 export type SessionValidationResult =
-    | { session: session; user: user }
+    | { session: session; user: user & { company_user: (company_user & { company: company })[] } }
     | { session: null; user: null };

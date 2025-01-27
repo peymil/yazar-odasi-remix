@@ -10,7 +10,7 @@ import type {LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 
 import "./tailwind.css";
 import {authTokenCookie} from "~/.server/cookies";
-import {Box, Key, LogIn, LogOut, MessageCircleQuestion, Percent, User, UserRoundPlus, Wallet} from "lucide-react";
+import {Box, Key, LogIn, LogOut, MessageCircleQuestion, Percent, Plus, User, UserRoundPlus, Wallet} from "lucide-react";
 import {validateSessionToken} from "~/.server/auth";
 
 export const links: LinksFunction = () => [
@@ -127,6 +127,12 @@ export function Layout({children}: { children: React.ReactNode }) {
                         <User/>
                         <p>Profil</p>
                     </Link>
+                    {data.user.company_user.length > 0 && (
+                        <Link to="/competition/new" className={"flex gap-2"}>
+                            <Plus/>
+                            <p>Yarışma Oluştur</p>
+                        </Link>
+                    )}
                     <Link to="/auth/sign-out" className={"flex gap-2"}>
                         <LogOut/>
                         <p>Çıkış Yap</p>
