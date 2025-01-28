@@ -1,4 +1,4 @@
-import { PostCard } from "./PostCard.client";
+import { PostCard } from "./PostCard";
 
 interface Post {
   id: number;

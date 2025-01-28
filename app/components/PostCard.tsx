@@ -1,7 +1,7 @@
 import { Link } from '@remix-run/react';
 import { Heart } from 'lucide-react';
 import { Button } from './ui/button';
-import MDEditor from '@uiw/react-md-editor';
+import { MDXEditor, headingsPlugin,linkPlugin,imagePlugin} from '@mdxeditor/editor'
 
 interface PostCardProps {
   post: {
@@ -67,7 +67,8 @@ export function PostCard({ post, isLiked, onLike }: PostCardProps) {
       </div>
 
       <div data-color-mode="light">
-        <MDEditor.Markdown source={post.content} />
+        <MDXEditor markdown={post.content}            plugins={[headingsPlugin(),linkPlugin(),imagePlugin()]}
+        />
       </div>
 
       <div className="flex items-center gap-2">

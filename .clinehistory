@@ -20,3 +20,9 @@
 - Added post sections to user and company profiles
 - Added post feed to main page after login
 - Implemented optimistic UI updates for post likes
+
+[2025-01-28T13:59:58.000Z] Created reusable MDX editor component:
+- Created MDXEditorComponent as a reusable component with @mdxeditor/editor
+- Extracted MDX editor functionality from PostEditor into MDXEditorComponent
+- Updated PostEditor to use the new MDXEditorComponent
+- Added support for headings, links, and image plugins

@@ -1,9 +1,10 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData, useNavigation, useSubmit } from "@remix-run/react";
-import { PostEditor } from "~/components/PostEditor.client";
+import { ClientOnly } from "remix-utils/client-only";
 import { validateSessionToken } from "~/.server/auth";
 import { authTokenCookie } from "~/.server/cookies";
 import { prisma } from "~/.server/prisma";
+import { PostEditor } from "~/components/PostEditor";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
@@ -102,11 +103,13 @@ export default function NewPost() {
           {actionData.error}
         </div>
       )}
-      <PostEditor
+      <ClientOnly>
+      {() => <PostEditor
         companies={companies}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
-      />
+      />}
+      </ClientOnly>
     </div>
   );
 }
