@@ -14,6 +14,7 @@ import {WriterProfileStoryCard} from "~/routes/user.$userId.profile/WriterProfil
 import {Button} from "~/components/ui/button";
 import {getProject} from "./service.server";
 import {getSessionFromRequest} from "~/.server/auth";
+import { PostFeed } from "~/components/PostFeed";
 
 export async function loader({params, request}: LoaderFunctionArgs) {
     invariant(params.userId, "userId is required");
@@ -38,6 +39,33 @@ export async function loader({params, request}: LoaderFunctionArgs) {
             profile_id: profile.id,
         },
     });
+
+    const posts = await prisma.post.findMany({
+        where: { user_id: Number(userId) },
+        orderBy: { created_at: 'desc' },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    email: true,
+                    image: true,
+                },
+            },
+            company: {
+                select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                },
+            },
+        },
+    });
+
+    const likedPosts = currentUser?.user ? await prisma.post_like.findMany({
+        where: { user_id: currentUser.user.id },
+        select: { post_id: true },
+    }) : [];
+
     const isUsersProfile = currentUser?.user?.id === user.id;
 
     return {
@@ -46,11 +74,13 @@ export async function loader({params, request}: LoaderFunctionArgs) {
         projects,
         experiences,
         isUsersProfile,
+        posts,
+        likedPostIds: likedPosts.map(like => like.post_id),
     };
 }
 
 export default function Layout() {
-    const {user, profile, projects, experiences, isUsersProfile} =
+    const {user, profile, projects, experiences, isUsersProfile, posts, likedPostIds} =
         useLoaderData<typeof loader>();
     const inOutlet = !!useOutlet();
     const navigate = useNavigate();
@@ -139,10 +169,31 @@ export default function Layout() {
                             </>
                         )}
                     </div>
-                    <div className={"flex flex-col gap-8 mb-36"}>
+                    <div className={"flex flex-col gap-8 mb-8"}>
                         {experiences.map((experience, index) => (
                             <WriterProfileItem {...experience} key={index}/>
                         ))}
+                    </div>
+
+                    <div className="mb-36">
+                        <div className="flex flex-row text-sm">
+                            <p className="text-3xl mb-3 font-bold">Gönderiler</p>
+                        </div>
+                        <PostFeed
+                            posts={posts.map(post => ({
+                                ...post,
+                                created_at: post.created_at.toISOString()
+                            }))}
+                            likedPostIds={likedPostIds}
+                            onLike={async (postId) => {
+                                const formData = new FormData();
+                                formData.append("postId", postId.toString());
+                                await fetch("/api/posts/like", {
+                                    method: "POST",
+                                    body: formData,
+                                });
+                            }}
+                        />
                     </div>
                 </div>
             </div>

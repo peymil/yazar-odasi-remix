@@ -1,9 +1,10 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { prisma } from "~/.server/prisma";
 import { getSessionFromRequest } from "~/.server/auth";
 import { Button } from "~/components/ui/button";
+import { PostFeed } from "~/components/PostFeed";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   invariant(params.id, "Company ID is required");
@@ -19,7 +20,20 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
           created_at: 'desc'
         },
         include: {
-          user: true
+          user: {
+            select: {
+              id: true,
+              email: true,
+              image: true,
+            },
+          },
+          company: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
+          },
         }
       }
     }
@@ -36,12 +50,22 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     }
   }) : null;
 
-  return json({ company, isCompanyUser: !!isCompanyUser });
+  const likedPosts = session?.user ? await prisma.post_like.findMany({
+    where: { user_id: session.user.id },
+    select: { post_id: true },
+  }) : [];
+
+  return json({ 
+    company, 
+    isCompanyUser: !!isCompanyUser,
+    likedPostIds: likedPosts.map(like => like.post_id)
+  });
 }
 
 export default function CompanyProfile() {
-  const { company, isCompanyUser } = useLoaderData<typeof loader>();
+  const { company, isCompanyUser, likedPostIds } = useLoaderData<typeof loader>();
   const profile = company.company_profile[0];
+  const navigate = useNavigate();
 
   return (
     <div className="container mx-auto max-w-4xl mt-10">
@@ -98,38 +122,29 @@ export default function CompanyProfile() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">Company Posts</h2>
           {isCompanyUser && (
-            <Button className="bg-yo-orange text-white">
+            <Button 
+              className="bg-yo-orange text-white"
+              onClick={() => navigate("/post/new")}
+            >
               New Post
             </Button>
           )}
         </div>
-        {company.post.length > 0 ? (
-          <div className="space-y-6">
-            {company.post.map((post) => (
-              <div key={post.id} className="border-b pb-6 last:border-b-0">
-                <div className="flex items-center mb-4">
-                  <img
-                    src={post.user.image || "https://cdn.yazarodasi.com/profile-photo-placeholder.webp"}
-                    alt={`${post.user.email}'s avatar`}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <div className="ml-3">
-                    <p className="font-semibold">{post.user.email}</p>
-                    <p className="text-sm text-gray-500">
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-gray-700">{post.content}</p>
-                <div className="mt-2 text-gray-500">
-                  <span>{post.likes || 0} likes</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500 text-center">No posts yet</p>
-        )}
+        <PostFeed
+          posts={company.post.map(post => ({
+            ...post,
+            created_at: new Date(post.created_at).toISOString()
+          }))}
+          likedPostIds={likedPostIds}
+          onLike={async (postId) => {
+            const formData = new FormData();
+            formData.append("postId", postId.toString());
+            await fetch("/api/posts/like", {
+              method: "POST",
+              body: formData,
+            });
+          }}
+        />
       </div>
     </div>
   );

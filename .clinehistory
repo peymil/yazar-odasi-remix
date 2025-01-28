@@ -1,4 +1,4 @@
-2025-01-27T04:20:30.000Z - Implemented competition feature:
+[2025-01-27T04:20:30.000Z] Implemented competition feature:
 - Updated Prisma schema with competition and competition_delivery models
 - Created competitionSearch.sql for searching competitions
 - Created competition routes:
@@ -7,3 +7,16 @@
   - /competitions/$id - View competition details
   - /competitions/$id/submit - Submit entries to competition
 - Added competition creation button in navigation for company users
+
+
+[2025-01-27T15:31:21.000Z] Implemented post feature:
+- Added post model with markdown content and like functionality
+- Created PostEditor component with markdown support using @uiw/react-md-editor
+- Created PostCard component for displaying posts with like functionality
+- Created PostFeed component for displaying lists of posts
+- Added "New Post" button to top navigation bar
+- Created /post/new route for creating new posts
+- Created /api/posts/like route for handling post likes
+- Added post sections to user and company profiles
+- Added post feed to main page after login
+- Implemented optimistic UI updates for post likes
