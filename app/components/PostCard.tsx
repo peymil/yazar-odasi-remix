@@ -1,7 +1,7 @@
 import { Link } from '@remix-run/react';
 import { Heart } from 'lucide-react';
 import { Button } from './ui/button';
-import { MDXEditor, headingsPlugin,linkPlugin,imagePlugin} from '@mdxeditor/editor'
+import { MDXEditor, headingsPlugin, linkPlugin, imagePlugin, UndoRedo, BoldItalicUnderlineToggles, CreateLink, InsertImage } from '@mdxeditor/editor'
 
 interface PostCardProps {
   post: {
@@ -12,12 +12,12 @@ interface PostCardProps {
     user: {
       id: number;
       email: string;
-    image: string | null;
+      image: string | null;
     };
     company: {
       id: number;
       name: string;
-    avatar: string | null;
+      avatar: string | null;
     } | null;
   };
   isLiked?: boolean;
@@ -67,7 +67,7 @@ export function PostCard({ post, isLiked, onLike }: PostCardProps) {
       </div>
 
       <div data-color-mode="light">
-        <MDXEditor markdown={post.content}            plugins={[headingsPlugin(),linkPlugin(),imagePlugin()]}
+        <MDXEditor markdown={post.content} readOnly plugins={[headingsPlugin(), linkPlugin(), imagePlugin()]}
         />
       </div>
 

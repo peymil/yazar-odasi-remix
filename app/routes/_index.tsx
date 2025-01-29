@@ -53,7 +53,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
         where: { user_id: session.user.id },
         select: { post_id: true },
     });
-
     return json({
         posts,
         likedPostIds: likedPosts.map(like => like.post_id),
@@ -71,10 +70,12 @@ export default function Index() {
         const formData = new FormData();
         formData.append("postId", postId.toString());
         
+        const isCurrentlyLiked = likedPostIds.includes(postId);
+        
         // Optimistically update the UI
-        setOptimisticLikes((prev: Record<number, boolean>) => ({
+        setOptimisticLikes((prev) => ({
             ...prev,
-            [postId]: !prev[postId] && !likedPostIds.includes(postId)
+            [postId]: !isCurrentlyLiked
         }));
         
         fetcher.submit(formData, {
@@ -84,19 +85,22 @@ export default function Index() {
     };
 
     const getOptimisticLikeCount = (post: (typeof posts)[0]) => {
+        const isCurrentlyLiked = likedPostIds.includes(post.id);
+        const hasOptimisticUpdate = optimisticLikes.hasOwnProperty(post.id);
         const isOptimisticallyLiked = optimisticLikes[post.id];
-        const wasLiked = likedPostIds.includes(post.id);
         
-        if (isOptimisticallyLiked && !wasLiked) {
-            return (post.likes || 0) + 1;
-        } else if (!isOptimisticallyLiked && wasLiked) {
-            return (post.likes || 0) - 1;
+        if (!hasOptimisticUpdate) {
+            return post.likes || 0;
         }
-        return post.likes || 0;
+        
+        return isOptimisticallyLiked ? 
+            (isCurrentlyLiked ? post.likes || 0 : (post.likes || 0) + 1) :
+            (isCurrentlyLiked ? (post.likes || 0) - 1 : post.likes || 0);
     };
 
     const isPostLiked = (postId: number) => {
-        return optimisticLikes[postId] || likedPostIds.includes(postId);
+        const hasOptimisticUpdate = optimisticLikes.hasOwnProperty(postId);
+        return hasOptimisticUpdate ? optimisticLikes[postId] : likedPostIds.includes(postId);
     };
 
     return (isAuthenticated ? (
