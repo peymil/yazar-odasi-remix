@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { MDXEditorComponent } from './MDXEditorComponent.client';
+import { ClientOnly } from 'remix-utils/client-only';
 interface PostEditorProps {
   companies?: Array<{ id: number; name: string }>;
   onSubmit: (data: { content: string; companyId?: number }) => void;
@@ -22,7 +23,7 @@ export function PostEditor({ companies, onSubmit, isSubmitting }: PostEditorProp
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4">
+    <div className="w-full mx-auto space-y-4">
       <MDXEditorComponent
         content={content}
         onChange={setContent}

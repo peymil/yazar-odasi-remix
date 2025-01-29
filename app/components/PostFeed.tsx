@@ -1,3 +1,4 @@
+import { ClientOnly } from "remix-utils/client-only";
 import { PostCard } from "./PostCard";
 
 interface Post {
@@ -8,7 +9,11 @@ interface Post {
   user: {
     id: number;
     email: string;
-    image: string | null;
+    user_profile: {
+      id: number;
+      image: string | null;
+      name: string;
+    }[];
   };
   company: {
     id: number;
@@ -26,14 +31,20 @@ interface PostFeedProps {
 export function PostFeed({ posts, likedPostIds = [], onLike }: PostFeedProps) {
   return (
     <div className="space-y-6">
-      {posts.map((post) => (
-        <PostCard
-          key={post.id}
-          post={post}
-          isLiked={likedPostIds.includes(post.id)}
-          onLike={onLike}
-        />
-      ))}
+      <ClientOnly>
+        {() => <>
+          {posts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              isLiked={likedPostIds.includes(post.id)}
+              onLike={onLike}
+            />
+          ))}
+        </>
+        }
+      </ClientOnly>
+
       {posts.length === 0 && (
         <div className="text-center text-gray-500 py-8">
           Henüz gönderi yok

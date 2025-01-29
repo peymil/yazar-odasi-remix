@@ -13,7 +13,11 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   const company = await prisma.company.findUnique({
     where: { id: companyId },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      avatar: true,
       company_profile: true,
       post: {
         orderBy: {
@@ -24,7 +28,13 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
             select: {
               id: true,
               email: true,
-              image: true,
+              user_profile: {
+                select: {
+                  id: true,
+                  image: true,
+                  name: true,
+                }
+              }
             },
           },
           company: {

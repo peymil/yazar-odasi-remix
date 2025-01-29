@@ -12,7 +12,11 @@ interface PostCardProps {
     user: {
       id: number;
       email: string;
-      image: string | null;
+      user_profile: {
+        id: number;
+        image: string | null;
+        name: string;
+      }[];
     };
     company: {
       id: number;
@@ -51,14 +55,15 @@ export function PostCard({ post, isLiked, onLike }: PostCardProps) {
             </>
           ) : null}
           <Link to={`/user/${post.user.id}/profile`} className="flex items-center gap-2">
-            {post.user.image && (
+        
               <img
-                src={post.user.image}
+                src={post.user.user_profile[0].image || 
+                  "https://cdn.yazarodasi.com/profile-photo-placeholder.webp"}
                 alt={post.user.email}
-                className="w-8 h-8 rounded-full"
+                className="w-12 h-12 rounded-full"
               />
-            )}
-            <span className="font-medium">{post.user.email}</span>
+   
+            <span className="font-medium">{post.user.user_profile[0]?.name || post.user.email}</span>
           </Link>
         </div>
         <span className="text-sm text-gray-500">

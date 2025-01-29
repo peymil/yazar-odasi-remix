@@ -6,6 +6,7 @@ import { competitionSearch } from "@prisma/client/sql";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Pagination } from "~/components/ui/pagination";
+import { getSessionFromRequest } from "~/.server/auth";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -21,11 +22,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   );
 
   const total = results.length > 0 ? Number(results[0].total_count) : 0;
-  return { competitions: results, total };
+
+  const session = await getSessionFromRequest(request);
+  const user = session?.user 
+  return { competitions: results, total, user };
 }
 
 export default function CompetitionsRoute() {
-  const { competitions, total } = useLoaderData<typeof loader>();
+  const { competitions, total, user } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const limitParam = searchParams.get("limit");
   const takeParam = searchParams.get("take");
@@ -50,6 +54,11 @@ export default function CompetitionsRoute() {
             className="w-full"
           />
         </form>
+        {(user?.company_user && user.company_user.length > 0) && (
+          <Link to="/competition/new">
+            <Button>Yarışma Oluştur</Button>
+          </Link>
+        )}
       </div>
 
       <div className="mb-4 text-sm text-gray-600">

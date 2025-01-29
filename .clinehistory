@@ -21,8 +21,13 @@
 - Added post feed to main page after login
 - Implemented optimistic UI updates for post likes
 
-[2025-01-28T13:59:58.000Z] Created reusable MDX editor component:
-- Created MDXEditorComponent as a reusable component with @mdxeditor/editor
-- Extracted MDX editor functionality from PostEditor into MDXEditorComponent
-- Updated PostEditor to use the new MDXEditorComponent
-- Added support for headings, links, and image plugins
+[2025-01-29T09:52:34.000Z] UI Navigation Updates:
+- Moved "Şirket Oluştur" button from profile page to top navigation bar
+- Removed "Gönderi Oluştur" button from top navigation bar
+- Added "Yarışma Oluştur" button to Açık Çağrılar page header
+
+[2025-01-29T10:27:31.000Z] Schema Update - Moved image field:
+- Moved image field from user model to user_profile model
+- Created migration to handle the data transfer
+- Updated Prisma schema to reflect the new structure
+- Updated components and routes to use user_profile.image instead of user.image

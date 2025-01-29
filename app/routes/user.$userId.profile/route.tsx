@@ -20,7 +20,6 @@ export async function loader({params, request}: LoaderFunctionArgs) {
     invariant(params.userId, "userId is required");
     const {userId} = params;
     const currentUser = await getSessionFromRequest(request);
-    console.log("currentUser", currentUser);
     const user = await prisma.user.findFirstOrThrow({
         where: {
             id: Number(userId),
@@ -48,7 +47,13 @@ export async function loader({params, request}: LoaderFunctionArgs) {
                 select: {
                     id: true,
                     email: true,
-                    image: true,
+                    user_profile: {
+                        select: {
+                            id: true,
+                            image: true,
+                            name: true,
+                        }
+                    }
                 },
             },
             company: {
@@ -105,7 +110,7 @@ export default function Layout() {
                     <div className={""}>
                         <img
                             src={
-                                user.image ||
+                                profile.image ||
                                 "https://cdn.yazarodasi.com/profile-photo-placeholder.webp"
                             }
                             alt={"Avatar"}
@@ -157,14 +162,6 @@ export default function Layout() {
                                     className={"w-20 h-8 ml-5"}
                                 >
                                     İş ekle
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        navigate("/company");
-                                    }}
-                                    className={"w-32 h-8 ml-5"}
-                                >
-                                    Şirket Oluştur
                                 </Button>
                             </>
                         )}

@@ -103,12 +103,12 @@ export default function NewPost() {
           {actionData.error}
         </div>
       )}
-      <ClientOnly>
-      {() => <PostEditor
-        companies={companies}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-      />}
+      <ClientOnly fallback={<div className="w-full max-w-4xl mx-auto h-[300px] border rounded-md bg-gray-50" />}>
+        {() => <PostEditor
+          companies={companies}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />}
       </ClientOnly>
     </div>
   );

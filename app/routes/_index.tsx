@@ -1,13 +1,14 @@
-import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
+import { useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState } from "react";
+import { ClientOnly } from "remix-utils/client-only";
+import { PostEditor } from "~/components/PostEditor";
 import { PostFeed } from "~/components/PostFeed";
 import { SignUp } from "~/components/sign-up";
 import { useOptionalUser } from "~/lib/authUtils";
 import { validateSessionToken } from "~/.server/auth";
 import { authTokenCookie } from "~/.server/cookies";
 import { prisma } from "~/.server/prisma";
-
 export const meta: MetaFunction = () => {
     return [
         {title: "Yazar Odasi"},
@@ -20,13 +21,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const sessionToken = await authTokenCookie.parse(cookieHeader);
 
     if (!sessionToken) {
-        return json({ posts: [], likedPostIds: [] });
+        return json({ posts: [], likedPostIds: [], companies: [] });
     }
 
     const session = await validateSessionToken(sessionToken);
     if (!session?.user) {
-        return json({ posts: [], likedPostIds: [] });
+        return json({ posts: [], likedPostIds: [], companies: [] });
     }
+
+    // Get user's companies
+    const userCompanies = await prisma.company_user.findMany({
+        where: { user_id: session.user.id },
+        include: {
+            company: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
+    });
 
     const posts = await prisma.post.findMany({
         orderBy: { created_at: 'desc' },
@@ -36,7 +50,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
                 select: {
                     id: true,
                     email: true,
-                    image: true,
+                    user_profile: {
+                        select: {
+                            id: true,
+                            image: true,
+                            name: true,
+                        }
+                    }
                 },
             },
             company: {
@@ -49,19 +69,63 @@ export async function loader({ request }: LoaderFunctionArgs) {
         },
     });
 
+    const profile = await prisma.user_profile.findFirst({
+        where: { user_id: session.user.id },
+        select: { id: false,name: true,  },
+    });
+
     const likedPosts = await prisma.post_like.findMany({
         where: { user_id: session.user.id },
         select: { post_id: true },
     });
     return json({
         posts,
+        
         likedPostIds: likedPosts.map(like => like.post_id),
+        companies: userCompanies.map(uc => uc.company),
     });
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+    const cookieHeader = request.headers.get("Cookie");
+    const sessionToken = await authTokenCookie.parse(cookieHeader);
+    
+    if (!sessionToken) {
+        throw new Response("Unauthorized", { status: 401 });
+    }
+
+    const session = await validateSessionToken(sessionToken);
+    if (!session?.user) {
+        throw new Response("Unauthorized", { status: 401 });
+    }
+
+    const formData = await request.formData();
+    const content = formData.get("content");
+    const companyId = formData.get("companyId");
+
+    if (!content || typeof content !== "string") {
+        return json({ error: "Content is required" }, { status: 400 });
+    }
+
+    try {
+        await prisma.post.create({
+            data: {
+                content,
+                user_id: session.user.id,
+                company_id: companyId ? parseInt(companyId.toString()) : null,
+            },
+        });
+
+        return redirect("/");
+    } catch (error) {
+        console.error("Failed to create post:", error);
+        return json({ error: "Failed to create post" }, { status: 500 });
+    }
 }
 
 export default function Index() {
     const isAuthenticated = useOptionalUser();
-    const { posts, likedPostIds } = useLoaderData<typeof loader>();
+    const { posts, likedPostIds, companies } = useLoaderData<typeof loader>();
 
     const fetcher = useFetcher();
     const [optimisticLikes, setOptimisticLikes] = useState<Record<number, boolean>>({});
@@ -84,7 +148,7 @@ export default function Index() {
         });
     };
 
-    const getOptimisticLikeCount = (post: (typeof posts)[0]) => {
+    const getOptimisticLikeCount = (post: {id: number, likes: number | null}) => {
         const isCurrentlyLiked = likedPostIds.includes(post.id);
         const hasOptimisticUpdate = optimisticLikes.hasOwnProperty(post.id);
         const isOptimisticallyLiked = optimisticLikes[post.id];
@@ -103,8 +167,26 @@ export default function Index() {
         return hasOptimisticUpdate ? optimisticLikes[postId] : likedPostIds.includes(postId);
     };
 
+    const submit = useSubmit();
+    const handleSubmit = (data: { content: string; companyId?: number }) => {
+        const formData = new FormData();
+        formData.append("content", data.content);
+        if (data.companyId) {
+            formData.append("companyId", data.companyId.toString());
+        }
+        submit(formData, { method: "post" });
+        //refresh page
+        window.location.reload();
+    };
+
     return (isAuthenticated ? (
-        <div className="container mx-auto py-8">
+        <div className="container mx-auto py-8 space-y-8">
+            <ClientOnly>
+                {() => <PostEditor
+                    companies={companies}
+                    onSubmit={handleSubmit}
+                />}
+            </ClientOnly>
             <PostFeed
                 posts={posts.map(post => ({
                     ...post,

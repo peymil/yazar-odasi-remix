@@ -127,10 +127,12 @@ export function Layout({children}: { children: React.ReactNode }) {
                         <User/>
                         <p>Profil</p>
                     </Link>
-                    <Link to="/post/new" className={"flex gap-2"}>
-                        <PenSquare/>
-                        <p>Gönderi Oluştur</p>
+                    {data.user.company_user.length === 0 && (
+                    <Link to="/company" className={"flex gap-2"}>
+                        <Plus/>
+                        <p>Şirket Oluştur</p>
                     </Link>
+                      )}
                     {data.user.company_user.length > 0 && (
                         <Link to="/competition/new" className={"flex gap-2"}>
                             <Plus/>
