@@ -16,6 +16,7 @@ import {
   Select,
 } from '~/components/ui/select';
 import React from 'react';
+import { Plus, Minus } from 'lucide-react';
 import { getSessionFromRequest } from '~/.server/auth';
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -23,12 +24,15 @@ export async function action({ request }: ActionFunctionArgs) {
   const method = request.method;
   const body = qs.parse(formQueryString);
   const currentUser = await getSessionFromRequest(request);
+  if (!currentUser?.user) {
+    throw new Error('Unauthorized');
+  }
   if (method === 'PATCH') {
     const { user_profile_project_characters, ...payload } =
       profileProjectUpdateSchema.parse(body);
     const profile = await prisma.user_profile.findFirstOrThrow({
       where: {
-        user_id: Number(currentUser.id),
+        user_id: currentUser.user.id,
       },
     });
     const project = await prisma.user_profile_project.findFirstOrThrow({
@@ -50,7 +54,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const profile = await prisma.user_profile.findFirstOrThrow({
       where: {
-        user_id: currentUser?.user?.id,
+        user_id: currentUser.user.id,
       },
     });
 
@@ -96,8 +100,7 @@ export async function loader() {
 
 export default function Layout() {
   const data = useLoaderData<typeof loader>();
-  const [characterCount, setCharacterCount] = React.useState(1);
-  const [characters, setCharacters] = React.useState([{ id: 1 }]);
+  const [characters, setCharacters] = React.useState<Array<{ id: number }>>([]);
 
   return (
     <div className={'container'}>
@@ -180,51 +183,66 @@ export default function Layout() {
             />
           </div>
           <div className={'flex-1'}>
-            <Label>Karakterler</Label>
+            <div className="flex items-center mb-5">
+              <Label>Karakterler</Label>
+              {characters.length === 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="ml-2 h-6 w-6"
+                  onClick={() => {
+                    setCharacters([{ id: Date.now() }]);
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
             {characters.map((char, i) => (
-              <div key={char.id} className='relative'>
+              <div key={char.id} className="relative mb-8 p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <Label className="text-sm font-medium">Karakter #{i + 1}</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => {
+                      setCharacters(characters.filter((c) => c.id !== char.id));
+                    }}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Input
                   name={`user_profile_project_characters[${i}][name]`}
-                  className='mb-5'
-                  type='text'
-                  placeholder='Karakter Adı'
+                  className="mb-3"
+                  type="text"
+                  placeholder="Karakter Adı"
                   required
                 />
                 <Textarea
                   name={`user_profile_project_characters[${i}][description]`}
-                  className='mb-5'
-                  placeholder='Karakter Açıklaması'
+                  className="mb-3"
+                  placeholder="Karakter Açıklaması"
                   required
                 />
-                <Button
-                  type='button'
-                  variant='destructive'
-                  className='absolute top-0 right-0'
-                  onClick={() => {
-                    setCharacters(characters.filter((c) => c.id !== char.id));
-                  }}
-                >
-                  Sil
-                </Button>
               </div>
             ))}
-
-            <Button
-              type='button'
-              onClick={() => {
-                setCharacters([...characters, { id: Date.now() }]);
-              }}
-            >
-              Add Character
-            </Button>
-            <Button
-              type={'button'}
-              onClick={() => {
-                setCharacterCount(characterCount + 1);
-              }}
-            >
-              Add Character
-            </Button>
+            {characters.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setCharacters([...characters, { id: Date.now() }]);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Yeni Karakter Ekle
+              </Button>
+            )}
           </div>
         </div>
         <Button className={'mr-auto'} type={'submit'}>

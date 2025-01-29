@@ -31,3 +31,12 @@
 - Created migration to handle the data transfer
 - Updated Prisma schema to reflect the new structure
 - Updated components and routes to use user_profile.image instead of user.image
+
+[2025-01-29T11:32:47.000Z] Refactored character creation UI:
+- Changed initial state to show just a plus button with zero inputs
+- Added small plus button to add first character
+- Added small minus buttons to remove characters
+- Improved character section styling with rounded borders
+- Fixed TypeScript errors in user authentication handling
+- Updated icons to use lucide-react
+- Added proper null checks for currentUser
