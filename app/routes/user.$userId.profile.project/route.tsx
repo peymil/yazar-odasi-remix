@@ -15,9 +15,10 @@ import {
   SelectValue,
   Select,
 } from '~/components/ui/select';
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { getSessionFromRequest } from '~/.server/auth';
+import { MultiSelect } from '~/components/ui/multi-select';
 
 export async function action({ request }: ActionFunctionArgs) {
   const formQueryString = await request.text();
@@ -101,6 +102,8 @@ export async function loader() {
 export default function Layout() {
   const data = useLoaderData<typeof loader>();
   const [characters, setCharacters] = React.useState<Array<{ id: number }>>([]);
+  const [selectedTags, setSelectedTags] = useState<(string | number)[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<(string | number)[]>([]);
 
   return (
     <div className={'container'}>
@@ -144,21 +147,31 @@ export default function Layout() {
               </SelectContent>
             </Select>
             <Label>Proje Etiketleri</Label>
-            <select multiple name={'tags[]'} className={'mb-5'} required>
-              {data?.tags?.map((tag) => (
-                <option key={tag.id} value={tag.id}>
-                  {tag.tag_name}
-                </option>
-              ))}
-            </select>
+            <MultiSelect
+              name="tags"
+              className="mb-5"
+              required
+              options={data?.tags?.map(tag => ({
+                value: tag.id,
+                label: tag.tag_name
+              })) || []}
+              value={selectedTags}
+              onChange={setSelectedTags}
+              placeholder="Etiket seçiniz..."
+            />
             <Label>Proje Türleri</Label>
-            <select multiple name={'genres[]'} className={'mb-5'} required>
-              {data?.genres?.map((genre) => (
-                <option key={genre.id} value={genre.id}>
-                  {genre.genre_name}
-                </option>
-              ))}
-            </select>
+            <MultiSelect
+              name="genres"
+              className="mb-5"
+              required
+              options={data?.genres?.map(genre => ({
+                value: genre.id,
+                label: genre.genre_name
+              })) || []}
+              value={selectedGenres}
+              onChange={setSelectedGenres}
+              placeholder="Tür seçiniz..."
+            />
             <Label>Hook</Label>
             <Textarea
               name={'hook'}
