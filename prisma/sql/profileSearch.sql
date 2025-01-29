@@ -6,7 +6,7 @@ SELECT up.id,
     up.current_title,
     up.about,
     u.email,
-    u.image,
+    up.image,
     up.name,
     COUNT(*) OVER() as total_count
 FROM user_profile up

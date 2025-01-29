@@ -7,6 +7,7 @@
 -- AlterTable
 ALTER TABLE "user_profile_project" ADD COLUMN     "setting" TEXT NOT NULL;
 
+
 -- CreateTable
 CREATE TABLE "user_profile_project_character" (
     "id" SERIAL NOT NULL,
