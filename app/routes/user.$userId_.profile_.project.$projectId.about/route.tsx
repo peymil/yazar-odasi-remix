@@ -51,7 +51,7 @@ export default function Layout() {
                     <div className={'grid grid-cols-3 gap-1'}>
                         {project.user_profile_project_characters.map((character) =>
                             <p key={character.id} className={'text-sm block'}><span
-                                className={'text-yo-text-secondary'}>{character.name}</span>: {character.description}</p>
+                                className={'text-yo-sub-title'}>{character.name}</span>: {character.description}</p>
                         )}
                     </div>
                 </div>

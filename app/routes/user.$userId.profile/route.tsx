@@ -123,7 +123,12 @@ export default function Layout() {
                         <div className={"flex flex-col min-w-full"}>
                             <p className={"text-5xl font-bold mb-10"}>{profile.name}</p>
                             {isUsersProfile && (
-                                <Button className={"w-20 h-8 m mb-2"}>Düzenle</Button>
+                                <Button 
+                                    onClick={() => navigate("./about")} 
+                                    className={"w-20 h-8 m mb-2"}
+                                >
+                                    Düzenle
+                                </Button>
                             )}
                             <div className={"min-w-full p-5 bg-[#F9F9FA]"}>
                                 <p className={"text-2xl inline mb-5 "}>{profile.about}</p>
@@ -194,7 +199,12 @@ export default function Layout() {
                     </div>
                 </div>
             </div>
-            <Modal isOpen={inOutlet}>
+            <Modal 
+             className={'absolute top-40 left-40 right-40 bottom-40 bg-white p-10 shadow-2xl overflow-y-auto '}
+                isOpen={inOutlet}
+                onRequestClose={() => navigate("./")}
+                shouldCloseOnOverlayClick={true}
+            >
                 <Outlet/>
             </Modal>
         </div>

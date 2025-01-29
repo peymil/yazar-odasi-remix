@@ -13,6 +13,8 @@
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.735.0",
+    "@aws-sdk/types": "^3.734.0",
     "@mdxeditor/editor": "^3.21.0",
     "@prisma/client": "^6.2.1",
     "@radix-ui/react-label": "^2.1.0",

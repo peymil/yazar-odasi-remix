@@ -50,11 +50,12 @@
 - Used project color scheme from tailwind config
 - Added proper TypeScript types and fixed type errors
 
-[2025-01-29T11:50:57.000Z] Updated competition submit form UI:
-- Refactored link input to use dynamic add/remove functionality
-- Added Plus/Minus icons from lucide-react
-- Styled link inputs with rounded borders and proper spacing
-- Implemented similar UI pattern to character creation form
-- Added required validation for link inputs
-- Maintained single link minimum requirement
-- Improved form layout and button styling
+[2025-01-29T12:16:08.000Z] Profile Navigation Update:
+- Modified "Düzenle" button in user profile to navigate to about page
+- Added onClick handler using navigate function
+- Used relative path "./about" for navigation
+
+[2025-01-29T12:17:34.000Z] Modal Interaction Update:
+- Added onRequestClose handler to Modal component
+- Enabled closing on overlay click with shouldCloseOnOverlayClick
+- Set navigation back to profile page on modal close
