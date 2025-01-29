@@ -5,6 +5,7 @@ import { Button } from "~/components/ui/button";
 import { validateSessionToken } from "~/.server/auth";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
+  console.log("competition.id");
   const competition = await prisma.competition.findUnique({
     where: { id: parseInt(params.id!) },
     include: {
@@ -53,12 +54,9 @@ export default function CompetitionDetailsRoute() {
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{competition.title}</h1>
-            <div className="text-yo-text-secondary">
-              by {companyProfile?.name || competition.company.name}
-            </div>
           </div>
           {isActive && !isCompanyUser && (
-            <Link to={`/competitions/${competition.id}/submit`}>
+            <Link to={`/competition/${competition.id}/submit`}>
               <Button className="bg-yo-orange hover:bg-yo-orange/90">
                 Submit Entry
               </Button>

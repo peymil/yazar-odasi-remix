@@ -1,19 +1,27 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import { Plus, Minus } from 'lucide-react';
+import React from 'react';
 import { prisma } from "~/.server/prisma";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { validateSessionToken } from "~/.server/auth";
+import { authTokenCookie } from "~/.server/cookies";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const session = await validateSessionToken(
-    await request.headers.get("Cookie")?.split("auth-token=")[1] || ""
-  );
 
+  console.log("competition.id.submit");
+
+    const cookieHeader = request.headers.get("Cookie");
+    const sessionToken = await authTokenCookie.parse(cookieHeader);
+
+  const session = await validateSessionToken(sessionToken);
   if (!session.user) {
     return redirect("/auth/sign-in");
   }
+
+  
 
   const competition = await prisma.competition.findUnique({
     where: { id: parseInt(params.id!) },
@@ -30,9 +38,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  if (new Date(competition.end_date) < new Date()) {
-    return redirect(`/competition/${competition.id}`);
-  }
 
   const isCompanyUser = session.user.company_user.some(
     cu => cu.company_id === competition.company_id
@@ -46,10 +51,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  const session = await validateSessionToken(
-    await request.headers.get("Cookie")?.split("auth-token=")[1] || ""
-  );
+  const cookieHeader = request.headers.get("Cookie");
+  const sessionToken = await authTokenCookie.parse(cookieHeader);
 
+const session = await validateSessionToken(sessionToken);
   if (!session.user) {
     return redirect("/auth/sign-in");
   }
@@ -84,6 +89,7 @@ export default function CompetitionSubmitRoute() {
   const { competition } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const companyProfile = competition.company.company_profile[0];
+  const [links, setLinks] = React.useState<Array<{ id: number }>>([{ id: Date.now() }]);
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -104,18 +110,45 @@ export default function CompetitionSubmitRoute() {
 
         <Form method="post" className="space-y-6">
           <div className="space-y-4" id="links">
-            {[0, 1, 2].map((index) => (
-              <div key={index}>
-                <Label htmlFor={`link-${index}`}>Link {index + 1}</Label>
+            {links.map((link, i) => (
+              <div key={link.id} className="relative mb-4 p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <Label className="text-sm font-medium">Link #{i + 1}</Label>
+                  {links.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => {
+                        setLinks(links.filter((l) => l.id !== link.id));
+                      }}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
                 <Input
-                  id={`link-${index}`}
                   name="links[]"
                   type="url"
                   placeholder="https://"
                   className="w-full"
+                  required
                 />
               </div>
             ))}
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setLinks([...links, { id: Date.now() }]);
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Link
+            </Button>
           </div>
 
           {actionData?.error && (

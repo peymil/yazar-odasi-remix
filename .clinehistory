@@ -49,3 +49,12 @@
 - Maintained form compatibility with hidden inputs
 - Used project color scheme from tailwind config
 - Added proper TypeScript types and fixed type errors
+
+[2025-01-29T11:50:57.000Z] Updated competition submit form UI:
+- Refactored link input to use dynamic add/remove functionality
+- Added Plus/Minus icons from lucide-react
+- Styled link inputs with rounded borders and proper spacing
+- Implemented similar UI pattern to character creation form
+- Added required validation for link inputs
+- Maintained single link minimum requirement
+- Improved form layout and button styling
