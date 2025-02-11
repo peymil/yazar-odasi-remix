@@ -1,34 +1,40 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 import { MDXEditorComponent } from './MDXEditorComponent.client';
-import { ClientOnly } from 'remix-utils/client-only';
 interface PostEditorProps {
   companies?: Array<{ id: number; name: string }>;
   onSubmit: (data: { content: string; companyId?: number }) => void;
   isSubmitting?: boolean;
 }
 
-export function PostEditor({ companies, onSubmit, isSubmitting }: PostEditorProps) {
+export function PostEditor({
+  companies,
+  onSubmit,
+  isSubmitting,
+}: PostEditorProps) {
   const [content, setContent] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
 
   const handleSubmit = () => {
     if (!content.trim()) return;
-    
+
     onSubmit({
       content,
-      companyId: selectedCompanyId ? parseInt(selectedCompanyId) : undefined
+      companyId: selectedCompanyId ? parseInt(selectedCompanyId) : undefined,
     });
   };
 
   return (
     <div className="w-full mx-auto space-y-4">
-      <MDXEditorComponent
-        content={content}
-        onChange={setContent}
-      />
-      
+      <MDXEditorComponent content={content} onChange={setContent} />
+
       <div className="flex items-center gap-4">
         {companies && companies.length > 0 && (
           <Select
@@ -48,8 +54,8 @@ export function PostEditor({ companies, onSubmit, isSubmitting }: PostEditorProp
             </SelectContent>
           </Select>
         )}
-        
-        <Button 
+
+        <Button
           onClick={handleSubmit}
           disabled={isSubmitting || !content.trim()}
         >

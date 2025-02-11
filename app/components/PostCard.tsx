@@ -1,28 +1,23 @@
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router';
 import { Heart } from 'lucide-react';
 import { Button } from './ui/button';
-import { MDXEditor, headingsPlugin, linkPlugin, imagePlugin, UndoRedo, BoldItalicUnderlineToggles, CreateLink, InsertImage } from '@mdxeditor/editor'
+import {
+  MDXEditor,
+  headingsPlugin,
+  linkPlugin,
+  imagePlugin,
+  UndoRedo,
+  BoldItalicUnderlineToggles,
+  CreateLink,
+  InsertImage,
+} from '@mdxeditor/editor';
+import { company, post, user, user_profile } from '@prisma/client';
 
 interface PostCardProps {
-  post: {
-    id: number;
-    content: string;
+  post: post & {
     likes: number | null;
-    created_at: string;
-    user: {
-      id: number;
-      email: string;
-      user_profile: {
-        id: number;
-        image: string | null;
-        name: string;
-      }[];
-    };
-    company: {
-      id: number;
-      name: string;
-      avatar: string | null;
-    } | null;
+    company?: company | null;
+    user: (user | null) & { user_profile: user_profile[] };
   };
   isLiked?: boolean;
   onLike?: (postId: number) => void;
@@ -41,7 +36,10 @@ export function PostCard({ post, isLiked, onLike }: PostCardProps) {
         <div className="flex items-center gap-2">
           {post.company ? (
             <>
-              <Link to={`/company/profile/${post.company.id}`} className="flex items-center gap-2">
+              <Link
+                to={`/company/profile/${post.company.id}`}
+                className="flex items-center gap-2"
+              >
                 {post.company.avatar && (
                   <img
                     src={post.company.avatar}
@@ -54,16 +52,22 @@ export function PostCard({ post, isLiked, onLike }: PostCardProps) {
               <span className="text-gray-500">via</span>
             </>
           ) : null}
-          <Link to={`/user/${post.user.id}/profile`} className="flex items-center gap-2">
-        
-              <img
-                src={post.user.user_profile[0].image || 
-                  "https://cdn.yazarodasi.com/profile-photo-placeholder.webp"}
-                alt={post.user.email}
-                className="w-12 h-12 rounded-full"
-              />
-   
-            <span className="font-medium">{post.user.user_profile[0]?.name || post.user.email}</span>
+          <Link
+            to={`/user/${post.user.id}/profile`}
+            className="flex items-center gap-2"
+          >
+            <img
+              src={
+                post.user.user_profile[0].image ||
+                'https://cdn.yazarodasi.com/profile-photo-placeholder.webp'
+              }
+              alt={post.user.email}
+              className="w-12 h-12 rounded-full"
+            />
+
+            <span className="font-medium">
+              {post.user.user_profile[0]?.name || post.user.email}
+            </span>
           </Link>
         </div>
         <span className="text-sm text-gray-500">
@@ -72,7 +76,10 @@ export function PostCard({ post, isLiked, onLike }: PostCardProps) {
       </div>
 
       <div data-color-mode="light">
-        <MDXEditor markdown={post.content} readOnly plugins={[headingsPlugin(), linkPlugin(), imagePlugin()]}
+        <MDXEditor
+          markdown={post.content}
+          readOnly
+          plugins={[headingsPlugin(), linkPlugin(), imagePlugin()]}
         />
       </div>
 

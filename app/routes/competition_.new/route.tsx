@@ -1,40 +1,36 @@
-import { json, redirect, type ActionFunctionArgs } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
-import { validateSessionToken } from "~/.server/auth";
-import { prisma } from "~/.server/prisma";
-import { authTokenCookie } from "~/.server/cookies";
+import { redirect, type ActionFunctionArgs } from 'react-router';
+import { Form, useActionData } from 'react-router';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
+import { Textarea } from '~/components/ui/textarea';
+import { validateSessionToken } from '~/.server/auth';
+import { prisma } from '~/.server/prisma';
+import { authTokenCookie } from '~/.server/cookies';
+import { Route } from './+types/route';
 
-export async function action({ request }: ActionFunctionArgs) {
-  const cookieHeader = request.headers.get("Cookie");
-      const sessionToken =
-          (await authTokenCookie.parse(cookieHeader));
-  const session = await validateSessionToken(
-    sessionToken
-  );
-  console.log('session',session)
+export async function action({ request }: Route.ActionArgs) {
+  const cookieHeader = request.headers.get('Cookie');
+  const sessionToken = await authTokenCookie.parse(cookieHeader);
+  const session = await validateSessionToken(sessionToken);
 
   if (!session.user || session.user.company_user.length === 0) {
-    return redirect("/");
+    return redirect('/');
   }
 
-
   const formData = await request.formData();
-  const title = formData.get("title") as string;
-  const description = formData.get("description") as string;
-  const startDate = formData.get("startDate") as string;
-  const endDate = formData.get("endDate") as string;
+  const title = formData.get('title') as string;
+  const description = formData.get('description') as string;
+  const startDate = formData.get('startDate') as string;
+  const endDate = formData.get('endDate') as string;
 
   if (!title || !description || !startDate || !endDate) {
-    return json({ error: "All fields are required" });
+    return { error: 'All fields are required' };
   }
 
   const company = session.user.company_user[0].company;
 
-  const {id} = await prisma.competition.create({
+  const { id } = await prisma.competition.create({
     data: {
       title,
       description,
@@ -52,7 +48,9 @@ export default function NewCompetitionRoute() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6 text-center">Create Competition</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        Create Competition
+      </h1>
 
       <Form method="post" className="space-y-6">
         <div className="space-y-2">
@@ -65,7 +63,6 @@ export default function NewCompetitionRoute() {
           />
         </div>
 
-
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
           <Textarea
@@ -75,7 +72,6 @@ export default function NewCompetitionRoute() {
             className="w-full min-h-[100px]"
           />
         </div>
-
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -90,12 +86,7 @@ export default function NewCompetitionRoute() {
 
           <div className="space-y-2">
             <Label htmlFor="endDate">End Date</Label>
-            <Input
-              id="endDate"
-              name="endDate"
-              type="date"
-              className="w-full"
-            />
+            <Input id="endDate" name="endDate" type="date" className="w-full" />
           </div>
         </div>
 
@@ -103,7 +94,10 @@ export default function NewCompetitionRoute() {
           <p className="text-red-500 text-sm">{actionData.error}</p>
         )}
 
-        <Button type="submit" className="w-full bg-yo-orange hover:bg-yo-orange/90">
+        <Button
+          type="submit"
+          className="w-full bg-yo-orange hover:bg-yo-orange/90"
+        >
           Create Competition
         </Button>
       </Form>

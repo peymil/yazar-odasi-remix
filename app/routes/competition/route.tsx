@@ -1,18 +1,19 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
-import { prisma } from "~/.server/prisma";
-import type { competition, company_profile } from "@prisma/client";
-import { competitionSearch } from "@prisma/client/sql";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Pagination } from "~/components/ui/pagination";
-import { getSessionFromRequest } from "~/.server/auth";
+import { type LoaderFunctionArgs } from 'react-router';
+import { Link, useLoaderData, useSearchParams } from 'react-router';
+import { prisma } from '~/.server/prisma';
+import type { competition, company_profile } from '@prisma/client';
+import { competitionSearch } from '@prisma/client/sql';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
+import { Pagination } from '~/components/ui/pagination';
+import { getSessionFromRequest } from '~/.server/auth';
+import { Route } from './+types/route';
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request }: Route.ActionArgs) {
   const url = new URL(request.url);
-  const searchQuery = url.searchParams.get("q") || "";
-  const limitParam = url.searchParams.get("limit");
-  const takeParam = url.searchParams.get("take");
+  const searchQuery = url.searchParams.get('q') || '';
+  const limitParam = url.searchParams.get('limit');
+  const takeParam = url.searchParams.get('take');
   const limit = limitParam ? parseInt(limitParam) : 50;
   const take = takeParam ? parseInt(takeParam) : 0;
 
@@ -24,18 +25,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const total = results.length > 0 ? Number(results[0].total_count) : 0;
 
   const session = await getSessionFromRequest(request);
-  const user = session?.user 
+  const user = session?.user;
   return { competitions: results, total, user };
 }
 
 export default function CompetitionsRoute() {
   const { competitions, total, user } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
-  const limitParam = searchParams.get("limit");
-  const takeParam = searchParams.get("take");
+  const limitParam = searchParams.get('limit');
+  const takeParam = searchParams.get('take');
   const limit = limitParam ? parseInt(limitParam) : 50;
   const take = takeParam ? parseInt(takeParam) : 0;
-  const searchQuery = searchParams.get("q");
+  const searchQuery = searchParams.get('q');
   const hasSearchQuery = Boolean(searchQuery && searchQuery.length >= 2);
 
   const hasMore = competitions.length === limit;
@@ -43,18 +44,18 @@ export default function CompetitionsRoute() {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6 text-center">Competitions</h1>
-      
+
       <div className="flex items-center gap-4 mb-8">
         <form className="flex-1">
           <Input
             type="search"
             name="q"
-            defaultValue={searchQuery || ""}
+            defaultValue={searchQuery || ''}
             placeholder="Search competitions..."
             className="w-full"
           />
         </form>
-        {(user?.company_user && user.company_user.length > 0) && (
+        {user?.company_user && user.company_user.length > 0 && (
           <Link to="/competition/new">
             <Button>Yarışma Oluştur</Button>
           </Link>
@@ -80,13 +81,13 @@ export default function CompetitionsRoute() {
                   <span>Company: {competition.company_name}</span>
                   <span>•</span>
                   <span>
-                    Deadline:{" "}
+                    Deadline:{' '}
                     {new Date(competition.end_date).toLocaleDateString()}
                   </span>
                   <span>•</span>
-                  <span>Prize: {competition.prize}</span>
-                  <span>•</span>
-                  <span>{competition.delivery_count?.toString()} submissions</span>
+                  <span>
+                    {competition.delivery_count?.toString()} submissions
+                  </span>
                 </div>
               </div>
               <Link to={`/competition/${competition.id}`}>
@@ -103,7 +104,7 @@ export default function CompetitionsRoute() {
         )}
       </div>
 
-      <Pagination 
+      <Pagination
         hasMore={hasMore}
         take={take}
         limit={limit}

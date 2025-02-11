@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { profileProjectCreateSchema } from "~/.server/schemas/profile-project-create.schema";
+import { z } from 'zod';
+import { profileProjectCreateSchema } from '~/.server/schemas/profile-project-create.schema';
 
 export const profileProjectUpdateSchema = profileProjectCreateSchema.partial();
 

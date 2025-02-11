@@ -1,23 +1,24 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigate } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { prisma } from "~/.server/prisma";
-import { getSessionFromRequest } from "~/.server/auth";
+import { ActionFunctionArgs, data, redirect } from 'react-router';
+import { Form, useActionData, useNavigate } from 'react-router';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
+import { prisma } from '~/.server/prisma';
+import { getSessionFromRequest } from '~/.server/auth';
+import { Route } from './+types/route';
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request }: Route.LoaderArgs) {
   const formData = await request.formData();
   const session = await getSessionFromRequest(request);
 
   if (!session?.user) {
-    return json({ error: "Unauthorized" }, { status: 401 });
+    return data({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const email = formData.get("email") as string;
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const website = formData.get("website") as string;
+  const email = formData.get('email') as string;
+  const name = formData.get('name') as string;
+  const description = formData.get('description') as string;
+  const website = formData.get('website') as string;
 
   try {
     const company = await prisma.company.create({
@@ -28,9 +29,9 @@ export async function action({ request }: ActionFunctionArgs) {
           create: {
             name,
             description,
-            website
-          }
-        }
+            website,
+          },
+        },
       },
     });
 
@@ -38,18 +39,19 @@ export async function action({ request }: ActionFunctionArgs) {
     await prisma.company_user.create({
       data: {
         user_id: session.user.id,
-        company_id: company.id
-      }
+        company_id: company.id,
+      },
     });
 
     return redirect(`/company/${company.id}`);
   } catch (error) {
-    return json({ error: "Failed to create company" }, { status: 500 });
+    return data({ error: 'Failed to create company' }, { status: 500 });
   }
 }
 
 export default function CompanyCreate() {
   const actionData = useActionData<typeof action>();
+
   const navigate = useNavigate();
 
   return (
@@ -69,13 +71,7 @@ export default function CompanyCreate() {
 
         <div>
           <Label htmlFor="name">Company Name</Label>
-          <Input
-            id="name"
-            name="name"
-            type="text"
-            required
-            className="mt-1"
-          />
+          <Input id="name" name="name" type="text" required className="mt-1" />
         </div>
 
         <div>
@@ -108,11 +104,7 @@ export default function CompanyCreate() {
           <Button type="submit" className="bg-yo-orange">
             Create Company
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate(-1)}
-          >
+          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
             Cancel
           </Button>
         </div>

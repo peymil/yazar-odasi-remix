@@ -1,40 +1,41 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
-import { prisma } from "~/.server/prisma";
-import { Button } from "~/components/ui/button";
-import { validateSessionToken } from "~/.server/auth";
+import { type LoaderFunctionArgs } from 'react-router';
+import { Link, useLoaderData } from 'react-router';
+import { prisma } from '~/.server/prisma';
+import { Button } from '~/components/ui/button';
+import { validateSessionToken } from '~/.server/auth';
+import { Route } from './+types/route';
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
-  console.log("params", params);
+export async function loader({ request, params }: Route.ActionArgs) {
+  console.log('params', params);
   const competition = await prisma.competition.findUnique({
     where: { id: parseInt(params.id!) },
     include: {
       company: {
         include: {
-          company_profile: true
-        }
+          company_profile: true,
+        },
       },
       deliveries: {
         include: {
-          user: true
-        }
-      }
-    }
+          user: true,
+        },
+      },
+    },
   });
 
   if (!competition) {
-    throw new Response("Not Found", { status: 404 });
+    throw new Response('Not Found', { status: 404 });
   }
 
   const session = await validateSessionToken(
-    await request.headers.get("Cookie")?.split("auth-token=")[1] || ""
+    (await request.headers.get('Cookie')?.split('auth-token=')[1]) || ''
   );
 
   const isCompanyUser = session?.user?.company_user.some(
-    cu => cu.company_id === competition.company_id
+    (cu) => cu.company_id === competition.company_id
   );
 
-  return json({ competition, isCompanyUser });
+  return { competition, isCompanyUser };
 }
 
 export default function CompetitionDetailsRoute() {
@@ -77,8 +78,8 @@ export default function CompetitionDetailsRoute() {
               </div>
               <div>
                 <div className="text-yo-text-secondary">Status</div>
-                <div className={isActive ? "text-green-600" : "text-red-600"}>
-                  {isActive ? "Active" : "Closed"}
+                <div className={isActive ? 'text-green-600' : 'text-red-600'}>
+                  {isActive ? 'Active' : 'Closed'}
                 </div>
               </div>
             </div>
@@ -94,7 +95,9 @@ export default function CompetitionDetailsRoute() {
 
         {isCompanyUser && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Submissions ({competition.deliveries.length})</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Submissions ({competition.deliveries.length})
+            </h2>
             <div className="space-y-4">
               {competition.deliveries.map((delivery) => (
                 <div key={delivery.id} className="border rounded p-4">
@@ -102,7 +105,8 @@ export default function CompetitionDetailsRoute() {
                     <div>
                       <div className="font-medium">{delivery.user.email}</div>
                       <div className="text-yo-text-secondary">
-                        Submitted on {new Date(delivery.created_at).toLocaleDateString()}
+                        Submitted on{' '}
+                        {new Date(delivery.created_at).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="space-x-2">

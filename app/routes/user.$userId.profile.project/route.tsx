@@ -1,11 +1,11 @@
-import { ActionFunctionArgs, redirect } from '@remix-run/node';
+import { ActionFunctionArgs, redirect } from 'react-router';
 import { profileProjectUpdateSchema } from '~/.server/schemas/profile-project-update.schema';
 import { prisma } from '~/.server/prisma';
 import { profileProjectCreateSchema } from '~/.server/schemas/profile-project-create.schema';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData } from 'react-router';
 import qs from 'qs';
 import { Textarea } from '~/components/ui/textarea';
 import {
@@ -19,8 +19,9 @@ import React, { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { getSessionFromRequest } from '~/.server/auth';
 import { MultiSelect } from '~/components/ui/multi-select';
+import { Route } from './+types/route';
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request }: Route.ActionArgs) {
   const formQueryString = await request.text();
   const method = request.method;
   const body = qs.parse(formQueryString);
@@ -114,7 +115,7 @@ export default function Layout() {
             <Input
               name={'plot_title'}
               className={'mb-5'}
-              type='text'
+              type="text"
               placeholder={'Proje Adı'}
               required
             />
@@ -129,14 +130,14 @@ export default function Layout() {
             <Input
               name={'logline'}
               className={'mb-5'}
-              type='text'
+              type="text"
               placeholder={'Proje Logline'}
               required
             />
             <Label>Proje Biçimi</Label>
             <Select name={'type'} required>
               <SelectTrigger className={'mb-5'}>
-                <SelectValue placeholder='Proje Biçimi' />
+                <SelectValue placeholder="Proje Biçimi" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={'film'}>Kitap</SelectItem>
@@ -151,10 +152,12 @@ export default function Layout() {
               name="tags"
               className="mb-5"
               required
-              options={data?.tags?.map(tag => ({
-                value: tag.id,
-                label: tag.tag_name
-              })) || []}
+              options={
+                data?.tags?.map((tag) => ({
+                  value: tag.id,
+                  label: tag.tag_name,
+                })) || []
+              }
               value={selectedTags}
               onChange={setSelectedTags}
               placeholder="Etiket seçiniz..."
@@ -164,10 +167,12 @@ export default function Layout() {
               name="genres"
               className="mb-5"
               required
-              options={data?.genres?.map(genre => ({
-                value: genre.id,
-                label: genre.genre_name
-              })) || []}
+              options={
+                data?.genres?.map((genre) => ({
+                  value: genre.id,
+                  label: genre.genre_name,
+                })) || []
+              }
               value={selectedGenres}
               onChange={setSelectedGenres}
               placeholder="Tür seçiniz..."
@@ -183,14 +188,14 @@ export default function Layout() {
             <Input
               name={'similar_works'}
               className={'mb-5'}
-              type='text'
+              type="text"
               placeholder={'Benzer İşler'}
               required
             />
             <Input
               name={'setting'}
               className={'mb-5'}
-              type='text'
+              type="text"
               placeholder={'Zaman/Mekan'}
               required
             />
@@ -213,9 +218,14 @@ export default function Layout() {
               )}
             </div>
             {characters.map((char, i) => (
-              <div key={char.id} className="relative mb-8 p-4 border rounded-lg">
+              <div
+                key={char.id}
+                className="relative mb-8 p-4 border rounded-lg"
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <Label className="text-sm font-medium">Karakter #{i + 1}</Label>
+                  <Label className="text-sm font-medium">
+                    Karakter #{i + 1}
+                  </Label>
                   <Button
                     type="button"
                     variant="ghost"

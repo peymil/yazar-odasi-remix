@@ -1,29 +1,32 @@
-import { json, type ActionFunctionArgs } from "@remix-run/node";
-import { validateSessionToken } from "~/.server/auth";
-import { authTokenCookie } from "~/.server/cookies";
-import { prisma } from "~/.server/prisma";
-export async function action({ request }: ActionFunctionArgs) {
-  if (request.method !== "POST") {
-    return json({ error: "Method not allowed" }, { status: 405 });
+import { type ActionFunctionArgs } from 'react-router';
+import { validateSessionToken } from '~/.server/auth';
+import { authTokenCookie } from '~/.server/cookies';
+import { prisma } from '~/.server/prisma';
+import { Route } from './+types/_index';
+import { data } from 'react-router';
+
+export async function action({ request }: Route.ActionArgs) {
+  if (request.method !== 'POST') {
+    return data({ error: 'Method not allowed' }, { status: 405 });
   }
 
-  const cookieHeader = request.headers.get("Cookie");
+  const cookieHeader = request.headers.get('Cookie');
   const sessionToken = await authTokenCookie.parse(cookieHeader);
 
   if (!sessionToken) {
-    return json({ error: "Unauthorized" }, { status: 401 });
+    return data({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const session = await validateSessionToken(sessionToken);
   if (!session?.user) {
-    return json({ error: "Unauthorized" }, { status: 401 });
+    return data({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const formData = await request.formData();
-  const postId = formData.get("postId");
+  const postId = formData.get('postId');
 
-  if (!postId || typeof postId !== "string") {
-    return json({ error: "Post ID is required" }, { status: 400 });
+  if (!postId || typeof postId !== 'string') {
+    return data({ error: 'Post ID is required' }, { status: 400 });
   }
 
   const post = await prisma.post.findUnique({
@@ -36,7 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 
   if (!post) {
-    return json({ error: "Post not found" }, { status: 404 });
+    return data({ error: 'Post not found' }, { status: 404 });
   }
 
   try {
@@ -76,9 +79,9 @@ export async function action({ request }: ActionFunctionArgs) {
       ]);
     }
 
-    return json({ success: true });
+    return { success: true };
   } catch (error) {
-    console.error("Failed to toggle like:", error);
-    return json({ error: "Failed to toggle like" }, { status: 500 });
+    console.error('Failed to toggle like:', error);
+    return data({ error: 'Failed to toggle like' }, { status: 500 });
   }
 }

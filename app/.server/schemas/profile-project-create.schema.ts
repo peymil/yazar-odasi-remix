@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const profileProjectCreateSchema = z.strictObject({
   plot_title: z.string(),

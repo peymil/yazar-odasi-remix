@@ -1,13 +1,13 @@
-import { LoaderFunctionArgs, json } from "@remix-run/node";
-import { useLoaderData, useNavigate } from "@remix-run/react";
-import invariant from "tiny-invariant";
-import { prisma } from "~/.server/prisma";
-import { getSessionFromRequest } from "~/.server/auth";
-import { Button } from "~/components/ui/button";
-import { PostFeed } from "~/components/PostFeed";
+import { useLoaderData, useNavigate } from 'react-router';
+import invariant from 'tiny-invariant';
+import { prisma } from '~/.server/prisma';
+import { getSessionFromRequest } from '~/.server/auth';
+import { Button } from '~/components/ui/button';
+import { PostFeed } from '~/components/PostFeed';
+import { Route } from './+types/route';
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
-  invariant(params.id, "Company ID is required");
+export async function loader({ params, request }: Route.ActionArgs) {
+  invariant(params.id, 'Company ID is required');
   const companyId = parseInt(params.id);
   const session = await getSessionFromRequest(request);
 
@@ -21,59 +21,49 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
       company_profile: true,
       post: {
         orderBy: {
-          created_at: 'desc'
+          created_at: 'desc',
         },
         include: {
           user: {
-            select: {
-              id: true,
-              email: true,
-              user_profile: {
-                select: {
-                  id: true,
-                  image: true,
-                  name: true,
-                }
-              }
+            include: {
+              user_profile: true,
             },
           },
-          company: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
-          },
-        }
-      }
-    }
+          company: true,
+        },
+      },
+    },
   });
 
   if (!company) {
-    throw new Response("Company not found", { status: 404 });
+    throw new Response('Company not found', { status: 404 });
   }
 
-  const isCompanyUser = session?.user ? await prisma.company_user.findFirst({
-    where: {
-      user_id: session.user.id,
-      company_id: companyId
-    }
-  }) : null;
+  const isCompanyUser = session?.user
+    ? await prisma.company_user.findFirst({
+        where: {
+          user_id: session.user.id,
+          company_id: companyId,
+        },
+      })
+    : null;
 
-  const likedPosts = session?.user ? await prisma.post_like.findMany({
-    where: { user_id: session.user.id },
-    select: { post_id: true },
-  }) : [];
+  const likedPosts = session?.user
+    ? await prisma.post_like.findMany({
+        where: { user_id: session.user.id },
+        select: { post_id: true },
+      })
+    : [];
 
-  return json({ 
-    company, 
+  return {
+    company,
     isCompanyUser: !!isCompanyUser,
-    likedPostIds: likedPosts.map(like => like.post_id)
-  });
+    likedPostIds: likedPosts.map((like) => like.post_id),
+  };
 }
 
-export default function CompanyProfile() {
-  const { company, isCompanyUser, likedPostIds } = useLoaderData<typeof loader>();
+export default function CompanyProfile({ loaderData }: Route.ComponentProps) {
+  const { company, isCompanyUser, likedPostIds } = loaderData;
   const profile = company.company_profile[0];
   const navigate = useNavigate();
 
@@ -114,7 +104,9 @@ export default function CompanyProfile() {
           {isCompanyUser && (
             <Button
               className="bg-yo-orange text-white"
-              onClick={() => {/* TODO: Add edit functionality */}}
+              onClick={() => {
+                /* TODO: Add edit functionality */
+              }}
             >
               Edit Profile
             </Button>
@@ -123,7 +115,9 @@ export default function CompanyProfile() {
 
         <div className="border-t mt-6 pt-6">
           <h2 className="text-xl font-semibold mb-4">About</h2>
-          <p className="text-gray-700 whitespace-pre-wrap">{profile.description}</p>
+          <p className="text-gray-700 whitespace-pre-wrap">
+            {profile.description}
+          </p>
         </div>
       </div>
 
@@ -132,25 +126,24 @@ export default function CompanyProfile() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">Company Posts</h2>
           {isCompanyUser && (
-            <Button 
+            <Button
               className="bg-yo-orange text-white"
-              onClick={() => navigate("/post/new")}
+              onClick={() => navigate('/post/new')}
             >
               New Post
             </Button>
           )}
         </div>
         <PostFeed
-          posts={company.post.map(post => ({
+          posts={company.post.map((post) => ({
             ...post,
-            created_at: new Date(post.created_at).toISOString()
           }))}
           likedPostIds={likedPostIds}
           onLike={async (postId) => {
             const formData = new FormData();
-            formData.append("postId", postId.toString());
-            await fetch("/api/posts/like", {
-              method: "POST",
+            formData.append('postId', postId.toString());
+            await fetch('/api/posts/like', {
+              method: 'POST',
               body: formData,
             });
           }}

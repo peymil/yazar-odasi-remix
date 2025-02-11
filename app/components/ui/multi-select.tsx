@@ -7,7 +7,8 @@ interface Option {
   label: string;
 }
 
-interface MultiSelectProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+interface MultiSelectProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   options: Option[];
   value: (string | number)[];
   onChange?: (value: (string | number)[]) => void;
@@ -34,7 +35,9 @@ export function MultiSelect({
   // Sort options to show selected items at the top
   const sortedOptions = React.useMemo(() => {
     const selected = options.filter((option) => value.includes(option.value));
-    const unselected = options.filter((option) => !value.includes(option.value));
+    const unselected = options.filter(
+      (option) => !value.includes(option.value)
+    );
     return [...selected, ...unselected];
   }, [options, value]);
 
@@ -46,7 +49,7 @@ export function MultiSelect({
     const newValue = value.includes(optionValue)
       ? value.filter((v) => v !== optionValue)
       : [...value, optionValue];
-    
+
     onChange?.(newValue);
   };
 
@@ -75,18 +78,13 @@ export function MultiSelect({
         <input key={v} type="hidden" name={`${name}[]`} value={v} />
       ))}
       {required && value.length === 0 && (
-        <input
-          type="hidden"
-          name={`${name}[]`}
-          required
-          id={inputId}
-        />
+        <input type="hidden" name={`${name}[]`} required id={inputId} />
       )}
 
       <div
         className={cn(
           'flex min-h-[2.5rem] w-full flex-wrap gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background',
-          isOpen && 'ring-2 ring-ring ring-offset-2',
+          isOpen && 'ring-2 ring-ring ring-offset-2'
         )}
         onClick={() => setIsOpen(true)}
       >

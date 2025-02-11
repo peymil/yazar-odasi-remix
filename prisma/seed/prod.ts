@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
   await prisma.project_genre.createMany({
@@ -25,10 +25,10 @@ async function main() {
       { genre_name: 'Family' },
       { genre_name: 'Epic' },
       { genre_name: 'Rom-Com' },
-      { genre_name: 'Superhero' }
+      { genre_name: 'Superhero' },
     ],
-    skipDuplicates: true
-  })
+    skipDuplicates: true,
+  });
 
   await prisma.project_tag.createMany({
     data: [
@@ -258,18 +258,18 @@ async function main() {
       { tag_name: 'young-adult' },
       { tag_name: 'zombies' },
       { tag_name: 'turkey' },
-      { tag_name: 'turkey-history' }
+      { tag_name: 'turkey-history' },
     ],
-    skipDuplicates: true
-  })
+    skipDuplicates: true,
+  });
 }
 
 main()
   .then(async () => {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

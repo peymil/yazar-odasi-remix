@@ -1,4 +1,13 @@
-import { PrismaClient, competition, user, user_profile, user_profile_experience, user_profile_project, company, competition_application, company_user } from '@prisma/client';
+import {
+  PrismaClient,
+  competition,
+  user,
+  user_profile,
+  user_profile_experience,
+  user_profile_project,
+  company,
+  company_user,
+} from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 export async function createMockUserWithProfileExperienceAndProjects(
@@ -15,7 +24,6 @@ export async function createMockUserWithProfileExperienceAndProjects(
   profile: user_profile;
   experiences: user_profile_experience[];
   projects: user_profile_project[];
-  competition_applications?: competition_application;
   company_user?: company_user;
 }> {
   return await prisma.$transaction(async (tx) => {
@@ -24,8 +32,7 @@ export async function createMockUserWithProfileExperienceAndProjects(
       data: {
         email: faker.internet.email(),
         password: faker.internet.password(),
-        image: faker.image.avatar()
-      }
+      },
     });
 
     // Create user profile
@@ -37,7 +44,7 @@ export async function createMockUserWithProfileExperienceAndProjects(
         about: faker.lorem.paragraph(),
         current_title: faker.person.jobTitle(),
         background_image: faker.image.url(),
-      }
+      },
     });
 
     // Create experiences
@@ -52,8 +59,10 @@ export async function createMockUserWithProfileExperienceAndProjects(
             location: `${faker.location.city()}, ${faker.location.state()}`,
             description: faker.lorem.paragraph(),
             start_date: faker.date.past(),
-            end_date: faker.helpers.maybe(() => faker.date.recent(), { probability: 0.7 })
-          }
+            end_date: faker.helpers.maybe(() => faker.date.recent(), {
+              probability: 0.7,
+            }),
+          },
         })
       )
     );
@@ -68,11 +77,18 @@ export async function createMockUserWithProfileExperienceAndProjects(
             plot_title: faker.lorem.words({ min: 2, max: 5 }),
             synopsis: faker.lorem.paragraph(),
             logline: faker.lorem.sentence(),
-            type: faker.helpers.arrayElement(['Feature Film', 'TV Series', 'Short Film', 'Web Series']),
+            type: faker.helpers.arrayElement([
+              'Feature Film',
+              'TV Series',
+              'Short Film',
+              'Web Series',
+            ]),
             hook: faker.lorem.sentence(),
             similar_works: faker.lorem.words({ min: 2, max: 4 }),
-            setting: `${faker.location.city()}, ${faker.date.future().getFullYear()}`
-          }
+            setting: `${faker.location.city()}, ${faker.date
+              .future()
+              .getFullYear()}`,
+          },
         })
       )
     );
@@ -82,21 +98,8 @@ export async function createMockUserWithProfileExperienceAndProjects(
       mockCompanyUser = await tx.company_user.create({
         data: {
           user_id: mockUser.id,
-          company_id: company_id
-        }
-      });
-    }
-
-    let mockCompetitionApplication: competition_application | undefined;
-    if (createCompetitionApplicationCount && createCompetitionApplicationCount.length > 0) {
-      mockCompetitionApplication = await tx.competition_application.create({
-        data: {
-          name: `${faker.word.adjective()} Screenplay Competition`,
-          description: faker.lorem.paragraph(),
-          start_date: faker.date.future(),
-          end_date: faker.date.future({ years: 1 }),
-          avatar: faker.image.avatar()
-        }
+          company_id: company_id,
+        },
       });
     }
 
@@ -105,33 +108,37 @@ export async function createMockUserWithProfileExperienceAndProjects(
       profile: mockProfile,
       experiences: mockExperiences,
       projects: mockProjects,
-      competition_applications: mockCompetitionApplication,
-      company_user: mockCompanyUser
+      company_user: mockCompanyUser,
     };
   });
 }
 
-export async function createMockCompany(prisma: PrismaClient): Promise<company> {
+export async function createMockCompany(
+  prisma: PrismaClient
+): Promise<company> {
   const companyData = {
     email: faker.internet.email(),
     name: faker.company.name(),
-    avatar: faker.image.avatar()
+    avatar: faker.image.avatar(),
   };
 
   return await prisma.company.create({
-    data: companyData
+    data: companyData,
   });
 }
 
-export async function createCompetition(prisma: PrismaClient): Promise<competition> {
+export async function createCompetition(
+  prisma: PrismaClient
+): Promise<competition> {
   const startDate = faker.date.future();
   return await prisma.competition.create({
     data: {
-      name: `${faker.word.adjective()} ${faker.word.noun()} Screenwriting Competition`,
+      title: `${faker.word.adjective()} ${faker.word.noun()} Screenwriting Competition`,
+      company_id: 1,
       description: faker.lorem.paragraph(),
       start_date: startDate,
       end_date: faker.date.future({ refDate: startDate }),
       avatar: faker.image.avatar(),
-    }
+    },
   });
 }
