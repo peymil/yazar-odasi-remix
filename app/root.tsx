@@ -70,8 +70,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <nav className=" h-36 sticky flex items-center justify-evenly text-[#9197B3]">
-          <Link to="/" className={'relative w-32 h-32'}>
+        <nav className=" h-24 sticky flex items-center justify-evenly text-[#9197B3]">
+          <Link to="/" className={'relative w-20 h-20'}>
             <img
               src={'https://cdn.yazarodasi.com/yazar_odasi_logo.svg'}
               alt={'yazar odasi logo'}
@@ -82,17 +82,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Key size={24} />
             <p>Anasayfa</p>
           </Link>
-          <Link to="/services" className={'flex gap-2'}>
-            <Box />
-            <p>Öne Çıkanlar</p>
+          <Link to="/user/profile" className={'flex gap-2'}>
+            <Wallet />
+            <p>Yazarlar</p>
           </Link>
           <Link to="/user/project" className={'flex gap-2'}>
             <Percent />
-            <p>Proje Keşfet</p>
-          </Link>
-          <Link to="/user/profile" className={'flex gap-2'}>
-            <Wallet />
-            <p>Yazar Keşfet</p>
+            <p>Projeler</p>
           </Link>
           <Link to="/competition" className={'flex gap-2'}>
             <MessageCircleQuestion />
@@ -127,7 +123,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 type="search"
                 id="default-search"
                 className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg "
-                placeholder="Yazar, Proje ya da Çağrı "
+                placeholder="Yazar, Proje, Çağrı "
                 required
               />
             </div>
@@ -142,12 +138,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <User />
                 <p>Profil</p>
               </Link>
-              {data.user.company_user.length === 0 && (
-                <Link to="/company" className={'flex gap-2'}>
-                  <Plus />
-                  <p>Şirket Oluştur</p>
-                </Link>
-              )}
+
               {data.user.company_user.length > 0 && (
                 <Link to="/competition/new" className={'flex gap-2'}>
                   <Plus />

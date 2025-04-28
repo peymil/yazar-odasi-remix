@@ -8,6 +8,7 @@ export default {
       colors: {
         'yo-orange': '#FF6D2B',
         'yo-text-secondary': '#6D7175',
+        "yo-purple": "#6050A8",
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

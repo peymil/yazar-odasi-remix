@@ -191,7 +191,7 @@ export default function Layout() {
       </div>
       <Modal
         className={
-          'absolute top-40 left-40 right-40 bottom-40 bg-white p-10 shadow-2xl overflow-y-auto '
+          'absolute top-20 left-80 right-80 bottom-20 bg-white p-10 shadow-2xl overflow-y-auto '
         }
         isOpen={inOutlet}
         onRequestClose={() => navigate('./')}
