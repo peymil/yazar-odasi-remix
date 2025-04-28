@@ -1,4 +1,3 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
 import { Label } from '~/components/ui/label';
 import { Button } from '~/components/ui/button';
 import { Textarea } from '~/components/ui/textarea';
@@ -8,6 +7,7 @@ import { Input } from '~/components/ui/input';
 import invariant from 'tiny-invariant';
 import { getSessionFromRequest } from '~/.server/auth';
 import { Route } from './+types/route';
+import { useRef, useState, useEffect } from 'react';
 
 export async function loader({ params, request }: Route.ActionArgs) {
   invariant(params.userId, 'userId is required');
@@ -35,15 +35,16 @@ export async function action({ request, params }: Route.ActionArgs) {
     },
   });
 
+  console.log('profile', formData.get('profileImageUrl'));
+
   await prisma.user_profile.update({
     where: {
       id: profile.id,
     },
     data: {
       about: formData.get('about') as string,
-      image: (formData.get('profileImage') as string) || undefined,
-      background_image:
-        (formData.get('backgroundImage') as string) || undefined,
+      image: formData.get('profileImageUrl') as string,
+      background_image: formData.get('backgroundImageUrl') as string,
     },
   });
 
@@ -52,33 +53,116 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 export default function Layout() {
   const { profile } = useLoaderData<typeof loader>();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(profile.image || null);
+  const [backgroundPreview, setBackgroundPreview] = useState<string | null>(profile.background_image || null);
+
+  // Cleanup preview URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (profilePreview && !profilePreview.startsWith('http')) {
+        URL.revokeObjectURL(profilePreview);
+      }
+      if (backgroundPreview && !backgroundPreview.startsWith('http')) {
+        URL.revokeObjectURL(backgroundPreview);
+      }
+    };
+  }, [profilePreview, backgroundPreview]);
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, urlFieldName: string) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Create temporary preview URL
+    const previewUrl = URL.createObjectURL(file);
+    if (urlFieldName === 'profileImageUrl') {
+      setProfilePreview(previewUrl);
+    } else {
+      setBackgroundPreview(previewUrl);
+    }
+
+    const formData = new FormData();
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
+    formData.append('folder', 'profile-pictures');
+
+    const response = await fetch('/api/presigned-url', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const { presignedUrl } = await response.json();
+    
+    // Upload to S3
+    await fetch(presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type,
+      },
+    });
+
+    // Get the public URL
+    const publicUrl = presignedUrl.split('?')[0]
+
+    const publicFileUrl = "https://cdn.yazarodasi.com/profile-pictures/" + publicUrl.split('/').pop();
+
+    
+    // Set the URL in a hidden input
+    const hiddenInput = formRef.current?.querySelector(`[name="${urlFieldName}"]`) as HTMLInputElement;
+    if (hiddenInput) {
+      hiddenInput.value = publicFileUrl;
+    }
+  };
 
   return (
     <div className={'container p-5'}>
       <div className={'flex'}>
         <Form
+          ref={formRef}
           className={'flex flex-1 flex-col gap-4'}
           method="post"
-          encType="multipart/form-data"
         >
           <div>
             <Label>Profil Fotoğrafı</Label>
-            <Input
-              type="file"
-              name="profileImage"
-              accept="image/*"
-              className="mt-2"
-            />
+            <div className="mt-2 space-y-2">
+              <Input
+                type="file"
+                onChange={(e) => handleFileChange(e, 'profileImageUrl')}
+                accept="image/*"
+              />
+              {profilePreview && (
+                <div className="w-32 h-32 rounded-full overflow-hidden">
+                  <img
+                    src={profilePreview}
+                    alt="Profile Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <input type="hidden" name="profileImageUrl" />
+            </div>
           </div>
 
           <div>
             <Label>Arkaplan Fotoğrafı</Label>
-            <Input
-              type="file"
-              name="backgroundImage"
-              accept="image/*"
-              className="mt-2"
-            />
+            <div className="mt-2 space-y-2">
+              <Input
+                type="file"
+                onChange={(e) => handleFileChange(e, 'backgroundImageUrl')}
+                accept="image/*"
+              />
+              {backgroundPreview && (
+                <div className="w-full h-32 rounded overflow-hidden">
+                  <img
+                    src={backgroundPreview}
+                    alt="Background Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <input type="hidden" name="backgroundImageUrl" />
+            </div>
           </div>
 
           <div>

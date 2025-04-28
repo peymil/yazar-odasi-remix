@@ -32,7 +32,7 @@ export function PostEditor({
   };
 
   return (
-    <div className="w-full mx-auto space-y-4">
+    <div className="w-full mx-auto space-y-4 shadow-md p-4 bg-white rounded-lg border">
       <MDXEditorComponent content={content} onChange={setContent} />
 
       <div className="flex items-center gap-4">

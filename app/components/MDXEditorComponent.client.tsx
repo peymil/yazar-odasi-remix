@@ -28,8 +28,6 @@ export function MDXEditorComponent({
       markdown={content}
       plugins={[
         headingsPlugin(),
-        linkPlugin(),
-        linkDialogPlugin(),
         imagePlugin(),
         toolbarPlugin({
           toolbarClassName: 'my-classname',
@@ -38,7 +36,6 @@ export function MDXEditorComponent({
               {' '}
               <UndoRedo />
               <BoldItalicUnderlineToggles />
-              <CreateLink />
               <InsertImage />
             </>
           ),

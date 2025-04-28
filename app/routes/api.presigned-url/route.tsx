@@ -1,5 +1,5 @@
 import { type ActionFunctionArgs, data } from 'react-router';
-import { generatePresignedUrl, generateS3Key } from '~/.server/s3';
+import { generatePresignedUrl, ALLOWED_FILE_TYPES } from '~/.server/s3';
 import { validateSessionToken } from '~/.server/auth';
 import { authTokenCookie } from '~/.server/cookies';
 import { randomUUID } from 'crypto';
@@ -33,19 +33,18 @@ export async function action({ request }: ActionFunctionArgs) {
       return data({ error: 'Filename and content type are required' }, { status: 400 });
     }
 
-    if (contentType !== 'application/pdf') {
-      return data({ error: 'Only PDF files are allowed' }, { status: 400 });
+    if (!ALLOWED_FILE_TYPES.includes(contentType)) {
+      return data({ error: 'Invalid file type' }, { status: 400 });
     }
 
     const uuid = randomUUID();
     const filePath = `${folder}/${uuid}-${filename}`;
 
-    const key = generateS3Key(session.user.id, filePath);
-    const presignedUrl = await generatePresignedUrl(key, contentType, 'upload');
+    const presignedUrl = await generatePresignedUrl(filePath, contentType, 'upload');
 
     return data({
       presignedUrl,
-      key,
+      filePath,
     });
   } catch (error) {
     console.error('Error generating presigned URL:', error);

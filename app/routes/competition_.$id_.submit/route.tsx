@@ -144,7 +144,7 @@ export default function CompetitionSubmitRoute() {
         const fileUrl = presignedUrl.split('?')[0]; // Extract the URL without query params
         console.log('publicFileUrl',fileUrl);
 
-        const publicFileUrl = "https://cdn.yazarodasi.com" + fileUrl.split('/').pop();
+        const publicFileUrl = "https://cdn.yazarodasi.com/competition-applications/" + fileUrl.split('/').pop();
 
         // Add to docs state
         setDocs([...docs, {

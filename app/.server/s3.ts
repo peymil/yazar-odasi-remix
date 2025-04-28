@@ -3,7 +3,7 @@ import { PutObjectCommand, GetObjectCommand,S3Client } from '@aws-sdk/client-s3'
 import { randomUUID } from 'crypto';
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME!;
-const ALLOWED_FILE_TYPES = ['application/pdf'];
+export const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
 const MAX_PRESIGNED_URL_AGE = 3600; // 1 hour in seconds
 
 export const s3Client = new S3Client({
@@ -44,12 +44,4 @@ export async function generatePresignedUrl(
     console.error('Error generating presigned URL:', error);
     throw new Error('Failed to generate presigned URL');
   }
-}
-
-export function generateS3Key(userId: number, filename: string) {
-  // Get file extension from original filename
-  const ext = filename.split('.').pop()?.toLowerCase() || 'pdf';
-  // Generate UUID for unique filename
-  const uuid = randomUUID();
-  return `competition-applications/${userId}/${uuid}.${ext}`;
 }
