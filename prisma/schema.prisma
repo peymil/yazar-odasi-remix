@@ -52,7 +52,7 @@ model competition_delivery {
   id             Int         @id @default(autoincrement())
   competition_id Int
   user_id        Int
-  links          String[]
+  docs          String[]
   created_at     DateTime    @default(now())
   competition    competition @relation(fields: [competition_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user           user        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
