@@ -14,10 +14,11 @@
     "typecheck": "react-router typegen && tsc",
     "prisma:generate": "prisma generate",
     "prisma:generate:sql": "prisma generate --sql",
-    "test:e2e":"playwright test"
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.735.0",
+    "@aws-sdk/s3-request-presigner": "^3.798.0",
     "@aws-sdk/types": "^3.734.0",
     "@mdxeditor/editor": "^3.21.0",
     "@prisma/client": "^6.2.1",
