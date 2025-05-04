@@ -13,6 +13,9 @@ export function SignUp({
   return (
     <div className="max-w-md w-full mx-auto p-8 bg-white rounded-lg">
       <Form
+        onError={() => {
+          
+        }}
         method="post"
         action={action}
         className={cn(className, 'space-y-4')}
