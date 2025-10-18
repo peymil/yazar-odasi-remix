@@ -46,7 +46,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const email = formData.get('email')?.toString();
 
   if (!email) {
-    return { error: 'Email is required' };
+    return { error: 'E-posta adresi gerekli.' };
   }
 
   const user = await prisma.user.findUnique({
@@ -55,11 +55,11 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 
   if (!user) {
-    return { error: 'User not found' };
+    return { error: 'Kullanıcı bulunamadı.' };
   }
 
   if (user.emailVerified) {
-    return { error: 'Email already verified' };
+    return { error: 'E-posta zaten doğrulanmış.' };
   }
 
   // Delete any existing verification tokens

@@ -17,11 +17,14 @@ import crypto from 'crypto';
 export async function action({ request }: Route.ActionArgs) {
   const body = Object.fromEntries(await request.formData());
   const payload = authSignInSchema.parse(body);
-  const user = await prisma.user.findFirstOrThrow({
+  const user = await prisma.user.findFirst({
     where: { email: payload.email },
   });
+  if (!user) {
+    return { error: 'Bu e-posta adresi ile kayıtlı bir kullanıcı bulunamadı.' };
+  }
   if (!(await verifyPassowrd(payload.password, user.password))) {
-    throw new Error('User password is incorrect');
+    return { error: 'Şifre yanlış.' };
   }
   if (!user.emailVerified) {
     // Send verification email if not verified
@@ -50,7 +53,7 @@ export async function action({ request }: Route.ActionArgs) {
       react: EmailVerification({ verificationUrl }),
     });
 
-    return { error: 'Please verify your email before signing in. A verification email has been sent.' };
+    return { error: 'Lütfen giriş yapmadan önce e-posta adresinizi doğrulayın. Doğrulama e-postası gönderildi.' };
   }
   const sessionToken = generateSessionToken();
   const session = await createSession(sessionToken, user.id);

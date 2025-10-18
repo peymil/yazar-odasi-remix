@@ -16,7 +16,7 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 
   if (existingUser) {
-    return { error: 'Email already exists' };
+    return { error: 'Bu e-posta adresi zaten kayıtlı.' };
   }
 
   const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))

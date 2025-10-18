@@ -1,4 +1,4 @@
-import { Form, Link } from 'react-router';
+import { Form, Link, useActionData } from 'react-router';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/utils';
@@ -10,6 +10,7 @@ export function SignUp({
   action?: string;
   className?: string;
 }) {
+  const actionData = useActionData<{ error?: string }>();
   return (
     <div className="max-w-md w-full mx-auto p-8 bg-white rounded-lg">
       <Form
@@ -20,6 +21,11 @@ export function SignUp({
         action={action}
         className={cn(className, 'space-y-4')}
       >
+        {actionData?.error && (
+          <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {actionData.error}
+          </div>
+        )}
         <div className="space-y-4">
           <div>
             <label
