@@ -6,7 +6,7 @@ import { useSubmit, useSearchParams } from 'react-router';
 
 export function SearchBar({
   className,
-  placeholder = 'Search users...',
+  placeholder = 'Kullanıcıları ara...',
 }: {
   className?: string;
   placeholder?: string;

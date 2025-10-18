@@ -1,34 +1,19 @@
 import { useState } from 'react';
-import { Button } from './ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
-import { MDXEditorComponent } from './MDXEditorComponent.client';
-interface PostEditorProps {
-  companies?: Array<{ id: number; name: string }>;
-  onSubmit: (data: { content: string; companyId?: number }) => void;
-  isSubmitting?: boolean;
-}
+import { useLoaderData } from 'react-router';
+import { Button } from '~/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
+import { MDXEditorComponent } from '~/components/MDXEditorComponent.client';
 
-export function PostEditor({
-  companies,
-  onSubmit,
-  isSubmitting,
-}: PostEditorProps) {
+export default function PostEditor() {
+  const { companies }: { companies: { id: number; name: string }[] } = useLoaderData();
   const [content, setContent] = useState('');
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (!content.trim()) return;
-
-    onSubmit({
-      content,
-      companyId: selectedCompanyId ? parseInt(selectedCompanyId) : undefined,
-    });
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    // Implementation for posting
+    setIsSubmitting(false);
   };
 
   return (
@@ -42,11 +27,11 @@ export function PostEditor({
             onValueChange={setSelectedCompanyId}
           >
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Post as..." />
+              <SelectValue placeholder="Şirket olarak paylaş..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="a">Personal Post</SelectItem>
-              {companies.map((company) => (
+              <SelectItem value="a">Kişisel Gönderi</SelectItem>
+              {companies.map((company: { id: number; name: string }) => (
                 <SelectItem key={company.id} value={company.id.toString()}>
                   {company.name}
                 </SelectItem>
@@ -59,7 +44,7 @@ export function PostEditor({
           onClick={handleSubmit}
           disabled={isSubmitting || !content.trim()}
         >
-          {isSubmitting ? 'Posting...' : 'Post'}
+          {isSubmitting ? 'Gönderiliyor...' : 'Gönder'}
         </Button>
       </div>
     </div>

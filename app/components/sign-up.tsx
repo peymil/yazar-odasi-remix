@@ -32,12 +32,12 @@ export function SignUp({
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Email
+              E-posta
             </label>
             <Input
               type="email"
               name="email"
-              placeholder="Enter your email"
+              placeholder="E-posta adresinizi girin"
               className="w-full focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -47,12 +47,12 @@ export function SignUp({
               htmlFor="name"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Full Name
+              Tam Ad
             </label>
             <Input
               type="text"
               name="name"
-              placeholder="Enter your full name"
+              placeholder="Tam adınızı girin"
               className="w-full focus:ring-2 focus:ring-yo-orange"
             />
           </div>
@@ -62,12 +62,12 @@ export function SignUp({
               htmlFor="password"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Password
+              Şifre
             </label>
             <Input
               type="password"
               name="password"
-              placeholder="Enter your password"
+              placeholder="Şifrenizi girin"
               className="w-full focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -77,16 +77,16 @@ export function SignUp({
           type="submit"
           className="w-full bg-yo-orange hover:bg-yo-orange/90 focus:ring-2 focus:ring-yo-orange text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200"
         >
-          Sign Up
+          Üye Ol
         </Button>
 
         <div className="text-center text-sm text-gray-600 mt-4">
-          Already have an account?{' '}
+          Zaten hesabınız var mı?{' '}
           <Link
             to="/auth/sign-in"
             className="font-medium text-yo-orange hover:text-yo-orange/90"
           >
-            Sign in
+            Giriş yap
           </Link>
         </div>
       </Form>

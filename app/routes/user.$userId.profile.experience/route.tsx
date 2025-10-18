@@ -29,7 +29,7 @@ export default function Layout() {
             name={'setting'}
             className={'mb-5'}
             type="text"
-            placeholder={'Location'}
+            placeholder={'Konum'}
             required
           />
           <Label>Açıklama</Label>

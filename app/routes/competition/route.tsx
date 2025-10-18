@@ -43,7 +43,7 @@ export default function CompetitionsRoute() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6 text-center">Competitions</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">Yarışmalar</h1>
 
       <div className="flex items-center gap-4 mb-8">
         <form className="flex-1">
@@ -51,7 +51,7 @@ export default function CompetitionsRoute() {
             type="search"
             name="q"
             defaultValue={searchQuery || ''}
-            placeholder="Search competitions..."
+            placeholder="Yarışmaları ara..."
             className="w-full"
           />
         </form>
@@ -63,7 +63,7 @@ export default function CompetitionsRoute() {
       </div>
 
       <div className="mb-4 text-sm text-gray-600">
-        {total} competition{total !== 1 ? 's' : ''}
+        {total} yarışma{total !== 1 ? 's' : ''}
       </div>
 
       <div className="bg-white rounded-lg shadow divide-y">
@@ -78,20 +78,20 @@ export default function CompetitionsRoute() {
                   {competition.description}
                 </p>
                 <div className="flex gap-4 text-sm text-gray-500">
-                  <span>Company: {competition.company_name}</span>
+                  <span>Şirket: {competition.company_name}</span>
                   <span>•</span>
                   <span>
-                    Deadline:{' '}
+                    Son Tarih:{' '}
                     {new Date(competition.end_date).toLocaleDateString()}
                   </span>
                   <span>•</span>
                   <span>
-                    {competition.delivery_count?.toString()} submissions
+                    {competition.delivery_count?.toString()} teslim
                   </span>
                 </div>
               </div>
               <Link to={`/competition/${competition.id}`}>
-                <Button variant="outline">View Details</Button>
+                <Button variant="outline">Detayları Görüntüle</Button>
               </Link>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function CompetitionsRoute() {
 
         {competitions.length === 0 && (
           <div className="p-4 text-center text-gray-500">
-            No competitions found
+            Yarışma bulunamadı
           </div>
         )}
       </div>

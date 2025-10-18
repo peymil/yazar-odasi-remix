@@ -47,7 +47,7 @@ export default function CompetitionDetailsRoute() {
     <div className="max-w-4xl mx-auto p-4">
       <div className="mb-6">
         <Link to="/competition" className="text-yo-orange hover:underline">
-          ← Back to Competitions
+          ← Yarışmalara Dön
         </Link>
       </div>
 
@@ -56,13 +56,13 @@ export default function CompetitionDetailsRoute() {
           <div>
             <h1 className="text-3xl font-bold mb-2">{competition.title}</h1>
             <div className="text-yo-text-secondary">
-              by {companyProfile?.name || competition.company.name}
+              {companyProfile?.name || competition.company.name} tarafından
             </div>
           </div>
           {isActive && !isCompanyUser && (
             <Link to={`/competition/${competition.id}/submit`}>
               <Button className="bg-yo-orange hover:bg-yo-orange/90">
-                Submit Entry
+                Başvuru Gönder
               </Button>
             </Link>
           )}
@@ -70,23 +70,23 @@ export default function CompetitionDetailsRoute() {
 
         <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Details</h2>
+            <h2 className="text-xl font-semibold mb-4">Detaylar</h2>
             <div className="space-y-4">
               <div>
-                <div className="text-yo-text-secondary">Deadline</div>
+                <div className="text-yo-text-secondary">Son Tarih</div>
                 <div>{new Date(competition.end_date).toLocaleDateString()}</div>
               </div>
               <div>
-                <div className="text-yo-text-secondary">Status</div>
+                <div className="text-yo-text-secondary">Durum</div>
                 <div className={isActive ? 'text-green-600' : 'text-red-600'}>
-                  {isActive ? 'Active' : 'Closed'}
+                  {isActive ? 'Aktif' : 'Kapalı'}
                 </div>
               </div>
             </div>
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold mb-4">About</h2>
+            <h2 className="text-xl font-semibold mb-4">Hakkında</h2>
             <p className="text-yo-text-secondary whitespace-pre-wrap">
               {competition.description}
             </p>
@@ -96,7 +96,7 @@ export default function CompetitionDetailsRoute() {
         {isCompanyUser && (
           <div>
             <h2 className="text-xl font-semibold mb-4">
-              Submissions ({competition.deliveries.length})
+              Başvurular ({competition.deliveries.length})
             </h2>
             <div className="space-y-4">
               {competition.deliveries.map((delivery) => (
@@ -105,8 +105,7 @@ export default function CompetitionDetailsRoute() {
                     <div>
                       <div className="font-medium">{delivery.user.email}</div>
                       <div className="text-yo-text-secondary">
-                        Submitted on{' '}
-                        {new Date(delivery.created_at).toLocaleDateString()}
+                        {new Date(delivery.created_at).toLocaleDateString()} tarihinde gönderildi
                       </div>
                     </div>
                     <div className="space-x-2">
@@ -118,7 +117,7 @@ export default function CompetitionDetailsRoute() {
                           rel="noopener noreferrer"
                           className="text-yo-orange hover:underline"
                         >
-                          Link {index + 1}
+                          Bağlantı {index + 1}
                         </a>
                       ))}
                     </div>

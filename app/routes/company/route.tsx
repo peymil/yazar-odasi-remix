@@ -12,7 +12,7 @@ export async function action({ request }: Route.LoaderArgs) {
   const session = await getSessionFromRequest(request);
 
   if (!session?.user) {
-    return data({ error: 'Unauthorized' }, { status: 401 });
+    return data({ error: 'Yetkisiz' }, { status: 401 });
   }
 
   const email = formData.get('email') as string;
@@ -45,7 +45,7 @@ export async function action({ request }: Route.LoaderArgs) {
 
     return redirect(`/company/${company.id}`);
   } catch (error) {
-    return data({ error: 'Failed to create company' }, { status: 500 });
+    return data({ error: 'Şirket oluşturulamadı' }, { status: 500 });
   }
 }
 
@@ -56,10 +56,10 @@ export default function CompanyCreate() {
 
   return (
     <div className="container mx-auto max-w-2xl mt-10">
-      <h1 className="text-3xl font-bold mb-8">Create Company</h1>
+      <h1 className="text-3xl font-bold mb-8">Şirket Oluştur</h1>
       <Form method="post" className="space-y-6">
         <div>
-          <Label htmlFor="email">Company Email</Label>
+          <Label htmlFor="email">Şirket E-postası</Label>
           <Input
             id="email"
             name="email"
@@ -70,12 +70,12 @@ export default function CompanyCreate() {
         </div>
 
         <div>
-          <Label htmlFor="name">Company Name</Label>
+          <Label htmlFor="name">Şirket Adı</Label>
           <Input id="name" name="name" type="text" required className="mt-1" />
         </div>
 
         <div>
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">Açıklama</Label>
           <Input
             id="description"
             name="description"
@@ -86,7 +86,7 @@ export default function CompanyCreate() {
         </div>
 
         <div>
-          <Label htmlFor="website">Website</Label>
+          <Label htmlFor="website">Web Sitesi</Label>
           <Input
             id="website"
             name="website"
@@ -102,10 +102,10 @@ export default function CompanyCreate() {
 
         <div className="flex gap-4">
           <Button type="submit" className="bg-yo-orange">
-            Create Company
+            Şirket Oluştur
           </Button>
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-            Cancel
+            İptal
           </Button>
         </div>
       </Form>

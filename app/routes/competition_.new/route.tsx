@@ -25,7 +25,7 @@ export async function action({ request }: Route.ActionArgs) {
   const endDate = formData.get('endDate') as string;
 
   if (!title || !description || !startDate || !endDate) {
-    return { error: 'All fields are required' };
+    return { error: 'Tüm alanlar zorunludur' };
   }
 
   const company = session.user.company_user[0].company;
@@ -49,33 +49,33 @@ export default function NewCompetitionRoute() {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6 text-center">
-        Create Competition
+        Yarışma Oluştur
       </h1>
 
       <Form method="post" className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">Başlık</Label>
           <Input
             id="title"
             name="title"
-            placeholder="Enter competition title"
+            placeholder="Yarışma başlığını girin"
             className="w-full"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">Açıklama</Label>
           <Textarea
             id="description"
             name="description"
-            placeholder="Enter competition description"
+            placeholder="Yarışma açıklamasını girin"
             className="w-full min-h-[100px]"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="startDate">Start Date</Label>
+            <Label htmlFor="startDate">Başlangıç Tarihi</Label>
             <Input
               id="startDate"
               name="startDate"
@@ -85,7 +85,7 @@ export default function NewCompetitionRoute() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="endDate">End Date</Label>
+            <Label htmlFor="endDate">Bitiş Tarihi</Label>
             <Input id="endDate" name="endDate" type="date" className="w-full" />
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function NewCompetitionRoute() {
           type="submit"
           className="w-full bg-yo-orange hover:bg-yo-orange/90"
         >
-          Create Competition
+          Yarışma Oluştur
         </Button>
       </Form>
     </div>
