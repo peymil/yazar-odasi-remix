@@ -18,12 +18,12 @@ export const EmailVerification = ({
 }: EmailVerificationProps) => (
   <Html>
     <Head />
-    <Preview>Verify your email address</Preview>
+    <Preview>E-posta adresinizi doğrulayın</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Verify your email</Heading>
+        <Heading style={h1}>E-posta adresinizi doğrulayın</Heading>
         <Text style={text}>
-          Thank you for signing up! Please verify your email address to complete your registration.
+          Yazar Odasına kaydolduğunuz için teşekkürler! Kayıt işleminizi tamamlamak için lütfen e-posta adresinizi doğrulayın.
         </Text>
         <Link
           href={verificationUrl}
@@ -34,7 +34,7 @@ export const EmailVerification = ({
             marginBottom: '16px',
           }}
         >
-          Click here to verify your email address
+          E-posta adresinizi doğrulamak için buraya tıklayın
         </Link>
         <Text
           style={{
@@ -44,7 +44,7 @@ export const EmailVerification = ({
             marginBottom: '16px',
           }}
         >
-          If you didn&apos;t sign up for an account, you can safely ignore this email.
+          Eğer bir hesap oluşturmadıysanız, bu e-postayı güvenle yok sayabilirsiniz.
         </Text>
       </Container>
     </Body>
