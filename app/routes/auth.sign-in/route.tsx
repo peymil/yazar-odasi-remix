@@ -1,6 +1,6 @@
 import { prisma } from '~/.server/prisma';
 
-import { ActionFunctionArgs, redirect } from 'react-router';
+import { redirect } from 'react-router';
 import { authSignInSchema } from '~/.server/schemas/auth-sign-in.schema';
 import {
   createSession,
@@ -10,6 +10,9 @@ import {
 import { authTokenCookie } from '~/.server/cookies';
 import { SignIn } from '~/components/sign-in';
 import { Route } from './+types/route';
+import { sendEmail } from '~/.server/email';
+import { EmailVerification } from '~/emails/email-verification';
+import crypto from 'crypto';
 
 export async function action({ request }: Route.ActionArgs) {
   const body = Object.fromEntries(await request.formData());
@@ -19,6 +22,35 @@ export async function action({ request }: Route.ActionArgs) {
   });
   if (!(await verifyPassowrd(payload.password, user.password))) {
     throw new Error('User password is incorrect');
+  }
+  if (!user.emailVerified) {
+    // Send verification email if not verified
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await prisma.email_verification.deleteMany({
+      where: { userId: user.id },
+    });
+
+    await prisma.email_verification.create({
+      data: {
+        userId: user.id,
+        token,
+        expires,
+      },
+    });
+
+    const verificationUrl = `${request.headers.get('origin')}/auth/verify-email?token=${token}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Verify your email address',
+      react: EmailVerification({ verificationUrl }),
+    });
+
+    return { error: 'Please verify your email before signing in. A verification email has been sent.' };
   }
   const sessionToken = generateSessionToken();
   const session = await createSession(sessionToken, user.id);

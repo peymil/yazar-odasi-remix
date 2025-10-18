@@ -186,6 +186,17 @@ model user {
   competition_delivery competition_delivery[]
   email               String                  @unique
   password            String
+  emailVerified       Boolean                @default(false)
+  email_verification  email_verification[]
+}
+
+model email_verification {
+  id        Int       @id @default(autoincrement())
+  user      user      @relation(fields: [userId], references: [id])
+  userId    Int
+  token     String    @unique
+  expires   DateTime  @db.Timestamptz(6)
+  createdAt DateTime  @default(now())
 }
 
 model session {

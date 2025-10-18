@@ -16,7 +16,6 @@ import { getProject } from './service.server';
 import { getSessionFromRequest } from '~/.server/auth';
 import { PostFeed } from '~/components/PostFeed';
 import { Route } from './+types/route';
-
 export async function loader({ params, request }: Route.ActionArgs) {
   invariant(params.userId, 'userId is required');
   const { userId } = params;
