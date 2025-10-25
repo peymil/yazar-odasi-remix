@@ -70,28 +70,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <nav className=" h-24 sticky flex items-center justify-evenly text-[#9197B3]">
-          <Link to="/" className={'relative w-20 h-20'}>
+        <nav className="h-24 sticky flex items-center justify-evenly text-[#9197B3]">
+          <Link to="/" className={'relative w-20 h-20 flex-shrink-0'}>
             <img
               src={'https://cdn.yazarodasi.com/yazar_odasi_logo.svg'}
               alt={'yazar odasi logo'}
+              className="w-full h-full object-contain"
             />
           </Link>
           <Link to="/" className={'flex gap-2'}>
             <Key size={24} />
-            <p>Anasayfa</p>
+            <p className="hidden md:inline">Anasayfa</p>
           </Link>
           <Link to="/user/profile" className={'flex gap-2'}>
             <Wallet />
-            <p>Yazarlar</p>
+            <p className="hidden md:inline">Yazarlar</p>
           </Link>
           <Link to="/user/project" className={'flex gap-2'}>
             <Percent />
-            <p>Projeler</p>
+            <p className="hidden md:inline">Projeler</p>
           </Link>
           <Link to="/competition" className={'flex gap-2'}>
             <MessageCircleQuestion />
-            <p>Açık Çağrılar</p>
+            <p className="hidden md:inline">Çağrılar</p>
           </Link>
           <form className="">
             <label
@@ -135,29 +136,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 className={'flex gap-2'}
               >
                 <User />
-                <p>Profil</p>
+                <p className="hidden md:inline">Profil</p>
               </Link>
 
               {data.user.company_user.length > 0 && (
                 <Link to="/competition/new" className={'flex gap-2'}>
                   <Plus />
-                  <p>Yarışma Oluştur</p>
+                  <p className="hidden md:inline">Yarışma Oluştur</p>
                 </Link>
               )}
               <Link to="/auth/sign-out" className={'flex gap-2'}>
                 <LogOut />
-                <p>Çıkış Yap</p>
+                <p className="hidden md:inline">Çıkış Yap</p>
               </Link>
             </>
           ) : (
             <>
               <Link to="/auth/sign-in" className={'flex gap-2'}>
                 <LogIn />
-                <p>Giriş Yap</p>
+                <p className="hidden md:inline">Giriş Yap</p>
               </Link>
               <Link to="/auth/sign-up" className={'flex gap-2'}>
                 <UserRoundPlus />
-                <p> Üye ol</p>
+                <p className="hidden md:inline"> Üye ol</p>
               </Link>
             </>
           )}
