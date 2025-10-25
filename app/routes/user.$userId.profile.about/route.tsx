@@ -117,7 +117,6 @@ export default function Layout() {
 
   return (
     <div className={'container p-5'}>
-      <div className={'flex'}>
         <Form
           ref={formRef}
           className={'flex flex-1 flex-col gap-4'}
@@ -175,10 +174,15 @@ export default function Layout() {
             />
           </div>
 
-          <Button type="submit">Kaydet</Button>
+          <div className='absolute bottom-0 right-0 m-4'>
+            <Button
+              className={'sticky float-right top-auto'}
+              type={'submit'}
+            >
+              Onayla
+            </Button>
+          </div>
         </Form>
-        <div className={'flex-1'} />
-      </div>
     </div>
   );
 }

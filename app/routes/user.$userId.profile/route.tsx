@@ -190,8 +190,10 @@ export default function Layout() {
       </div>
       <Modal
         className={
-          'absolute top-20 left-80 right-80 bottom-20 bg-white p-10 shadow-2xl overflow-y-auto '
+          'absolute bg-white p-6 shadow-2xl w-full h-full md:w-2/3 md:h-5/6 overflow-y-auto overscroll-none '
         }
+        htmlOpenClassName={'overflow-hidden'}
+        overlayClassName={"fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"}
         isOpen={inOutlet}
         onRequestClose={() => navigate('./')}
         shouldCloseOnOverlayClick={true}

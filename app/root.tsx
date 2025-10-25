@@ -75,7 +75,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <img
               src={'https://cdn.yazarodasi.com/yazar_odasi_logo.svg'}
               alt={'yazar odasi logo'}
-              sizes={'10vv'}
             />
           </Link>
           <Link to="/" className={'flex gap-2'}>
