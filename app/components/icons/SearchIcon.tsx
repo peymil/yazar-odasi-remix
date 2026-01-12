@@ -1,26 +1,14 @@
 export function SearchIcon({ className = "" }: { className?: string }) {
   return (
     <svg
-      width="21"
-      height="24"
-      viewBox="0 0 21 24"
+      viewBox="0 0 20.9734 24.1839"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <path
-        d="M9.5 17C13.6421 17 17 13.6421 17 9.5C17 5.35786 13.6421 2 9.5 2C5.35786 2 2 5.35786 2 9.5C2 13.6421 5.35786 17 9.5 17Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14.5 14.5L19 19"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M8.40223 2.4135C4.92372 2.4135 2.10304 5.66599 2.10304 9.677C2.10304 13.688 4.92372 16.9405 8.40223 16.9405C11.8807 16.9405 14.7014 13.688 14.7014 9.677C14.7014 5.66599 11.8807 2.4135 8.40223 2.4135ZM0 9.677C0 4.33281 3.75758 0 8.40223 0C13.0369 0 16.7945 4.33282 16.7945 9.6885C16.7945 11.8377 16.1765 13.9294 15.0303 15.6188L20.6817 22.1353C21.0803 22.618 21.0703 23.388 20.6517 23.8477C20.2431 24.2959 19.5952 24.2959 19.1965 23.8477L13.5452 17.3313C9.87733 20.6067 4.60474 19.8482 1.76413 15.6188C0.617917 13.9179 0 11.8262 0 9.677Z"
+        fill="currentColor"
       />
     </svg>
   );

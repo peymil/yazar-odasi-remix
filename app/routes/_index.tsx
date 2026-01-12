@@ -215,7 +215,7 @@ export default function Index() {
             </div>
             <div className="flex justify-center lg:justify-end">
               <img
-                src="https://www.figma.com/api/mcp/asset/14f09d02-a5b9-436f-b745-e3ff96bb7a0e"
+                src="/images/writer-illustration.png"
                 alt="Illustration of a writer"
                 className="w-full max-w-[256.69px] h-auto object-contain transform rotate-180 scale-y-[-1]"
               />
@@ -226,7 +226,7 @@ export default function Index() {
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             <div className="flex justify-center lg:justify-start">
               <img
-                src="https://www.figma.com/api/mcp/asset/e2772831-0e2e-4621-a157-b1be20fe0919"
+                src="/images/boxer-illustration.png"
                 alt="Illustration of a boxer"
                 className="w-full max-w-[266.197px] h-auto object-contain"
               />
@@ -253,7 +253,7 @@ export default function Index() {
             </div>
             <div className="flex justify-center lg:justify-end">
               <img
-                src="https://www.figma.com/api/mcp/asset/714a69a6-b738-421a-bb3c-cdc6bd0eb647"
+                src="/images/elderly-illustration.png"
                 alt="Illustration of an elderly person"
                 className="w-full max-w-[281.027px] h-auto object-contain"
               />
@@ -264,7 +264,7 @@ export default function Index() {
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             <div className="flex justify-center lg:justify-start">
               <img
-                src="https://www.figma.com/api/mcp/asset/d7b21d02-f998-4c49-8132-415095a9a13d"
+                src="/images/documents-illustration.png"
                 alt="Illustration of a person with documents"
                 className="w-full max-w-[217.151px] h-auto object-contain"
               />
