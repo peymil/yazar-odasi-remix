@@ -5,6 +5,10 @@ export default {
   content: ['./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        primary: ['Playfair Display', 'serif'],
+        secondary: ['IBM Plex Sans', 'sans-serif'],
+      },
       colors: {
         'yo-orange': '#FF6D2B',
         'yo-text-secondary': '#6D7175',

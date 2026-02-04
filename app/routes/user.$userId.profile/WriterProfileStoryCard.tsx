@@ -18,27 +18,29 @@ export type WriterProfileStoryCardProps = {
 export const WriterProfileStoryCard: React.FC<WriterProfileStoryCardProps> = ({
   plot_title,
   synopsis,
+  type,
   className,
 }) => {
   return (
-    <div className={cn(className, 'border border-yo-orange rounded')}>
-      <div className={'h-1/2 relative'}>
-        <img
-          src={''}
-          alt={'Story Thumbnail'}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-      </div>
-      <div className={' text-xs  p-2'}>
-        <h1
-          className={
-            'font-extrabold mb-1 underline-offset-4 underline overflow-ellipsis'
-          }
-        >
+    <div className={cn('border-2 border-[#231f20] flex flex-col', className)}>
+      {/* Orange thumbnail placeholder */}
+      <div className="bg-[#F36D31] h-48 flex-shrink-0" />
+
+      {/* Content */}
+      <div className="flex-1 p-6 flex flex-col gap-3 text-[#231f20]">
+        <p className="text-xl">{type || 'Senarist'}</p>
+        <p className="text-xl font-bold">
           {plot_title}
-        </h1>
-        <p className={'overflow-ellipsis line-clamp-6'}>{synopsis}</p>
+        </p>
+        <p className="text-xl line-clamp-4">
+          {synopsis}
+        </p>
       </div>
+
+      {/* View button */}
+      <button className="bg-[#F36D31] text-white text-[10px] font-primary font-semibold py-3 hover:bg-[#E05520] transition-colors">
+        incele
+      </button>
     </div>
   );
 };

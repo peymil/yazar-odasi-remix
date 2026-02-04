@@ -34,10 +34,10 @@ export function SignIn({
   return (
     <div className="flex items-center justify-center gap-8 lg:gap-16 px-4 sm:px-8 md:px-16 lg:px-32 py-8 md:py-16 min-h-[480px]">
       <div className="flex flex-col gap-3 items-center justify-center max-w-xs">
-        <h1 className="font-['Playfair_Display'] font-extrabold text-[22px] text-[#231f20] text-center">
+        <h1 className="font-primary font-extrabold text-[22px] text-[#231f20] text-center">
           Yazar Odası'na hoş geldin!
         </h1>
-        <p className="font-['Inter'] font-normal text-[20px] text-[#231f20] text-center">
+        <p className="font-normal text-[20px] text-[#231f20] text-center">
           Herkes senin hikayeni bekliyor.
         </p>
         
@@ -73,7 +73,7 @@ export function SignIn({
 
           <Button
             type="submit"
-            className="w-full h-[38px] bg-[#f36d31] hover:bg-[#f36d31]/90 text-white font-['Playfair_Display'] font-semibold text-[12px] rounded-md"
+            className="w-full h-[38px] bg-[#f36d31] hover:bg-[#f36d31]/90 text-white font-primary font-semibold text-[12px] rounded-md"
           >
             Giriş Yap
           </Button>

@@ -24,7 +24,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+    href: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap',
   },
 ];
 
@@ -57,7 +57,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="bg-white">
+      <body className="bg-white font-secondary">
         <Header user={data?.user} />
         {children}
         <ScrollRestoration />

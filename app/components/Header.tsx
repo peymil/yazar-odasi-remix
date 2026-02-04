@@ -23,7 +23,7 @@ export function Header({ user }: HeaderProps) {
       {/* Yazarlar */}
       <Link 
         to="/user/profile" 
-        className="inline-flex items-center gap-2.5 text-[#231f20] text-[20px] font-['Degular',sans-serif]"
+        className="inline-flex items-center gap-2.5 text-[#231f20] text-[20px]"
       >
         <WritersIcon className="w-[28.6px] h-[28.69px]" />
         <span>yazarlar</span>
@@ -32,7 +32,7 @@ export function Header({ user }: HeaderProps) {
       {/* Projeler */}
       <Link 
         to="/user/project" 
-        className="inline-flex items-center gap-3 text-[#231f20] text-[20px] font-['Degular',sans-serif]"
+        className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
       >
         <ProjectsIcon className="w-[33.8px] h-[27.13px]" />
         <span>projeler</span>
@@ -41,7 +41,7 @@ export function Header({ user }: HeaderProps) {
       {/* Açık Çağrılar */}
       <Link 
         to="/competition" 
-        className="inline-flex items-center gap-3 text-[#231f20] text-[20px] font-['Degular',sans-serif]"
+        className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
       >
         <CallsIcon className="w-[27.03px] h-[27.13px]" />
         <span>açık çağrılar</span>
@@ -54,7 +54,7 @@ export function Header({ user }: HeaderProps) {
           <input
             type="search"
             placeholder="yazar, proje, açık çağrı"
-            className="bg-transparent border-none outline-none text-[#bcbec0] text-[15px] font-['Degular',sans-serif] w-full placeholder:text-[#bcbec0]"
+            className="bg-transparent border-none outline-none text-[#bcbec0] text-[15px] w-full placeholder:text-[#bcbec0]"
           />
         </div>
       </div>
@@ -66,7 +66,7 @@ export function Header({ user }: HeaderProps) {
       {user ? (
         <Link 
           to={`/user/${user.id}/profile`}
-          className="inline-flex items-center gap-3 text-[#231f20] text-[20px] font-['Degular',sans-serif]"
+          className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
         >
           <LoginIcon className="w-[28.54px] h-[27.11px]" />
           <span>profil</span>
@@ -74,7 +74,7 @@ export function Header({ user }: HeaderProps) {
       ) : (
         <Link 
           to="/auth/sign-in" 
-          className="inline-flex items-center gap-3 text-[#231f20] text-[20px] font-['Degular',sans-serif]"
+          className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
         >
           <LoginIcon className="w-[28.54px] h-[27.11px]" />
           <span>giriş yap</span>
