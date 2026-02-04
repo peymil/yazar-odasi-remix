@@ -12,84 +12,73 @@ export function SignUp({
 }) {
   const actionData = useActionData<{ error?: string }>();
   return (
-    <div className="max-w-md w-full mx-auto p-8 bg-white rounded-lg">
-      <Form
-        onError={() => {
-          
-        }}
-        method="post"
-        action={action}
-        className={cn(className, 'space-y-4')}
-      >
-        {actionData?.error && (
-          <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {actionData.error}
-          </div>
-        )}
-        <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              E-posta
-            </label>
-            <Input
-              type="email"
-              name="email"
-              placeholder="E-posta adresinizi girin"
-              className="w-full focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Tam Ad
-            </label>
-            <Input
-              type="text"
-              name="name"
-              placeholder="Tam adınızı girin"
-              className="w-full focus:ring-2 focus:ring-yo-orange"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Şifre
-            </label>
-            <Input
-              type="password"
-              name="password"
-              placeholder="Şifrenizi girin"
-              className="w-full focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        <Button
-          type="submit"
-          className="w-full bg-yo-orange hover:bg-yo-orange/90 focus:ring-2 focus:ring-yo-orange text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200"
+    <div className="flex items-center justify-center gap-8 lg:gap-16 px-4 sm:px-8 md:px-16 lg:px-32 py-8 md:py-16 min-h-[480px]">
+      <div className="flex flex-col gap-3 items-center justify-center max-w-xs">
+        <h1 className="font-['Playfair_Display'] font-extrabold text-[22px] text-[#231f20] text-center">
+          Yazar Odası'na hoş geldin!
+        </h1>
+        <p className="font-['Inter'] font-normal text-[20px] text-[#231f20] text-center">
+          Herkes senin hikayeni bekliyor.
+        </p>
+        
+        <Form
+          method="post"
+          action={action}
+          className={cn(className, 'flex flex-col gap-3 w-full')}
         >
-          Üye Ol
-        </Button>
+          {actionData?.error && (
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+              {actionData.error}
+            </div>
+          )}
+          
+          <Input
+            type="text"
+            name="name"
+            placeholder="İsim Soyisim"
+            className="h-[38px] w-full border border-[#bcbec0] rounded-md px-3 text-[15px] placeholder:text-[#bcbec0]"
+          />
+          
+          <Input
+            type="email"
+            name="email"
+            placeholder="e-mail"
+            className="h-[38px] w-full border border-[#bcbec0] rounded-md px-3 text-[15px] placeholder:text-[#bcbec0]"
+          />
 
-        <div className="text-center text-sm text-gray-600 mt-4">
-          Zaten hesabınız var mı?{' '}
-          <Link
-            to="/auth/sign-in"
-            className="font-medium text-yo-orange hover:text-yo-orange/90"
+          <Input
+            type="password"
+            name="password"
+            placeholder="şifre"
+            className="h-[38px] w-full border border-[#bcbec0] rounded-md px-3 text-[15px] placeholder:text-[#bcbec0]"
+          />
+
+          <Button
+            type="submit"
+            className="w-full h-[38px] bg-[#f36d31] hover:bg-[#f36d31]/90 text-white font-['Playfair_Display'] font-semibold text-[12px] rounded-md"
           >
-            Giriş yap
-          </Link>
-        </div>
-      </Form>
+            Üye Ol
+          </Button>
+
+          <div className="text-center text-[10px] text-black">
+            Zaten Hesabın var mı?{' '}
+            <Link
+              to="/auth/sign-in"
+              className="text-[#f36d31] hover:underline"
+            >
+              Giriş yap?
+            </Link>
+          </div>
+        </Form>
+      </div>
+      
+      <div className="hidden md:block relative h-[370px] w-[322px] flex-shrink-0">
+        <img 
+          src="/images/auth-illustration.png" 
+          alt="Writing illustration" 
+          className="w-full h-full object-contain"
+        />
+      </div>
     </div>
   );
 }
