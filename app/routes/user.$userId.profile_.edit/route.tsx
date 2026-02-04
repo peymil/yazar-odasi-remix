@@ -81,9 +81,24 @@ export default function ProfileEdit() {
   const inOutlet = !!useOutlet();
 
   return (
-    <div className="bg-white min-h-screen flex flex-col gap-14 px-10 py-8">
+    <div className="bg-white min-h-screen flex flex-col gap-7 px-10 py-8">
+      {/* Back to Profile Link */}
+      <Link 
+        to=".."
+        relative="path"
+        className="flex items-center gap-3 text-[#231f20] text-xl hover:text-[#F36D31] transition-colors w-fit"
+      >
+        <svg className="w-7 h-7" viewBox="0 0 29 29" fill="none">
+          <path
+            d="M14.5 0C6.5 0 0 6.5 0 14.5C0 22.5 6.5 29 14.5 29C22.5 29 29 22.5 29 14.5C29 6.5 22.5 0 14.5 0ZM14.5 26.1C8.1 26.1 2.9 20.9 2.9 14.5C2.9 8.1 8.1 2.9 14.5 2.9C20.9 2.9 26.1 8.1 26.1 14.5C26.1 20.9 20.9 26.1 14.5 26.1ZM19.4 13.1H11.9L15.5 9.5L14.5 8.5L9 14L14.5 19.5L15.5 18.5L11.9 14.9H19.4V13.1Z"
+            fill="currentColor"
+          />
+        </svg>
+        <span className="font-primary">Profile dön</span>
+      </Link>
+      
       {/* Profile Section */}
-      <div className="flex flex-col md:flex-row items-start gap-8 w-full max-w-6xl mx-auto">
+      <div className="flex flex-col md:flex-row items-start gap-8 w-full max-w-6xl mx-auto p-32">
         {/* Profile Photo */}
         <div className="w-full md:w-1/2 flex-shrink-0 relative">
           <img
@@ -92,7 +107,7 @@ export default function ProfileEdit() {
               'https://cdn.yazarodasi.com/profile-photo-placeholder.webp'
             }
             alt={profile.name || 'Profile'}
-            className="w-full h-auto object-cover border-2 border-[#F36D31]"
+            className="w-full h-auto object-cover"
           />
           {/* Edit icon on photo */}
           <button
@@ -118,10 +133,10 @@ export default function ProfileEdit() {
           </div>
           
           {/* Edit icon for description */}
-          <div className="relative">
+          <div className="relative pt-10">
             <button
               onClick={() => navigate('./about')}
-              className="absolute top-0 right-0 text-gray-400 hover:text-[#F36D31] transition-colors"
+              className="absolute top-10 right-0 text-gray-400 hover:text-[#F36D31] transition-colors"
               aria-label="Açıklamayı düzenle"
             >
               <svg className="w-6 h-6" viewBox="0 0 28 28" fill="none">
@@ -144,72 +159,54 @@ export default function ProfileEdit() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center justify-center gap-2.5 w-full max-w-6xl mx-auto">
-        <button className="px-12 py-2.5 rounded font-primary font-semibold text-[15px] bg-white text-[#231f20] border-2 border-[#231f20]">
-          işler
-        </button>
-        <button className="px-12 py-2.5 rounded font-primary font-semibold text-[15px] bg-white text-[#231f20] border-2 border-[#231f20]">
-          projeler
-        </button>
-      </div>
-
-      {/* Works Section */}
+      {/* Works and Projects Section - Side by Side */}
       <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Works List */}
-        <div className="border-2 border-[#231f20] p-6">
-          <div className="flex flex-col gap-4 mb-6">
-            {experiences.map((experience) => (
-              <EditableItem
-                key={experience.id}
-                title={experience.title}
-                type={experience.company_name}
-                onEdit={() => navigate(`./experience`)}
-              />
-            ))}
-          </div>
+        <div className="flex flex-col gap-4 border-2 border-[#231f20] p-6">
+          {experiences.map((experience) => (
+            <EditableItem
+              key={experience.id}
+              title={experience.title}
+              type={experience.company_name}
+              onEdit={() => navigate(`./experience`)}
+            />
+          ))}
+          {experiences.length === 0 && (
+            <p className="text-center text-gray-400 py-12">
+              Henüz iş deneyimi eklenmedi.
+            </p>
+          )}
           <button 
             onClick={() => navigate('./experience')}
-            className="w-full bg-[#F36D31] text-white text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors"
+            className="w-full bg-[#F36D31] text-white text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors mt-4"
           >
             yeni iş ekle
           </button>
         </div>
 
         {/* Projects List */}
-        <div className="border-2 border-[#231f20] p-6">
-          <div className="flex flex-col gap-4 mb-6">
-            {projects.map((project) => (
-              <EditableItem
-                key={project.id}
-                title={project.plot_title}
-                type={project.type}
-                onEdit={() => navigate(`./project/${project.id}/about`)}
-              />
-            ))}
-          </div>
+        <div className="flex flex-col gap-4 border-2 border-[#231f20] p-6">
+          {projects.map((project) => (
+            <EditableItem
+              key={project.id}
+              title={project.plot_title}
+              type={project.type}
+              onEdit={() => navigate(`./project/${project.id}/about`)}
+            />
+          ))}
+          {projects.length === 0 && (
+            <p className="text-center text-gray-400 py-12">
+              Henüz proje eklenmedi.
+            </p>
+          )}
           <button 
             onClick={() => navigate('./project')}
-            className="w-full bg-[#F36D31] text-white text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors"
+            className="w-full bg-[#F36D31] text-white text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors mt-4"
           >
             yeni proje ekle
           </button>
         </div>
       </div>
-
-      {/* Back to Profile Link */}
-      <Link 
-        to=".."
-        className="flex items-center gap-3 text-[#231f20] text-xl hover:text-[#F36D31] transition-colors w-fit"
-      >
-        <svg className="w-7 h-7" viewBox="0 0 29 29" fill="none">
-          <path
-            d="M14.5 0C6.5 0 0 6.5 0 14.5C0 22.5 6.5 29 14.5 29C22.5 29 29 22.5 29 14.5C29 6.5 22.5 0 14.5 0ZM14.5 26.1C8.1 26.1 2.9 20.9 2.9 14.5C2.9 8.1 8.1 2.9 14.5 2.9C20.9 2.9 26.1 8.1 26.1 14.5C26.1 20.9 20.9 26.1 14.5 26.1ZM19.4 13.1H11.9L15.5 9.5L14.5 8.5L9 14L14.5 19.5L15.5 18.5L11.9 14.9H19.4V13.1Z"
-            fill="currentColor"
-          />
-        </svg>
-        <span className="font-['IBM_Plex_Sans',sans-serif]">profil'e dön</span>
-      </Link>
 
       <Modal
         className={

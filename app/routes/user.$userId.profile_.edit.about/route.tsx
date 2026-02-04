@@ -2,7 +2,7 @@ import { Label } from '~/components/ui/label';
 import { Button } from '~/components/ui/button';
 import { Textarea } from '~/components/ui/textarea';
 import { prisma } from '~/.server/prisma';
-import { Form, useLoaderData } from 'react-router';
+import { Form, redirect, useLoaderData } from 'react-router';
 import { Input } from '~/components/ui/input';
 import invariant from 'tiny-invariant';
 import { getSessionFromRequest } from '~/.server/auth';
@@ -48,7 +48,9 @@ export async function action({ request, params }: Route.ActionArgs) {
     },
   });
 
-  return null;
+  
+
+  return redirect("..")
 }
 
 export default function Layout() {

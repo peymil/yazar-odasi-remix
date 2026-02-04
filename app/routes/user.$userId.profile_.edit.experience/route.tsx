@@ -5,6 +5,7 @@ import { Textarea } from '~/components/ui/textarea';
 import { profileExperienceCreateSchema } from '~/.server/schemas/profile-experience-create.schema';
 import { prisma } from '~/.server/prisma';
 import { Route } from './+types/route';
+import { redirect } from 'react-router';
 
 export async function action({ request }: Route.ActionArgs) {
   const body = Object.fromEntries(await request.formData());
@@ -13,6 +14,9 @@ export async function action({ request }: Route.ActionArgs) {
   prisma.user_profile_experience.create({
     data: experience,
   });
+
+  // navigate user back
+  return redirect('..');
 }
 
 export default function Layout() {
