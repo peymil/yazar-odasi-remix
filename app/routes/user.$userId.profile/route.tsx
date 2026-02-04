@@ -113,7 +113,7 @@ export default function Layout() {
             </h1>
             {isUsersProfile && (
               <button
-                onClick={() => navigate('./about')}
+                onClick={() => navigate('./edit')}
                 className="text-[#231f20] hover:text-[#F36D31] transition-colors"
                 aria-label="Düzenle"
               >
