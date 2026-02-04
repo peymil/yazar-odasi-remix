@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   return (
-    <header className="flex items-end justify-between px-10 py-2.5 w-full">
+    <header className="flex items-end justify-between px-10 py-2.5 w-full pb-6 border-b-2 border-b-yo-orange">
       {/* Logo */}
       <Link to="/" className="h-[133.893px] w-[142.28px] flex-shrink-0">
         <img

@@ -156,8 +156,8 @@ export default function Index() {
         ? post.likes || 0
         : (post.likes || 0) + 1
       : isCurrentlyLiked
-      ? (post.likes || 0) - 1
-      : post.likes || 0;
+        ? (post.likes || 0) - 1
+        : post.likes || 0;
   };
 
   const isPostLiked = (postId: number) => {
@@ -201,86 +201,111 @@ export default function Index() {
   // Landing page for non-authenticated users
   return (
     <div className="bg-white flex flex-col gap-10 items-center px-10 py-10 min-h-screen">
-      <BowFrame className="w-full max-w-[1360px]">
-        <div className="flex flex-col gap-10 w-full max-w-[1055.931px] mx-auto">
-          {/* Section 1 */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            <div className="flex flex-col gap-6">
-              <h1 className="text-[#231f20] font-extrabold text-[25px] leading-normal" style={{ fontFamily: 'Balkist, sans-serif' }}>
-                Herkes senin hikayeni bekliyor!
-              </h1>
-              <p className="text-[#231f20] text-[20px] leading-normal font-normal" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Özgün hikayeleriyle yüzlerce yazar ve doğru projeyi arayan onlarca yapımcı ve yayıncı Yazar Odası'nda buluşuyor.
-              </p>
-            </div>
-            <div className="flex justify-center lg:justify-end">
-              <img
-                src="/images/writer-illustration.png"
-                alt="Illustration of a writer"
-                className="w-full max-w-[256.69px] h-auto object-contain transform rotate-180 scale-y-[-1]"
-              />
-            </div>
-          </section>
+      <div className="flex flex-col gap-10 w-full max-w-[1055.931px] mx-auto">
+        {/* Section 1 */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          <div className="flex flex-col gap-6">
+            <h1
+              className="text-[#231f20] font-extrabold text-[25px] leading-normal"
+              style={{ fontFamily: 'Balkist, sans-serif' }}
+            >
+              Herkes senin hikayeni bekliyor!
+            </h1>
+            <p
+              className="text-[#231f20] text-[20px] leading-normal font-normal"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Özgün hikayeleriyle yüzlerce yazar ve doğru projeyi arayan onlarca
+              yapımcı ve yayıncı Yazar Odası'nda buluşuyor.
+            </p>
+          </div>
+          <div className="flex justify-center lg:justify-end">
+            <img
+              src="/images/writer-illustration.png"
+              alt="Illustration of a writer"
+              className="w-full max-w-[256.69px] h-auto object-contain transform rotate-180 scale-y-[-1]"
+            />
+          </div>
+        </section>
 
-          {/* Section 2 */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            <div className="flex justify-center lg:justify-start">
-              <img
-                src="/images/boxer-illustration.png"
-                alt="Illustration of a boxer"
-                className="w-full max-w-[266.197px] h-auto object-contain"
-              />
-            </div>
-            <div className="flex flex-col gap-6">
-              <h2 className="text-[#231f20] font-extrabold text-[25px] leading-normal" style={{ fontFamily: 'Balkist, sans-serif' }}>
-                Keşfedilmek için yapabileceğiniz yazmaktan başka şeyler de var.
-              </h2>
-              <p className="text-[#231f20] text-[20px] leading-normal font-normal" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Yazar Odası'nda kendinize ait bir oda oluşturun, proje ve hikayeleriniz doğru kişilere ulaşsın.
-              </p>
-            </div>
-          </section>
+        {/* Section 2 */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          <div className="flex justify-center lg:justify-start">
+            <img
+              src="/images/boxer-illustration.png"
+              alt="Illustration of a boxer"
+              className="w-full max-w-[266.197px] h-auto object-contain"
+            />
+          </div>
+          <div className="flex flex-col gap-6">
+            <h2
+              className="text-[#231f20] font-extrabold text-[25px] leading-normal"
+              style={{ fontFamily: 'Balkist, sans-serif' }}
+            >
+              Keşfedilmek için yapabileceğiniz yazmaktan başka şeyler de var.
+            </h2>
+            <p
+              className="text-[#231f20] text-[20px] leading-normal font-normal"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Yazar Odası'nda kendinize ait bir oda oluşturun, proje ve
+              hikayeleriniz doğru kişilere ulaşsın.
+            </p>
+          </div>
+        </section>
 
-          {/* Section 3 */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            <div className="flex flex-col gap-6">
-              <h2 className="text-[#231f20] font-extrabold text-[25px] leading-normal" style={{ fontFamily: 'Balkist, sans-serif' }}>
-                Bir hikaye, birilerine ulaşana kadar bitmez.
-              </h2>
-              <p className="text-[#231f20] text-[20px] leading-normal font-normal" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Yayıncı ve yapımcıların açık çağrılarını inceleyin, hikaye ve projelerinizi gönderin.
-              </p>
-            </div>
-            <div className="flex justify-center lg:justify-end">
-              <img
-                src="/images/elderly-illustration.png"
-                alt="Illustration of an elderly person"
-                className="w-full max-w-[281.027px] h-auto object-contain"
-              />
-            </div>
-          </section>
+        {/* Section 3 */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          <div className="flex flex-col gap-6">
+            <h2
+              className="text-[#231f20] font-extrabold text-[25px] leading-normal"
+              style={{ fontFamily: 'Balkist, sans-serif' }}
+            >
+              Bir hikaye, birilerine ulaşana kadar bitmez.
+            </h2>
+            <p
+              className="text-[#231f20] text-[20px] leading-normal font-normal"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Yayıncı ve yapımcıların açık çağrılarını inceleyin, hikaye ve
+              projelerinizi gönderin.
+            </p>
+          </div>
+          <div className="flex justify-center lg:justify-end">
+            <img
+              src="/images/elderly-illustration.png"
+              alt="Illustration of an elderly person"
+              className="w-full max-w-[281.027px] h-auto object-contain"
+            />
+          </div>
+        </section>
 
-          {/* Section 4 */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            <div className="flex justify-center lg:justify-start">
-              <img
-                src="/images/documents-illustration.png"
-                alt="Illustration of a person with documents"
-                className="w-full max-w-[217.151px] h-auto object-contain"
-              />
-            </div>
-            <div className="flex flex-col gap-6">
-              <h2 className="text-[#231f20] font-extrabold text-[25px] leading-normal" style={{ fontFamily: 'Balkist, sans-serif' }}>
-                Tüm hikayelerinizi koruma altına alın.
-              </h2>
-              <p className="text-[#231f20] text-[20px] leading-normal font-normal" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Proje ve hikayelerinizi Yazar Odası'nda tasdikleyerek zaman damgasıyla koruma altına alın.
-              </p>
-            </div>
-          </section>
-        </div>
-      </BowFrame>
-
+        {/* Section 4 */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          <div className="flex justify-center lg:justify-start">
+            <img
+              src="/images/documents-illustration.png"
+              alt="Illustration of a person with documents"
+              className="w-full max-w-[217.151px] h-auto object-contain"
+            />
+          </div>
+          <div className="flex flex-col gap-6">
+            <h2
+              className="text-[#231f20] font-extrabold text-[25px] leading-normal"
+              style={{ fontFamily: 'Balkist, sans-serif' }}
+            >
+              Tüm hikayelerinizi koruma altına alın.
+            </h2>
+            <p
+              className="text-[#231f20] text-[20px] leading-normal font-normal"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Proje ve hikayelerinizi Yazar Odası'nda tasdikleyerek zaman
+              damgasıyla koruma altına alın.
+            </p>
+          </div>
+        </section>
+      </div>
       <Footer />
     </div>
   );
