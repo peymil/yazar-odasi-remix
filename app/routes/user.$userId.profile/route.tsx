@@ -136,7 +136,7 @@ export default function Layout() {
       {/* Tabs */}
       <div className="flex items-center justify-center gap-2.5 w-full max-w-6xl mx-auto">
         <button
-          onClick={() => setSearchParams({ tab: 'işler' })}
+          onClick={() => setSearchParams({ tab: 'işler' }, { preventScrollReset: true })}
           className={`px-12 py-2.5 rounded font-primary font-semibold text-[15px] transition-colors ${
             activeTab === 'işler'
               ? 'bg-[#F36D31] text-white'
@@ -146,7 +146,7 @@ export default function Layout() {
           işler
         </button>
         <button
-          onClick={() => setSearchParams({ tab: 'projeler' })}
+          onClick={() => setSearchParams({ tab: 'projeler' }, { preventScrollReset: true })}
           className={`px-12 py-2.5 rounded font-primary font-semibold text-[15px] transition-colors ${
             activeTab === 'projeler'
               ? 'bg-[#F36D31] text-white'
@@ -161,16 +161,6 @@ export default function Layout() {
       <div className="w-full max-w-6xl mx-auto">
         {activeTab === 'projeler' ? (
           <div className="flex flex-col gap-6">
-            {isUsersProfile && (
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => navigate('./project')}
-                  className="bg-[#F36D31] hover:bg-[#E05520] text-white"
-                >
-                  Proje ekle
-                </Button>
-              </div>
-            )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project, index) => (
                 <Link to={`./project/${project.id}/about`} key={index}>
@@ -186,16 +176,6 @@ export default function Layout() {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            {isUsersProfile && (
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => navigate('./experience')}
-                  className="bg-[#F36D31] hover:bg-[#E05520] text-white"
-                >
-                  İş ekle
-                </Button>
-              </div>
-            )}
             <div className="flex flex-col gap-8">
               {experiences.map((experience, index) => (
                 <WriterProfileItem {...experience} key={index} />
