@@ -2,12 +2,13 @@ import { Label } from '~/components/ui/label';
 import { Button } from '~/components/ui/button';
 import { Textarea } from '~/components/ui/textarea';
 import { prisma } from '~/.server/prisma';
-import { Form, redirect, useLoaderData } from 'react-router';
+import { Form, redirect, useLoaderData, useNavigate } from 'react-router';
 import { Input } from '~/components/ui/input';
 import invariant from 'tiny-invariant';
 import { getSessionFromRequest } from '~/.server/auth';
 import { Route } from './+types/route';
 import { useRef, useState, useEffect } from 'react';
+import Modal from 'react-modal';
 
 export async function loader({ params, request }: Route.ActionArgs) {
   invariant(params.userId, 'userId is required');
@@ -55,6 +56,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 export default function Layout() {
   const { profile } = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement>(null);
   const [profilePreview, setProfilePreview] = useState<string | null>(profile.image || null);
   const [backgroundPreview, setBackgroundPreview] = useState<string | null>(profile.background_image || null);
@@ -118,12 +120,20 @@ export default function Layout() {
   };
 
   return (
-    <div className={'container p-5'}>
-        <Form
-          ref={formRef}
-          className={'flex flex-1 flex-col gap-4'}
-          method="post"
-        >
+    <Modal
+      className="absolute bg-white p-6 shadow-2xl w-full h-full md:w-2/3 md:h-5/6 overflow-y-auto overscroll-none"
+      htmlOpenClassName="overflow-hidden"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
+      isOpen={true}
+      onRequestClose={() => navigate('..')}
+      shouldCloseOnOverlayClick={true}
+    >
+      <div className={'container p-5'}>
+          <Form
+            ref={formRef}
+            className={'flex flex-1 flex-col gap-4'}
+            method="post"
+          >
           <div>
             <Label>Profil Fotoğrafı</Label>
             <div className="mt-2 space-y-2">
@@ -185,6 +195,7 @@ export default function Layout() {
             </Button>
           </div>
         </Form>
-    </div>
+      </div>
+    </Modal>
   );
 }

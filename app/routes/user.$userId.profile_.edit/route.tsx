@@ -1,10 +1,9 @@
-import { useNavigate, useLoaderData, Link, Outlet, useOutlet } from 'react-router';
+import { useNavigate, useLoaderData, Link } from 'react-router';
 import { Route } from './+types/route';
 import invariant from 'tiny-invariant';
 import { prisma } from '~/.server/prisma';
 import { getProject } from '../user.$userId.profile/service.server';
 import { getSessionFromRequest } from '~/.server/auth';
-import Modal from 'react-modal';
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   invariant(params.userId, 'userId is required');
@@ -78,7 +77,6 @@ function EditableItem({
 export default function ProfileEdit() {
   const { profile, projects, experiences } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
-  const inOutlet = !!useOutlet();
 
   return (
     <div className="bg-white min-h-screen flex flex-col gap-7 px-10 py-8">
@@ -88,11 +86,13 @@ export default function ProfileEdit() {
         relative="path"
         className="flex items-center gap-3 text-[#231f20] text-xl hover:text-[#F36D31] transition-colors w-fit"
       >
-        <svg className="w-7 h-7" viewBox="0 0 29 29" fill="none">
+        <svg width="32" height="29" viewBox="0 0 32 29" fill="none">
           <path
-            d="M14.5 0C6.5 0 0 6.5 0 14.5C0 22.5 6.5 29 14.5 29C22.5 29 29 22.5 29 14.5C29 6.5 22.5 0 14.5 0ZM14.5 26.1C8.1 26.1 2.9 20.9 2.9 14.5C2.9 8.1 8.1 2.9 14.5 2.9C20.9 2.9 26.1 8.1 26.1 14.5C26.1 20.9 20.9 26.1 14.5 26.1ZM19.4 13.1H11.9L15.5 9.5L14.5 8.5L9 14L14.5 19.5L15.5 18.5L11.9 14.9H19.4V13.1Z"
-            fill="currentColor"
+            d="M14.5 1C14.5 1 1 7.5 1 14.5C1 21.5 14.5 28 14.5 28"
+            stroke="currentColor"
+            strokeWidth="2"
           />
+          <path d="M3 14.5H31" stroke="currentColor" strokeWidth="2" />
         </svg>
         <span className="font-primary">Profile dön</span>
       </Link>
@@ -168,7 +168,7 @@ export default function ProfileEdit() {
               key={experience.id}
               title={experience.title}
               type={experience.company_name}
-              onEdit={() => navigate(`./experience`)}
+              onEdit={() => navigate(`./job`)}
             />
           ))}
           {experiences.length === 0 && (
@@ -177,7 +177,7 @@ export default function ProfileEdit() {
             </p>
           )}
           <button 
-            onClick={() => navigate('./experience')}
+            onClick={() => navigate('./job')}
             className="w-full bg-[#F36D31] text-white text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors mt-4"
           >
             yeni iş ekle
@@ -187,41 +187,31 @@ export default function ProfileEdit() {
         {/* Projects List */}
         <div className="flex flex-col gap-4 border-2 border-[#231f20] p-6">
           {projects.map((project) => (
-            <EditableItem
+            <Link
               key={project.id}
-              title={project.plot_title}
-              type={project.type}
-              onEdit={() => navigate(`./project/${project.id}/about`)}
-            />
+              to={`./project/${project.id}`}
+              className="block"
+            >
+              <EditableItem
+                title={project.plot_title}
+                type={project.type}
+                onEdit={() => {}}
+              />
+            </Link>
           ))}
           {projects.length === 0 && (
             <p className="text-center text-gray-400 py-12">
               Henüz proje eklenmedi.
             </p>
           )}
-          <button 
-            onClick={() => navigate('./project')}
-            className="w-full bg-[#F36D31] text-white text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors mt-4"
+          <Link
+            to="./project"
+            className="block w-full bg-[#F36D31] text-white text-center text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors mt-4"
           >
             yeni proje ekle
-          </button>
+          </Link>
         </div>
       </div>
-
-      <Modal
-        className={
-          'absolute bg-white p-6 shadow-2xl w-full h-full md:w-2/3 md:h-5/6 overflow-y-auto overscroll-none '
-        }
-        htmlOpenClassName={'overflow-hidden'}
-        overlayClassName={
-          'fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center'
-        }
-        isOpen={inOutlet}
-        onRequestClose={() => navigate('./')}
-        shouldCloseOnOverlayClick={true}
-      >
-        <Outlet />
-      </Modal>
     </div>
   );
 }
