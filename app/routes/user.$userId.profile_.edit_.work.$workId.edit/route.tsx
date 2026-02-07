@@ -66,7 +66,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         where: { work_id: workId },
       });
       await prisma.user_profile_work_character.createMany({
-        data: user_profile_work_characters.map((char: any) => ({
+        data: user_profile_work_characters.map((char) => ({
           ...char,
           work_id: workId,
         })),
@@ -79,7 +79,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         where: { work_id: workId },
       });
       await prisma.work_workgenre.createMany({
-        data: genres.map((genre_id: any) => ({
+        data: genres.map((genre_id) => ({
           work_id: workId,
           work_genre_id: Number(genre_id),
         })),
@@ -92,7 +92,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         where: { work_id: workId },
       });
       await prisma.work_worktag.createMany({
-        data: tags.map((tag_id: any) => ({
+        data: tags.map((tag_id) => ({
           work_id: workId,
           work_tag_id: Number(tag_id),
         })),
@@ -163,7 +163,7 @@ export default function Layout() {
     if (data.work) {
       if (data.work.user_profile_work_characters.length > 0) {
         setCharacters(
-          data.work.user_profile_work_characters.map((char: any) => ({
+          data.work.user_profile_work_characters.map((char) => ({
             id: char.id,
             name: char.name,
             description: char.description,
@@ -172,11 +172,11 @@ export default function Layout() {
       }
       
       if (data.work.work_workgenre) {
-        setSelectedGenres(data.work.work_workgenre.map((wg: any) => wg.work_genre_id));
+        setSelectedGenres(data.work.work_workgenre.map((wg) => wg.work_genre_id));
       }
       
       if (data.work.work_worktag) {
-        setSelectedTags(data.work.work_worktag.map((wt: any) => wt.work_tag_id));
+        setSelectedTags(data.work.work_worktag.map((wt) => wt.work_tag_id));
       }
     }
   }, [data.work]);

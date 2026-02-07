@@ -66,7 +66,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         where: { project_id: projectId },
       });
       await prisma.user_profile_project_character.createMany({
-        data: user_profile_project_characters.map((char: any) => ({
+        data: user_profile_project_characters.map((char) => ({
           ...char,
           project_id: projectId,
         })),
@@ -79,7 +79,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         where: { project_id: projectId },
       });
       await prisma.project_projectgenre.createMany({
-        data: genres.map((genre_id: any) => ({
+        data: genres.map((genre_id) => ({
           project_id: projectId,
           project_genre_id: Number(genre_id),
         })),
@@ -92,7 +92,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         where: { project_id: projectId },
       });
       await prisma.project_projecttag.createMany({
-        data: tags.map((tag_id: any) => ({
+        data: tags.map((tag_id) => ({
           project_id: projectId,
           project_tag_id: Number(tag_id),
         })),
@@ -163,7 +163,7 @@ export default function Layout() {
     if (data.project) {
       if (data.project.user_profile_project_characters.length > 0) {
         setCharacters(
-          data.project.user_profile_project_characters.map((char: any) => ({
+          data.project.user_profile_project_characters.map((char) => ({
             id: char.id,
             name: char.name,
             description: char.description,
@@ -172,11 +172,11 @@ export default function Layout() {
       }
       
       if (data.project.project_projectgenre) {
-        setSelectedGenres(data.project.project_projectgenre.map((pg: any) => pg.project_genre_id));
+        setSelectedGenres(data.project.project_projectgenre.map((pg) => pg.project_genre_id));
       }
       
       if (data.project.project_projecttag) {
-        setSelectedTags(data.project.project_projecttag.map((pt: any) => pt.project_tag_id));
+        setSelectedTags(data.project.project_projecttag.map((pt) => pt.project_tag_id));
       }
     }
   }, [data.project]);

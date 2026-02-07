@@ -4,7 +4,7 @@ import { WritersIcon, ProjectsIcon, CallsIcon, SearchIcon, LoginIcon } from './i
 interface HeaderProps {
   user?: {
     id: string;
-    company_user: any[];
+    company_user[];
   } | null;
 }
 
