@@ -168,16 +168,16 @@ export default function ProfileEdit() {
               key={experience.id}
               title={experience.title}
               type={experience.company_name}
-              onEdit={() => navigate(`./job`)}
+              onEdit={() => navigate(`./work/${experience.id}/edit`)}
             />
           ))}
           {experiences.length === 0 && (
             <p className="text-center text-gray-400 py-12">
-              Henüz iş deneyimi eklenmedi.
+              Henüz iş eklenmedi.
             </p>
           )}
           <button 
-            onClick={() => navigate('./job')}
+            onClick={() => navigate('./work')}
             className="w-full bg-[#F36D31] text-white text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors mt-4"
           >
             yeni iş ekle
@@ -189,7 +189,7 @@ export default function ProfileEdit() {
           {projects.map((project) => (
             <Link
               key={project.id}
-              to={`./project/${project.id}`}
+              to={`./project/${project.id}/edit`}
               className="block"
             >
               <EditableItem

@@ -130,6 +130,7 @@ model user_profile {
   user                    user                      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   user_profile_experience user_profile_experience[]
   user_profile_project    user_profile_project[]
+  user_profile_work       user_profile_work[]
 }
 
 model user_profile_experience {
@@ -166,6 +167,60 @@ model user_profile_project_character {
   description          String
   project_id           Int
   user_profile_project user_profile_project @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model work_genre {
+  id               Int               @id @default(autoincrement())
+  genre_name       String            @unique
+  work_workgenre   work_workgenre[]
+}
+
+model work_workgenre {
+  work_id          Int
+  work_genre_id    Int
+  work_genre       work_genre        @relation(fields: [work_genre_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_profile_work user_profile_work @relation(fields: [work_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([work_id, work_genre_id])
+}
+
+model work_worktag {
+  work_id           Int
+  work_tag_id       Int
+  user_profile_work user_profile_work @relation(fields: [work_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  work_tag          work_tag          @relation(fields: [work_tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([work_id, work_tag_id])
+}
+
+model work_tag {
+  id           Int            @id @default(autoincrement())
+  tag_name     String         @unique
+  work_worktag work_worktag[]
+}
+
+model user_profile_work {
+  id                     Int                     @id @default(autoincrement())
+  plot_title             String
+  synopsis               String
+  logline                String
+  type                   String
+  hook                   String
+  similar_works          String
+  setting                String
+  profile_id             Int?
+  work_workgenre         work_workgenre[]
+  work_worktag           work_worktag[]
+  user_profile           user_profile?           @relation(fields: [profile_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_profile_work_characters user_profile_work_character[]
+}
+
+model user_profile_work_character {
+  id                Int               @id @default(autoincrement())
+  name              String
+  description       String
+  work_id           Int
+  user_profile_work user_profile_work @relation(fields: [work_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model verification_token {

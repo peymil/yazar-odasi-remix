@@ -1,7 +1,7 @@
 import { ActionFunctionArgs, redirect, Link } from 'react-router';
-import { profileProjectUpdateSchema } from '~/.server/schemas/profile-project-update.schema';
+import { profileWorkUpdateSchema } from '~/.server/schemas/profile-work-update.schema';
 import { prisma } from '~/.server/prisma';
-import { profileProjectCreateSchema } from '~/.server/schemas/profile-project-create.schema';
+import { profileWorkCreateSchema } from '~/.server/schemas/profile-work-create.schema';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
@@ -30,29 +30,29 @@ export async function action({ request }: Route.ActionArgs) {
     throw new Error('Unauthorized');
   }
   if (method === 'PATCH') {
-    const { user_profile_project_characters, ...payload } =
-      profileProjectUpdateSchema.parse(body);
+    const { user_profile_work_characters, ...payload } =
+      profileWorkUpdateSchema.parse(body);
     const profile = await prisma.user_profile.findFirstOrThrow({
       where: {
         user_id: currentUser.user.id,
       },
     });
-    const project = await prisma.user_profile_project.findFirstOrThrow({
+    const work = await prisma.user_profile_work.findFirstOrThrow({
       where: {
-        id: Number(profile.id),
+        profile_id: profile.id,
       },
     });
-    await prisma.user_profile_project.update({
+    await prisma.user_profile_work.update({
       where: {
-        id: project.id,
+        id: work.id,
       },
       data: {
         ...payload,
       },
     });
   } else if (method === 'POST') {
-    const { user_profile_project_characters, genres, tags, ...payload } =
-      profileProjectCreateSchema.parse(body);
+    const { user_profile_work_characters, genres, tags, ...payload } =
+      profileWorkCreateSchema.parse(body);
 
     const profile = await prisma.user_profile.findFirstOrThrow({
       where: {
@@ -60,27 +60,27 @@ export async function action({ request }: Route.ActionArgs) {
       },
     });
 
-    const project = await prisma.user_profile_project.create({
+    const work = await prisma.user_profile_work.create({
       data: {
         ...payload,
         profile_id: profile.id,
-        user_profile_project_characters: {
-          createMany: { data: user_profile_project_characters },
+        user_profile_work_characters: {
+          createMany: { data: user_profile_work_characters },
         },
       },
     });
 
-    await prisma.project_projectgenre.createMany({
+    await prisma.work_workgenre.createMany({
       data: genres.map((genre_id) => ({
-        project_id: project.id,
-        project_genre_id: Number(genre_id),
+        work_id: work.id,
+        work_genre_id: Number(genre_id),
       })),
     });
 
-    await prisma.project_projecttag.createMany({
+    await prisma.work_worktag.createMany({
       data: tags.map((tag_id) => ({
-        project_id: project.id,
-        project_tag_id: Number(tag_id),
+        work_id: work.id,
+        work_tag_id: Number(tag_id),
       })),
     });
 
@@ -92,8 +92,8 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export async function loader() {
-  const tags = await prisma.project_tag.findMany();
-  const genres = await prisma.project_genre.findMany();
+  const tags = await prisma.work_tag.findMany();
+  const genres = await prisma.work_genre.findMany();
   return {
     tags,
     genres,
@@ -290,14 +290,14 @@ export default function Layout() {
                   Karakter #{i + 1}
                 </Label>
                 <Textarea
-                  name={`user_profile_project_characters[${i}][description]`}
+                  name={`user_profile_work_characters[${i}][description]`}
                   className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20] min-h-[81px]"
                   placeholder="Karakter açıklaması giriniz"
                   required
                 />
                 <input
                   type="hidden"
-                  name={`user_profile_project_characters[${i}][name]`}
+                  name={`user_profile_work_characters[${i}][name]`}
                   value={`Karakter ${i + 1}`}
                 />
                 {i > 0 && (
@@ -342,3 +342,4 @@ export default function Layout() {
     </div>
   );
 }
+

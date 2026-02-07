@@ -1,7 +1,6 @@
 import { ActionFunctionArgs, redirect, Link } from 'react-router';
 import { profileProjectUpdateSchema } from '~/.server/schemas/profile-project-update.schema';
 import { prisma } from '~/.server/prisma';
-import { profileProjectCreateSchema } from '~/.server/schemas/profile-project-create.schema';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
@@ -15,104 +14,178 @@ import {
   SelectValue,
   Select,
 } from '~/components/ui/select';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Minus, X, ChevronDown } from 'lucide-react';
 import { getSessionFromRequest } from '~/.server/auth';
 import { MultiSelect } from '~/components/ui/multi-select';
 import { Route } from './+types/route';
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
   const formQueryString = await request.text();
   const method = request.method;
   const body = qs.parse(formQueryString);
   const currentUser = await getSessionFromRequest(request);
+  
   if (!currentUser?.user) {
     throw new Error('Unauthorized');
   }
-  if (method === 'PATCH') {
-    const { user_profile_project_characters, ...payload } =
+
+  const projectId = Number(params.projectId);
+
+  if (method === 'PATCH' || method === 'POST') {
+    const { user_profile_project_characters, genres, tags, ...payload } =
       profileProjectUpdateSchema.parse(body);
+
     const profile = await prisma.user_profile.findFirstOrThrow({
       where: {
         user_id: currentUser.user.id,
       },
     });
-    const project = await prisma.user_profile_project.findFirstOrThrow({
+
+    // Verify the project belongs to the user
+    const existingProject = await prisma.user_profile_project.findFirstOrThrow({
       where: {
-        id: Number(profile.id),
+        id: projectId,
+        profile_id: profile.id,
       },
     });
+
+    // Update the project
     await prisma.user_profile_project.update({
       where: {
-        id: project.id,
+        id: projectId,
       },
       data: {
         ...payload,
       },
     });
-  } else if (method === 'POST') {
-    const { user_profile_project_characters, genres, tags, ...payload } =
-      profileProjectCreateSchema.parse(body);
 
-    const profile = await prisma.user_profile.findFirstOrThrow({
-      where: {
-        user_id: currentUser.user.id,
-      },
-    });
+    // Delete existing characters and recreate them
+    if (user_profile_project_characters) {
+      await prisma.user_profile_project_character.deleteMany({
+        where: { project_id: projectId },
+      });
+      await prisma.user_profile_project_character.createMany({
+        data: user_profile_project_characters.map((char: any) => ({
+          ...char,
+          project_id: projectId,
+        })),
+      });
+    }
 
-    const project = await prisma.user_profile_project.create({
-      data: {
-        ...payload,
-        profile_id: profile.id,
-        user_profile_project_characters: {
-          createMany: { data: user_profile_project_characters },
-        },
-      },
-    });
+    // Update genres
+    if (genres) {
+      await prisma.project_projectgenre.deleteMany({
+        where: { project_id: projectId },
+      });
+      await prisma.project_projectgenre.createMany({
+        data: genres.map((genre_id: any) => ({
+          project_id: projectId,
+          project_genre_id: Number(genre_id),
+        })),
+      });
+    }
 
-    await prisma.project_projectgenre.createMany({
-      data: genres.map((genre_id) => ({
-        project_id: project.id,
-        project_genre_id: Number(genre_id),
-      })),
-    });
+    // Update tags
+    if (tags) {
+      await prisma.project_projecttag.deleteMany({
+        where: { project_id: projectId },
+      });
+      await prisma.project_projecttag.createMany({
+        data: tags.map((tag_id: any) => ({
+          project_id: projectId,
+          project_tag_id: Number(tag_id),
+        })),
+      });
+    }
 
-    await prisma.project_projecttag.createMany({
-      data: tags.map((tag_id) => ({
-        project_id: project.id,
-        project_tag_id: Number(tag_id),
-      })),
-    });
-
-    return redirect(`..`);
+    return redirect(`../../..`);
   } else {
     throw new Error('Method not allowed');
   }
-  redirect('..');
 }
 
-export async function loader() {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const currentUser = await getSessionFromRequest(request);
+  
+  if (!currentUser?.user) {
+    throw new Error('Unauthorized');
+  }
+
+  const projectId = Number(params.projectId);
+
   const tags = await prisma.project_tag.findMany();
   const genres = await prisma.project_genre.findMany();
+
+  const profile = await prisma.user_profile.findFirstOrThrow({
+    where: {
+      user_id: currentUser.user.id,
+    },
+  });
+
+  const project = await prisma.user_profile_project.findFirstOrThrow({
+    where: {
+      id: projectId,
+      profile_id: profile.id,
+    },
+    include: {
+      user_profile_project_characters: true,
+      project_projectgenre: {
+        include: {
+          project_genre: true,
+        },
+      },
+      project_projecttag: {
+        include: {
+          project_tag: true,
+        },
+      },
+    },
+  });
+
   return {
     tags,
     genres,
+    project,
   };
 }
 
 export default function Layout() {
   const data = useLoaderData<typeof loader>();
-  const [characters, setCharacters] = React.useState<Array<{ id: number }>>([
+  const [characters, setCharacters] = React.useState<Array<{ id: number; name?: string; description?: string }>>([
     { id: Date.now() },
   ]);
   const [selectedTags, setSelectedTags] = useState<(string | number)[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<(string | number)[]>([]);
 
+  // Initialize state with existing project data
+  useEffect(() => {
+    if (data.project) {
+      if (data.project.user_profile_project_characters.length > 0) {
+        setCharacters(
+          data.project.user_profile_project_characters.map((char: any) => ({
+            id: char.id,
+            name: char.name,
+            description: char.description,
+          }))
+        );
+      }
+      
+      if (data.project.project_projectgenre) {
+        setSelectedGenres(data.project.project_projectgenre.map((pg: any) => pg.project_genre_id));
+      }
+      
+      if (data.project.project_projecttag) {
+        setSelectedTags(data.project.project_projecttag.map((pt: any) => pt.project_tag_id));
+      }
+    }
+  }, [data.project]);
+
   return (
     <div className="min-h-screen bg-white px-10 py-5">
       {/* Back Link */}
       <Link
-        to=".."
+        to="../.."
         relative="path"
         className="flex items-center gap-3 text-[#231f20] text-xl hover:text-[#F36D31] transition-colors w-fit mb-8"
       >
@@ -137,12 +210,11 @@ export default function Layout() {
             {/* Synopsis Section */}
             <div className="mb-12">
               <h3 className="font-inter text-xl text-[#231f20] mb-3">Kısa Özet</h3>
-              <Textarea
-                name="synopsis"
-                className="border border-[#231f20] rounded p-4 h-40 font-inter text-[15px] text-[#231f20]"
-                placeholder="Kısa özet yazınız..."
-                required
-              />
+              <div className="border border-[#231f20] rounded p-4 h-40">
+                <p className="font-inter text-[15px] text-[#231f20] leading-relaxed">
+                  {data.project.synopsis}
+                </p>
+              </div>
             </div>
 
             {/* Similar Works Section */}
@@ -150,6 +222,7 @@ export default function Layout() {
               <h3 className="font-inter text-xl text-[#231f20] mb-3">Benzer İşler</h3>
               <Input
                 name="similar_works"
+                defaultValue={data.project.similar_works || ''}
                 className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]"
                 placeholder="Benzer işleri yazınız..."
               />
@@ -197,6 +270,7 @@ export default function Layout() {
               <Label className="font-inter text-xl text-[#231f20] mb-2 block">İş Adı</Label>
               <Input
                 name="plot_title"
+                defaultValue={data.project.plot_title || ''}
                 className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]"
                 type="text"
                 placeholder="İş adını giriniz"
@@ -208,7 +282,7 @@ export default function Layout() {
             <div className="mb-8">
               <Label className="font-inter text-xl text-[#231f20] mb-2 block">İş Tipi</Label>
               <div className="relative">
-                <Select name="type" required>
+                <Select name="type" defaultValue={data.project.type || undefined} required>
                   <SelectTrigger className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]">
                     <SelectValue placeholder="İş tipini seçiniz" />
                   </SelectTrigger>
@@ -229,6 +303,7 @@ export default function Layout() {
               <Label className="font-inter text-xl text-[#231f20] mb-2 block">Hook</Label>
               <Input
                 name="hook"
+                defaultValue={data.project.hook || ''}
                 className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20]"
                 type="text"
                 placeholder="Hook giriniz"
@@ -241,6 +316,7 @@ export default function Layout() {
               <Label className="font-inter text-xl text-[#231f20] mb-2 block">Logline</Label>
               <Textarea
                 name="logline"
+                defaultValue={data.project.logline || ''}
                 className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20] min-h-[64px]"
                 placeholder="Logline giriniz"
                 required
@@ -291,6 +367,7 @@ export default function Layout() {
                 </Label>
                 <Textarea
                   name={`user_profile_project_characters[${i}][description]`}
+                  defaultValue={char.description || ''}
                   className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20] min-h-[81px]"
                   placeholder="Karakter açıklaması giriniz"
                   required
@@ -298,7 +375,7 @@ export default function Layout() {
                 <input
                   type="hidden"
                   name={`user_profile_project_characters[${i}][name]`}
-                  value={`Karakter ${i + 1}`}
+                  value={char.name || `Karakter ${i + 1}`}
                 />
                 {i > 0 && (
                   <Button
@@ -330,11 +407,18 @@ export default function Layout() {
               Yeni Karakter Ekle
             </Button>
 
+            {/* Synopsis (Hidden on Right, shown on Left) */}
+            <Input
+              type="hidden"
+              name="synopsis"
+              defaultValue={data.project.synopsis || 'Placeholder synopsis'}
+            />
+
             {/* Setting (Hidden) */}
             <Input
               type="hidden"
               name="setting"
-              defaultValue="İstanbul, 90'lar"
+              defaultValue={data.project.setting || 'İstanbul, 90\'lar'}
             />
           </div>
         </div>

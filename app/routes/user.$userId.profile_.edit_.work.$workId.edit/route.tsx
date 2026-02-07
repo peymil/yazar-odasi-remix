@@ -1,7 +1,6 @@
 import { ActionFunctionArgs, redirect, Link } from 'react-router';
-import { profileProjectUpdateSchema } from '~/.server/schemas/profile-project-update.schema';
+import { profileWorkUpdateSchema } from '~/.server/schemas/profile-work-update.schema';
 import { prisma } from '~/.server/prisma';
-import { profileProjectCreateSchema } from '~/.server/schemas/profile-project-create.schema';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
@@ -15,44 +14,27 @@ import {
   SelectValue,
   Select,
 } from '~/components/ui/select';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Minus, X, ChevronDown } from 'lucide-react';
 import { getSessionFromRequest } from '~/.server/auth';
 import { MultiSelect } from '~/components/ui/multi-select';
 import { Route } from './+types/route';
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
   const formQueryString = await request.text();
   const method = request.method;
   const body = qs.parse(formQueryString);
   const currentUser = await getSessionFromRequest(request);
+  
   if (!currentUser?.user) {
     throw new Error('Unauthorized');
   }
-  if (method === 'PATCH') {
-    const { user_profile_project_characters, ...payload } =
-      profileProjectUpdateSchema.parse(body);
-    const profile = await prisma.user_profile.findFirstOrThrow({
-      where: {
-        user_id: currentUser.user.id,
-      },
-    });
-    const project = await prisma.user_profile_project.findFirstOrThrow({
-      where: {
-        id: Number(profile.id),
-      },
-    });
-    await prisma.user_profile_project.update({
-      where: {
-        id: project.id,
-      },
-      data: {
-        ...payload,
-      },
-    });
-  } else if (method === 'POST') {
-    const { user_profile_project_characters, genres, tags, ...payload } =
-      profileProjectCreateSchema.parse(body);
+
+  const workId = Number(params.workId);
+
+  if (method === 'PATCH' || method === 'POST') {
+    const { user_profile_work_characters, genres, tags, ...payload } =
+      profileWorkUpdateSchema.parse(body);
 
     const profile = await prisma.user_profile.findFirstOrThrow({
       where: {
@@ -60,59 +42,150 @@ export async function action({ request }: Route.ActionArgs) {
       },
     });
 
-    const project = await prisma.user_profile_project.create({
-      data: {
-        ...payload,
+    // Verify the work belongs to the user
+    const existingWork = await prisma.user_profile_work.findFirstOrThrow({
+      where: {
+        id: workId,
         profile_id: profile.id,
-        user_profile_project_characters: {
-          createMany: { data: user_profile_project_characters },
-        },
       },
     });
 
-    await prisma.project_projectgenre.createMany({
-      data: genres.map((genre_id) => ({
-        project_id: project.id,
-        project_genre_id: Number(genre_id),
-      })),
+    // Update the work
+    await prisma.user_profile_work.update({
+      where: {
+        id: workId,
+      },
+      data: {
+        ...payload,
+      },
     });
 
-    await prisma.project_projecttag.createMany({
-      data: tags.map((tag_id) => ({
-        project_id: project.id,
-        project_tag_id: Number(tag_id),
-      })),
-    });
+    // Delete existing characters and recreate them
+    if (user_profile_work_characters) {
+      await prisma.user_profile_work_character.deleteMany({
+        where: { work_id: workId },
+      });
+      await prisma.user_profile_work_character.createMany({
+        data: user_profile_work_characters.map((char: any) => ({
+          ...char,
+          work_id: workId,
+        })),
+      });
+    }
 
-    return redirect(`..`);
+    // Update genres
+    if (genres) {
+      await prisma.work_workgenre.deleteMany({
+        where: { work_id: workId },
+      });
+      await prisma.work_workgenre.createMany({
+        data: genres.map((genre_id: any) => ({
+          work_id: workId,
+          work_genre_id: Number(genre_id),
+        })),
+      });
+    }
+
+    // Update tags
+    if (tags) {
+      await prisma.work_worktag.deleteMany({
+        where: { work_id: workId },
+      });
+      await prisma.work_worktag.createMany({
+        data: tags.map((tag_id: any) => ({
+          work_id: workId,
+          work_tag_id: Number(tag_id),
+        })),
+      });
+    }
+
+    return redirect(`../../..`);
   } else {
     throw new Error('Method not allowed');
   }
-  redirect('..');
 }
 
-export async function loader() {
-  const tags = await prisma.project_tag.findMany();
-  const genres = await prisma.project_genre.findMany();
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const currentUser = await getSessionFromRequest(request);
+  
+  if (!currentUser?.user) {
+    throw new Error('Unauthorized');
+  }
+
+  const workId = Number(params.workId);
+
+  const tags = await prisma.work_tag.findMany();
+  const genres = await prisma.work_genre.findMany();
+
+  const profile = await prisma.user_profile.findFirstOrThrow({
+    where: {
+      user_id: currentUser.user.id,
+    },
+  });
+
+  const work = await prisma.user_profile_work.findFirstOrThrow({
+    where: {
+      id: workId,
+      profile_id: profile.id,
+    },
+    include: {
+      user_profile_work_characters: true,
+      work_workgenre: {
+        include: {
+          work_genre: true,
+        },
+      },
+      work_worktag: {
+        include: {
+          work_tag: true,
+        },
+      },
+    },
+  });
+
   return {
     tags,
     genres,
+    work,
   };
 }
 
 export default function Layout() {
   const data = useLoaderData<typeof loader>();
-  const [characters, setCharacters] = React.useState<Array<{ id: number }>>([
+  const [characters, setCharacters] = React.useState<Array<{ id: number; name?: string; description?: string }>>([
     { id: Date.now() },
   ]);
   const [selectedTags, setSelectedTags] = useState<(string | number)[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<(string | number)[]>([]);
 
+  // Initialize state with existing work data
+  useEffect(() => {
+    if (data.work) {
+      if (data.work.user_profile_work_characters.length > 0) {
+        setCharacters(
+          data.work.user_profile_work_characters.map((char: any) => ({
+            id: char.id,
+            name: char.name,
+            description: char.description,
+          }))
+        );
+      }
+      
+      if (data.work.work_workgenre) {
+        setSelectedGenres(data.work.work_workgenre.map((wg: any) => wg.work_genre_id));
+      }
+      
+      if (data.work.work_worktag) {
+        setSelectedTags(data.work.work_worktag.map((wt: any) => wt.work_tag_id));
+      }
+    }
+  }, [data.work]);
+
   return (
     <div className="min-h-screen bg-white px-10 py-5">
       {/* Back Link */}
       <Link
-        to=".."
+        to="../.."
         relative="path"
         className="flex items-center gap-3 text-[#231f20] text-xl hover:text-[#F36D31] transition-colors w-fit mb-8"
       >
@@ -137,12 +210,11 @@ export default function Layout() {
             {/* Synopsis Section */}
             <div className="mb-12">
               <h3 className="font-inter text-xl text-[#231f20] mb-3">Kısa Özet</h3>
-              <Textarea
-                name="synopsis"
-                className="border border-[#231f20] rounded p-4 h-40 font-inter text-[15px] text-[#231f20]"
-                placeholder="Kısa özet yazınız..."
-                required
-              />
+              <div className="border border-[#231f20] rounded p-4 h-40">
+                <p className="font-inter text-[15px] text-[#231f20] leading-relaxed">
+                  {data.work.synopsis}
+                </p>
+              </div>
             </div>
 
             {/* Similar Works Section */}
@@ -150,6 +222,7 @@ export default function Layout() {
               <h3 className="font-inter text-xl text-[#231f20] mb-3">Benzer İşler</h3>
               <Input
                 name="similar_works"
+                defaultValue={data.work.similar_works || ''}
                 className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]"
                 placeholder="Benzer işleri yazınız..."
               />
@@ -197,6 +270,7 @@ export default function Layout() {
               <Label className="font-inter text-xl text-[#231f20] mb-2 block">İş Adı</Label>
               <Input
                 name="plot_title"
+                defaultValue={data.work.plot_title || ''}
                 className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]"
                 type="text"
                 placeholder="İş adını giriniz"
@@ -208,7 +282,7 @@ export default function Layout() {
             <div className="mb-8">
               <Label className="font-inter text-xl text-[#231f20] mb-2 block">İş Tipi</Label>
               <div className="relative">
-                <Select name="type" required>
+                <Select name="type" defaultValue={data.work.type || undefined} required>
                   <SelectTrigger className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]">
                     <SelectValue placeholder="İş tipini seçiniz" />
                   </SelectTrigger>
@@ -229,6 +303,7 @@ export default function Layout() {
               <Label className="font-inter text-xl text-[#231f20] mb-2 block">Hook</Label>
               <Input
                 name="hook"
+                defaultValue={data.work.hook || ''}
                 className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20]"
                 type="text"
                 placeholder="Hook giriniz"
@@ -241,6 +316,7 @@ export default function Layout() {
               <Label className="font-inter text-xl text-[#231f20] mb-2 block">Logline</Label>
               <Textarea
                 name="logline"
+                defaultValue={data.work.logline || ''}
                 className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20] min-h-[64px]"
                 placeholder="Logline giriniz"
                 required
@@ -290,15 +366,16 @@ export default function Layout() {
                   Karakter #{i + 1}
                 </Label>
                 <Textarea
-                  name={`user_profile_project_characters[${i}][description]`}
+                  name={`user_profile_work_characters[${i}][description]`}
+                  defaultValue={char.description || ''}
                   className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20] min-h-[81px]"
                   placeholder="Karakter açıklaması giriniz"
                   required
                 />
                 <input
                   type="hidden"
-                  name={`user_profile_project_characters[${i}][name]`}
-                  value={`Karakter ${i + 1}`}
+                  name={`user_profile_work_characters[${i}][name]`}
+                  value={char.name || `Karakter ${i + 1}`}
                 />
                 {i > 0 && (
                   <Button
@@ -330,11 +407,18 @@ export default function Layout() {
               Yeni Karakter Ekle
             </Button>
 
+            {/* Synopsis (Hidden on Right, shown on Left) */}
+            <Input
+              type="hidden"
+              name="synopsis"
+              defaultValue={data.work.synopsis || 'Placeholder synopsis'}
+            />
+
             {/* Setting (Hidden) */}
             <Input
               type="hidden"
               name="setting"
-              defaultValue="İstanbul, 90'lar"
+              defaultValue={data.work.setting || 'İstanbul, 90\'lar'}
             />
           </div>
         </div>
