@@ -1,10 +1,11 @@
 import { Link } from 'react-router';
 import { WritersIcon, ProjectsIcon, CallsIcon, SearchIcon, LoginIcon } from './icons';
+import { company_user } from '@prisma/client';
 
 interface HeaderProps {
   user?: {
     id: string;
-    company_user[];
+    company_user: company_user
   } | null;
 }
 
@@ -12,7 +13,7 @@ export function Header({ user }: HeaderProps) {
   return (
     <header className="flex items-end justify-between px-10 py-2.5 w-full pb-6 border-b-2 border-b-yo-orange">
       {/* Logo */}
-      <Link to="/" className="h-[133.893px] w-[142.28px] flex-shrink-0">
+      <Link to="/" relative='path' className="h-[133.893px] w-[142.28px] flex-shrink-0">
         <img
           src="https://cdn.yazarodasi.com/yazar_odasi_logo.svg"
           alt="Yazar Odası Logo"
