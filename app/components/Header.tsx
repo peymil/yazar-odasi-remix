@@ -13,7 +13,7 @@ export function Header({ user }: HeaderProps) {
   return (
     <header className="flex items-end justify-between px-10 py-2.5 w-full pb-6 border-b-2 border-b-yo-orange">
       {/* Logo */}
-      <Link to="/" relative='path' className="h-[133.893px] w-[142.28px] flex-shrink-0">
+      <Link to="" className="h-[133.893px] w-[142.28px] flex-shrink-0">
         <img
           src="https://cdn.yazarodasi.com/yazar_odasi_logo.svg"
           alt="Yazar Odası Logo"
@@ -24,6 +24,7 @@ export function Header({ user }: HeaderProps) {
       {/* Yazarlar */}
       <Link 
         to="/user/profile" 
+        relative="route"
         className="inline-flex items-center gap-2.5 text-[#231f20] text-[20px]"
       >
         <WritersIcon className="w-[28.6px] h-[28.69px]" />

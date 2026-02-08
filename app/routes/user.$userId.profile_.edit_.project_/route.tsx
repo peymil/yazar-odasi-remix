@@ -24,11 +24,11 @@ import { Route } from './+types/route';
 export async function action({ request }: Route.ActionArgs) {
   const formQueryString = await request.text();
   const method = request.method;
-  const body = qs.parse(formQueryString);
+  const body = qs.parse(formQueryString, { comma: false });
   const currentUser = await getSessionFromRequest(request);
   if (!currentUser?.user) {
     throw new Error('Unauthorized');
-  }
+  }f
   if (method === 'PATCH') {
     const { user_profile_project_characters, ...payload } =
       profileProjectUpdateSchema.parse(body);

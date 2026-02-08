@@ -24,7 +24,7 @@ import { Route } from './+types/route';
 export async function action({ request }: Route.ActionArgs) {
   const formQueryString = await request.text();
   const method = request.method;
-  const body = qs.parse(formQueryString);
+  const body = qs.parse(formQueryString, { comma: false });
   const currentUser = await getSessionFromRequest(request);
   if (!currentUser?.user) {
     throw new Error('Unauthorized');
@@ -70,17 +70,17 @@ export async function action({ request }: Route.ActionArgs) {
       },
     });
 
-    await prisma.work_workgenre.createMany({
+    await prisma.work_projectgenre.createMany({
       data: genres.map((genre_id) => ({
         work_id: work.id,
-        work_genre_id: Number(genre_id),
+        project_genre_id: Number(genre_id),
       })),
     });
 
-    await prisma.work_worktag.createMany({
+    await prisma.work_projecttag.createMany({
       data: tags.map((tag_id) => ({
         work_id: work.id,
-        work_tag_id: Number(tag_id),
+        project_tag_id: Number(tag_id),
       })),
     });
 
@@ -92,8 +92,8 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export async function loader() {
-  const tags = await prisma.work_tag.findMany();
-  const genres = await prisma.work_genre.findMany();
+  const tags = await prisma.project_tag.findMany();
+  const genres = await prisma.project_genre.findMany();
   return {
     tags,
     genres,

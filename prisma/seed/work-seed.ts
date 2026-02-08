@@ -19,7 +19,7 @@ async function seedWorkData() {
   ];
 
   for (const genreName of genres) {
-    await prisma.work_genre.upsert({
+    await prisma.project_genre.upsert({
       where: { genre_name: genreName },
       update: {},
       create: { genre_name: genreName },
@@ -52,7 +52,7 @@ async function seedWorkData() {
   ];
 
   for (const tagName of tags) {
-    await prisma.work_tag.upsert({
+    await prisma.project_tag.upsert({
       where: { tag_name: tagName },
       update: {},
       create: { tag_name: tagName },

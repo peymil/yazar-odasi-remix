@@ -41,7 +41,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         user_id: currentUser.user.id,
       },
     });
-
+ 
     // Verify the project belongs to the user
     const existingProject = await prisma.user_profile_project.findFirstOrThrow({
       where: {
@@ -99,7 +99,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       });
     }
 
-    return redirect(`../../..`);
+    return redirect(`/user/${currentUser.user.id}/profile/edit`);
   } else {
     throw new Error('Method not allowed');
   }
@@ -210,11 +210,13 @@ export default function Layout() {
             {/* Synopsis Section */}
             <div className="mb-12">
               <h3 className="font-inter text-xl text-[#231f20] mb-3">Kısa Özet</h3>
-              <div className="border border-[#231f20] rounded p-4 h-40">
-                <p className="font-inter text-[15px] text-[#231f20] leading-relaxed">
-                  {data.project.synopsis}
-                </p>
-              </div>
+              <Textarea
+                name="synopsis"
+                defaultValue={data.project.synopsis || ''}
+                className="border border-[#231f20] rounded p-4 h-40 font-inter text-[15px] text-[#231f20]"
+                placeholder="Kısa özet yazınız..."
+                required
+              />
             </div>
 
             {/* Similar Works Section */}
@@ -406,13 +408,6 @@ export default function Layout() {
               <Plus className="h-4 w-4 mr-2" />
               Yeni Karakter Ekle
             </Button>
-
-            {/* Synopsis (Hidden on Right, shown on Left) */}
-            <Input
-              type="hidden"
-              name="synopsis"
-              defaultValue={data.project.synopsis || 'Placeholder synopsis'}
-            />
 
             {/* Setting (Hidden) */}
             <Input

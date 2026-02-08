@@ -8,6 +8,8 @@ export const profileWorkUpdateSchema = z.strictObject({
   hook: z.string(),
   similar_works: z.string(),
   setting: z.string(),
+  genres: z.array(z.string()),
+  tags: z.array(z.string()),
   user_profile_work_characters: z.array(
     z.strictObject({
       name: z.string(),

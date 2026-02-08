@@ -2,7 +2,7 @@ import { prisma } from '~/.server/prisma';
 import { Link, useLoaderData, useSearchParams } from 'react-router';
 import { SearchBar } from '~/components/SearchBar';
 import { workSearch } from '@prisma/client/sql';
-import { work_genre, work_tag } from '@prisma/client';
+import { project_genre, project_tag } from '@prisma/client';
 import { Pagination } from '~/components/ui/pagination';
 import { Route } from './+types/route';
 
@@ -65,7 +65,7 @@ export default function WorkSearch() {
             <div className="p-4 border rounded-lg hover:border-yo-orange transition-colors duration-200">
               <h2 className="text-xl font-bold mb-2">{work.plot_title}</h2>
               <div className="flex flex-wrap gap-2">
-                {(work.genres as work_genre[])
+                {(work.genres as project_genre[])
                   .filter((genre) => genre.genre_name)
                   .map((genre) => (
                     <span
@@ -75,7 +75,7 @@ export default function WorkSearch() {
                       {genre.genre_name}
                     </span>
                   ))}
-                {(work.tags as work_tag[])
+                {(work.tags as project_tag[])
                   .filter((tag) => tag.tag_name)
                   .map((tag) => (
                     <span

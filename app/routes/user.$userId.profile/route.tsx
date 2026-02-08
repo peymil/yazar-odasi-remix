@@ -35,11 +35,33 @@ export async function loader({ params, request }: Route.ActionArgs) {
 
   const projects = await getProject(profile.id);
 
-  const experiences = await prisma.user_profile_experience.findMany({
-    where: {
-      profile_id: profile.id,
-    },
-  });
+  const works = await prisma.user_profile_work
+    .findMany({
+      where: {
+        profile_id: profile.id,
+      },
+      include: {
+        work_projectgenre: {
+          include: {
+            project_genre: true,
+          },
+        },
+        work_projecttag: { include: { project_tag: true } },
+      },
+    })
+    .then((works) => {
+      return works.map(
+        ({ work_projectgenre, work_projecttag, ...work }) => {
+          return {
+            ...work,
+            genres: work_projectgenre.map(
+              (genre) => genre.project_genre!.genre_name
+            ),
+            tags: work_projecttag.map((tag) => tag.project_tag!.tag_name),
+          };
+        }
+      );
+    });
 
   const posts = await prisma.post.findMany({
     where: { user_id: Number(userId) },
@@ -67,7 +89,7 @@ export async function loader({ params, request }: Route.ActionArgs) {
     user,
     profile,
     projects,
-    experiences,
+    works,
     isUsersProfile,
     posts,
     likedPostIds: likedPosts.map((like) => like.post_id),
@@ -79,7 +101,7 @@ export default function Layout() {
     user,
     profile,
     projects,
-    experiences,
+    works,
     isUsersProfile,
     posts,
     likedPostIds,
@@ -176,14 +198,14 @@ export default function Layout() {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-8">
-              {experiences.map((experience, index) => (
-                <WriterProfileItem {...experience} key={index} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {works.map((work, index) => (
+                <WriterProfileStoryCard {...work} key={index} />
               ))}
             </div>
-            {experiences.length === 0 && (
+            {works.length === 0 && (
               <p className="text-center text-gray-400 py-12">
-                Henüz iş deneyimi eklenmedi.
+                Henüz iş eklenmedi.
               </p>
             )}
           </div>

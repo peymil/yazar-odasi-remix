@@ -23,7 +23,7 @@ import { Route } from './+types/route';
 export async function action({ request, params }: Route.ActionArgs) {
   const formQueryString = await request.text();
   const method = request.method;
-  const body = qs.parse(formQueryString);
+  const body = qs.parse(formQueryString, { comma: false });
   const currentUser = await getSessionFromRequest(request);
   
   if (!currentUser?.user) {
@@ -75,26 +75,26 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     // Update genres
     if (genres) {
-      await prisma.work_workgenre.deleteMany({
+      await prisma.work_projectgenre.deleteMany({
         where: { work_id: workId },
       });
-      await prisma.work_workgenre.createMany({
+      await prisma.work_projectgenre.createMany({
         data: genres.map((genre_id) => ({
           work_id: workId,
-          work_genre_id: Number(genre_id),
+          project_genre_id: Number(genre_id),
         })),
       });
     }
 
     // Update tags
     if (tags) {
-      await prisma.work_worktag.deleteMany({
+      await prisma.work_projecttag.deleteMany({
         where: { work_id: workId },
       });
-      await prisma.work_worktag.createMany({
+      await prisma.work_projecttag.createMany({
         data: tags.map((tag_id) => ({
           work_id: workId,
-          work_tag_id: Number(tag_id),
+          project_tag_id: Number(tag_id),
         })),
       });
     }
@@ -114,8 +114,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   const workId = Number(params.workId);
 
-  const tags = await prisma.work_tag.findMany();
-  const genres = await prisma.work_genre.findMany();
+  const tags = await prisma.project_tag.findMany();
+  const genres = await prisma.project_genre.findMany();
 
   const profile = await prisma.user_profile.findFirstOrThrow({
     where: {
@@ -130,14 +130,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     },
     include: {
       user_profile_work_characters: true,
-      work_workgenre: {
+      work_projectgenre: {
         include: {
-          work_genre: true,
+          project_genre: true,
         },
       },
-      work_worktag: {
+      work_projecttag: {
         include: {
-          work_tag: true,
+          project_tag: true,
         },
       },
     },
@@ -171,12 +171,12 @@ export default function Layout() {
         );
       }
       
-      if (data.work.work_workgenre) {
-        setSelectedGenres(data.work.work_workgenre.map((wg) => wg.work_genre_id));
+      if (data.work.work_projectgenre) {
+        setSelectedGenres(data.work.work_projectgenre.map((wg) => wg.project_genre_id));
       }
       
-      if (data.work.work_worktag) {
-        setSelectedTags(data.work.work_worktag.map((wt) => wt.work_tag_id));
+      if (data.work.work_projecttag) {
+        setSelectedTags(data.work.work_projecttag.map((wt) => wt.project_tag_id));
       }
     }
   }, [data.work]);
@@ -210,11 +210,13 @@ export default function Layout() {
             {/* Synopsis Section */}
             <div className="mb-12">
               <h3 className="font-inter text-xl text-[#231f20] mb-3">Kısa Özet</h3>
-              <div className="border border-[#231f20] rounded p-4 h-40">
-                <p className="font-inter text-[15px] text-[#231f20] leading-relaxed">
-                  {data.work.synopsis}
-                </p>
-              </div>
+              <Textarea
+                name="synopsis"
+                defaultValue={data.work.synopsis || ''}
+                className="border border-[#231f20] rounded p-4 h-40 font-inter text-[15px] text-[#231f20]"
+                placeholder="Kısa özet yazınız..."
+                required
+              />
             </div>
 
             {/* Similar Works Section */}
@@ -406,13 +408,6 @@ export default function Layout() {
               <Plus className="h-4 w-4 mr-2" />
               Yeni Karakter Ekle
             </Button>
-
-            {/* Synopsis (Hidden on Right, shown on Left) */}
-            <Input
-              type="hidden"
-              name="synopsis"
-              defaultValue={data.work.synopsis || 'Placeholder synopsis'}
-            />
 
             {/* Setting (Hidden) */}
             <Input
