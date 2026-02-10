@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, Form, useNavigate } from 'react-router';
 import { WritersIcon, ProjectsIcon, CallsIcon, SearchIcon, LoginIcon } from './icons';
 import { company_user } from '@prisma/client';
 
@@ -10,16 +10,21 @@ interface HeaderProps {
 }
 
 export function Header({ user }: HeaderProps) {
+  const navigate = useNavigate();
+
   return (
     <header className="flex items-end justify-between px-10 py-2.5 w-full pb-6 border-b-2 border-b-yo-orange">
       {/* Logo */}
-      <Link to="" className="h-[133.893px] w-[142.28px] flex-shrink-0">
+      <button 
+        onClick={() => navigate('..')}
+        className="h-[133.893px] w-[142.28px] flex-shrink-0 cursor-pointer"
+      >
         <img
           src="https://cdn.yazarodasi.com/yazar_odasi_logo.svg"
           alt="Yazar Odası Logo"
           className="w-full h-full object-contain"
         />
-      </Link>
+      </button>
 
       {/* Yazarlar */}
       <Link 
@@ -66,13 +71,23 @@ export function Header({ user }: HeaderProps) {
 
       {/* Giriş Yap / User Menu */}
       {user ? (
-        <Link 
-          to={`/user/${user.id}/profile`}
-          className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
-        >
-          <LoginIcon className="w-[28.54px] h-[27.11px]" />
-          <span>profil</span>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link 
+            to={`/user/${user.id}/profile`}
+            className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
+          >
+            <LoginIcon className="w-[28.54px] h-[27.11px]" />
+            <span>profil</span>
+          </Link>
+          <Form method="post" action="/auth/sign-out" className="inline">
+            <button 
+              type="submit"
+              className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-gray-600 transition-colors"
+            >
+              çıkış yap
+            </button>
+          </Form>
+        </div>
       ) : (
         <Link 
           to="/auth/sign-in" 

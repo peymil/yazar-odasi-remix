@@ -15,7 +15,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { validateSessionToken } from '~/.server/auth';
 import { authTokenCookie } from '~/.server/cookies';
 import { prisma } from '~/.server/prisma';
-import { PostEditor } from '~/components/PostEditor';
+import PostEditor from '~/components/PostEditor';
 import { Route } from './+types/route';
 
 export async function loader({ request }: Route.ActionArgs) {

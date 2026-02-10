@@ -2,7 +2,7 @@ import { data, redirect, type MetaFunction } from 'react-router';
 import { useFetcher, useLoaderData, useSubmit } from 'react-router';
 import { useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
-import { PostEditor } from '~/components/PostEditor';
+import PostEditor from '~/components/PostEditor';
 import { PostFeed } from '~/components/PostFeed';
 import { SignUp } from '~/components/sign-up';
 import { useOptionalUser } from '~/lib/authUtils';
