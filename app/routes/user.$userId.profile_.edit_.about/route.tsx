@@ -51,7 +51,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   
 
-  return redirect("..")
+  return redirect(`/user/${params.userId}/profile`);
 }
 
 export default function Layout() {

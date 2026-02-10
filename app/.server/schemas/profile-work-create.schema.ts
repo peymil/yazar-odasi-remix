@@ -10,6 +10,7 @@ export const profileWorkCreateSchema = z.strictObject({
   tags: z.array(z.string()),
   genres: z.array(z.string()),
   setting: z.string(),
+  image: z.string().optional(),
   user_profile_work_characters: z.array(
     z.strictObject({
       name: z.string(),

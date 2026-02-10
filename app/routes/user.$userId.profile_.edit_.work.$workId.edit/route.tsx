@@ -74,29 +74,35 @@ export async function action({ request, params }: Route.ActionArgs) {
     }
 
     // Update genres
-    if (genres) {
+    if (genres && Array.isArray(genres) && genres.length > 0) {
       await prisma.work_projectgenre.deleteMany({
         where: { work_id: workId },
       });
-      await prisma.work_projectgenre.createMany({
-        data: genres.map((genre_id) => ({
-          work_id: workId,
-          project_genre_id: Number(genre_id),
-        })),
-      });
+      const validGenres = genres.filter(id => id && !isNaN(Number(id)));
+      if (validGenres.length > 0) {
+        await prisma.work_projectgenre.createMany({
+          data: validGenres.map((genre_id) => ({
+            work_id: workId,
+            project_genre_id: Number(genre_id),
+          })),
+        });
+      }
     }
 
     // Update tags
-    if (tags) {
+    if (tags && Array.isArray(tags) && tags.length > 0) {
       await prisma.work_projecttag.deleteMany({
         where: { work_id: workId },
       });
-      await prisma.work_projecttag.createMany({
-        data: tags.map((tag_id) => ({
-          work_id: workId,
-          project_tag_id: Number(tag_id),
-        })),
-      });
+      const validTags = tags.filter(id => id && !isNaN(Number(id)));
+      if (validTags.length > 0) {
+        await prisma.work_projecttag.createMany({
+          data: validTags.map((tag_id) => ({
+            work_id: workId,
+            project_tag_id: Number(tag_id),
+          })),
+        });
+      }
     }
 
     return redirect(`../../..`);
@@ -157,6 +163,45 @@ export default function Layout() {
   ]);
   const [selectedTags, setSelectedTags] = useState<(string | number)[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<(string | number)[]>([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(data.work.image || null);
+  const formRef = React.useRef<HTMLFormElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreview(previewUrl);
+
+    const formData = new FormData();
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
+    formData.append('folder', 'work-images');
+
+    const response = await fetch('/api/presigned-url', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const { presignedUrl } = await response.json();
+    
+    await fetch(presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type,
+      },
+    });
+
+    const publicUrl = presignedUrl.split('?')[0];
+    const publicFileUrl = "https://cdn.yazarodasi.com/work-images/" + publicUrl.split('/').pop();
+
+    const hiddenInput = formRef.current?.querySelector('[name="image"]') as HTMLInputElement;
+    if (hiddenInput) {
+      hiddenInput.value = publicFileUrl;
+    }
+  };
 
   // Initialize state with existing work data
   useEffect(() => {
@@ -200,12 +245,35 @@ export default function Layout() {
         <span className="font-ibm-plex-sans">Profile Dön</span>
       </Link>
 
-      <form method="POST" className="max-w-[1400px] mx-auto">
+      <form ref={formRef} method="POST" className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-2 gap-10">
           {/* Left Column */}
           <div>
-            {/* Photo Placeholder */}
-            <div className="w-full h-[470px] bg-gray-200 mb-12"></div>
+            {/* Photo Upload */}
+            <div className="w-full h-[470px] bg-gray-200 mb-4 relative overflow-hidden flex items-center justify-center">
+              {imagePreview ? (
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-gray-400 text-lg">
+                  Resim Önizlemesi
+                </div>
+              )}
+            </div>
+            <Input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleImageChange}
+              accept="image/*"
+              className="hidden"
+            />
+            <Button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-[#F36D31] hover:bg-[#E05520] text-white font-playfair-display font-semibold text-xs rounded px-6 py-2 mb-12 w-full"
+            >
+              Resim Yükle
+            </Button>
+            <Input type="hidden" name="image" defaultValue={data.work.image || ''} />
 
             {/* Synopsis Section */}
             <div className="mb-12">

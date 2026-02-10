@@ -156,6 +156,7 @@ model user_profile_project {
   hook                            String
   similar_works                   String
   setting                         String
+  image                           String?
   profile_id                      Int?
   project_projectgenre            project_projectgenre[]
   project_projecttag              project_projecttag[]
@@ -198,6 +199,7 @@ model user_profile_work {
   hook                   String
   similar_works          String
   setting                String
+  image                  String?
   profile_id             Int?
   work_projectgenre      work_projectgenre[]
   work_projecttag        work_projecttag[]
