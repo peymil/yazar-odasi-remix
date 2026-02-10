@@ -5,45 +5,33 @@ import { ArrowLeftIcon, DocumentIcon, CheckIcon } from '~/components/icons';
 import { DownloadIcon, ListChevronsUpDown } from 'lucide-react';
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const project = await prisma.user_profile_project.findUniqueOrThrow({
+  const work = await prisma.user_profile_work.findUniqueOrThrow({
     where: {
-      id: Number(params.projectId),
+      id: Number(params.workId),
     },
     include: {
-      user_profile_project_characters: true,
-      project_projecttag: { include: { project_tag: true } },
-      project_projectgenre: { include: { project_genre: true } },
+      user_profile_work_characters: true,
+      work_projecttag: { include: { project_tag: true } },
+      work_projectgenre: { include: { project_genre: true } },
     },
   });
 
-  const tags = project.project_projecttag.map(
-    (item) => item.project_tag!.tag_name,
-  );
-  const genres = project.project_projectgenre.map(
+  const tags = work.work_projecttag.map((item) => item.project_tag!.tag_name);
+  const genres = work.work_projectgenre.map(
     (item) => item.project_genre!.genre_name,
   );
 
-  const { user } = await prisma.user_profile.findFirstOrThrow({
-    where: {
-      id: project.profile_id!,
-    },
-    select: {
-      user: true,
-    },
-  });
-
   return {
-    project: {
-      ...project,
+    work: {
+      ...work,
       tags,
       genres,
     },
-    user,
   };
 }
 
-export default function ProjectDetailPage() {
-  const { project } = useLoaderData<typeof loader>();
+export default function WorkDetailPage() {
+  const { work } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
   return (
@@ -63,10 +51,10 @@ export default function ProjectDetailPage() {
       <div className="flex gap-[50px] max-w-7xl mx-auto w-full">
         {/* Left Side - Image */}
         <div className="flex-shrink-0">
-          {project.image ? (
+          {work.image ? (
             <img
-              src={project.image}
-              alt={project.plot_title}
+              src={work.image}
+              alt={work.plot_title}
               className="w-[562px] h-[470px] object-cover"
             />
           ) : (
@@ -79,7 +67,7 @@ export default function ProjectDetailPage() {
           {/* Title and Favorite Icon */}
           <div className="flex items-start justify-between">
             <h1 className="font-['Balkist',sans-serif] font-extrabold text-xs text-[#231f20]">
-              {project.plot_title}
+              {work.plot_title}
             </h1>
             <button className="text-[#231f20] hover:text-[#F36D31]">
               <svg className="w-7 h-7" viewBox="0 0 28 28" fill="currentColor">
@@ -90,7 +78,7 @@ export default function ProjectDetailPage() {
 
           {/* Type */}
           <div className="text-[#231f20] text-xl font-['Inter',sans-serif]">
-            {project.type}
+            {work.type}
           </div>
 
           {/* Hook */}
@@ -99,7 +87,7 @@ export default function ProjectDetailPage() {
               Hook
             </h2>
             <p className="font-['Inter',sans-serif] text-xl text-[#231f20] leading-normal">
-              {project.hook}
+              {work.hook}
             </p>
           </div>
 
@@ -111,7 +99,7 @@ export default function ProjectDetailPage() {
               Logline
             </h2>
             <p className="font-['Inter',sans-serif] text-xl text-[#231f20] leading-normal whitespace-pre-line">
-              {project.logline}
+              {work.logline}
             </p>
           </div>
 
@@ -142,7 +130,7 @@ export default function ProjectDetailPage() {
           </h3>
           <div className="h-8 w-[1px] bg-[#231f20]" />
           <div className="flex flex-wrap gap-4">
-            {project.tags.map((tag, index) => (
+            {work.tags.map((tag, index) => (
               <span
                 key={index}
                 className="font-['Inter',sans-serif] text-xl text-[#231f20]"
@@ -160,7 +148,7 @@ export default function ProjectDetailPage() {
           </h3>
           <div className="h-8 w-[1px] bg-[#231f20]" />
           <div className="flex flex-wrap gap-4">
-            {project.genres.map((genre, index) => (
+            {work.genres.map((genre, index) => (
               <span
                 key={index}
                 className="font-['Inter',sans-serif] text-xl text-[#231f20]"
@@ -168,6 +156,7 @@ export default function ProjectDetailPage() {
                 {genre}
               </span>
             ))}
+            <ListChevronsUpDown />
           </div>
         </div>
       </div>
@@ -180,7 +169,7 @@ export default function ProjectDetailPage() {
             Kısa Özet
           </h3>
           <p className="font-['Inter',sans-serif] text-xl text-[#231f20] leading-normal whitespace-pre-line">
-            {project.synopsis}
+            {work.synopsis}
           </p>
           <ListChevronsUpDown />
         </div>
@@ -202,7 +191,7 @@ export default function ProjectDetailPage() {
             Karakterler
           </h3>
           <div className="flex flex-col gap-2">
-            {project.user_profile_project_characters.map((character) => (
+            {work.user_profile_work_characters.map((character) => (
               <p
                 key={character.id}
                 className="font-['Inter',sans-serif] text-xl text-[#231f20] leading-normal"
@@ -220,9 +209,9 @@ export default function ProjectDetailPage() {
             Benzer İşler
           </h3>
           <div className="flex gap-4">
-            {project.similar_works && (
+            {work.similar_works && (
               <p className="font-['Inter',sans-serif] text-xl text-[#231f20]">
-                {project.similar_works}
+                {work.similar_works}
               </p>
             )}
           </div>

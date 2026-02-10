@@ -185,7 +185,7 @@ export default function Layout() {
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project, index) => (
-                <Link to={`./project/${project.id}/about`} key={index}>
+                <Link to={`/user/${user.id}/profile/project/${project.id}`} key={index}>
                   <WriterProfileStoryCard {...project} />
                 </Link>
               ))}
@@ -200,7 +200,9 @@ export default function Layout() {
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {works.map((work, index) => (
-                <WriterProfileStoryCard {...work} key={index} />
+                <Link to={`/user/${user.id}/profile/work/${work.id}`} key={index}>
+                  <WriterProfileStoryCard {...work} />
+                </Link>
               ))}
             </div>
             {works.length === 0 && (

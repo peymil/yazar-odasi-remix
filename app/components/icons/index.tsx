@@ -4,3 +4,6 @@ export { CallsIcon } from './CallsIcon';
 export { SearchIcon } from './SearchIcon';
 export { LoginIcon } from './LoginIcon';
 export { EditIcon } from './EditIcon';
+export { ArrowLeftIcon } from './ArrowLeftIcon';
+export { DocumentIcon } from './DocumentIcon';
+export { CheckIcon } from './CheckIcon';
