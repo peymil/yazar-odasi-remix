@@ -19,7 +19,8 @@ async function main() {
   // Competitions
   const competitions = await Promise.all(
     Array.from({ length: 10 }, () => {
-      return createCompetition(prismaClient);
+      const randomCompany = companies[faker.number.int({ min: 0, max: companies.length - 1 })];
+      return createCompetition(prismaClient, randomCompany.id);
     })
   );
   console.log(competitions);

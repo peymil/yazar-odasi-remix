@@ -127,18 +127,61 @@ export async function createMockCompany(
   });
 }
 
+const COMPETITION_TITLES = [
+  'Türkiye Senaryo Ödülleri',
+  'Genç Kalemler Senaryo Yarışması',
+  'Uluslararası Kısa Film Senaryosu Yarışması',
+  'Ulusal Uzun Metraj Senaryo Yarışması',
+  'Fantastik & Bilim-Kurgu Senaryo Ödülü',
+  'Sosyal Sorumluluk Senaryosu Yarışması',
+  'Kadın Yönetmenler Senaryo Yarışması',
+  'Gelecek Sesler: Yeni Yazarlar Yarışması',
+  'Bağımsız Sinema Senaryo Ödülleri',
+  'Dijital İçerik Yaratıcıları Yarışması',
+  'Anadolu Hikayeleri Senaryo Yarışması',
+  'Türk Dizi Senaryosu Yarışması',
+];
+
+const CONTENT_TYPES = [
+  'Uzun Metraj Film',
+  'Kısa Film',
+  'TV Dizisi',
+  'Web Serisi',
+  'Belgesel',
+  'Animasyon',
+];
+
 export async function createCompetition(
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  company_id: number
 ): Promise<competition> {
-  const startDate = faker.date.future();
+  const startDate = faker.date.between({
+    from: new Date('2026-01-01'),
+    to: new Date('2026-06-30'),
+  });
+  const endDate = faker.date.between({
+    from: startDate,
+    to: new Date('2026-12-31'),
+  });
+
+  const title = faker.helpers.arrayElement(COMPETITION_TITLES);
+  const contentType = faker.helpers.arrayElement(CONTENT_TYPES);
+
+  const description = [
+    faker.lorem.paragraph(),
+    faker.lorem.paragraph(),
+    faker.lorem.paragraph(),
+  ].join('\n\n');
+
   return await prisma.competition.create({
     data: {
-      title: `${faker.word.adjective()} ${faker.word.noun()} Screenwriting Competition`,
-      company_id: 1,
-      description: faker.lorem.paragraph(),
+      title,
+      company_id,
+      description,
       start_date: startDate,
-      end_date: faker.date.future({ refDate: startDate }),
-      avatar: faker.image.avatar(),
+      end_date: endDate,
+      content_type: contentType,
+      avatar: `https://picsum.photos/seed/${faker.string.alphanumeric(8)}/400/300`,
     },
   });
 }

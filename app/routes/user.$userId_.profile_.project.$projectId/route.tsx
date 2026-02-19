@@ -2,7 +2,7 @@ import { prisma } from '~/.server/prisma';
 import { useLoaderData, useNavigate } from 'react-router';
 import { Route } from './+types/route';
 import { ArrowLeftIcon, DocumentIcon, CheckIcon } from '~/components/icons';
-import { DownloadIcon, ChevronsUpDown } from 'lucide-react';
+import { DownloadIcon, ListChevronsUpDown } from 'lucide-react';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const project = await prisma.user_profile_project.findUniqueOrThrow({
@@ -161,9 +161,7 @@ export default function ProjectDetailPage() {
             {project.synopsis}
           </p>
           <ListChevronsUpDown />
-        </div>
-
-        {/* Yazar Odası'nın Yorumu Card */}
+          </div>
         <div className="border-2 border-[#bcbec0] p-10 flex flex-col gap-4">
           <h3 className=" font-bold text-xl text-[#231f20]">
             Yazar Odası&apos;nın Yorumu
