@@ -49,7 +49,7 @@ export default function Layout() {
 
         <div>
           <h3 className={'mb-2 text-lg flex font-bold'}>Karakterler</h3>
-          <div className={'grid grid-cols-3 gap-1'}>
+          <div className={'grid gap-1'}>
             {project.user_profile_project_characters.map((character) => (
               <p key={character.id} className={'text-sm block'}>
                 <span className={'text-yo-sub-title'}>{character.name}</span>:{' '}

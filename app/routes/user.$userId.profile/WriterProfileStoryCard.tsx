@@ -29,7 +29,7 @@ export const WriterProfileStoryCard: React.FC<WriterProfileStoryCardProps> = ({
   return (
     <div 
       className={cn(
-        'border-2 border-[#bcbec0] p-5 grid grid-cols-[auto_1fr] gap-5 w-full',
+        'border-2 border-[#bcbec0] p-5 grid grid-cols-[auto_1fr] gap-5 w-full h-full',
         className
       )}
     >
@@ -53,11 +53,11 @@ export const WriterProfileStoryCard: React.FC<WriterProfileStoryCardProps> = ({
       </div>
 
       {/* Right side - Content */}
-      <div className="flex flex-col gap-5 text-[#231f20] text-xl">
-        <p>{type || 'Yazar'}</p>
-        <p>{plot_title}</p>
-        <p>{genreText}</p>
-        <p className="line-clamp-4">
+      <div className="flex flex-col gap-5 text-[#231f20] text-lg min-w-0">
+        <p className="break-words">{type || 'Yazar'}</p>
+        <p className="break-words font-bold">{plot_title}</p>
+        <p className="break-words">{genreText}</p>
+        <p className="line-clamp-4 overflow-hidden break-words">
           {synopsis}
         </p>
       </div>

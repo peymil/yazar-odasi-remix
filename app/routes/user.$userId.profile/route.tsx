@@ -112,25 +112,23 @@ export default function Layout() {
   const activeTab = searchParams.get('tab') || 'projeler';
 
   return (
-    <div className="bg-white min-h-screen flex flex-col gap-7 px-10 py-8">
+    <div className="bg-white min-h-screen flex flex-col gap-7 px-10 pt-10 w-full">
       {/* Profile Section */}
-      <div className="flex flex-col md:flex-row items-start gap-8 w-full max-w-6xl mx-auto p-32">
+      <div className="flex flex-col gap-8 w-full max-w-6xl items-center mx-auto">
         {/* Profile Photo */}
-        <div className="w-full md:w-1/2 flex-shrink-0">
           <img
             src={
               profile.image ||
               'https://cdn.yazarodasi.com/profile-photo-placeholder.webp'
             }
             alt={profile.name || 'Profile'}
-            className="w-128 h-128 h-auto object-cover"
+            className="w-64 h-64 object-cover"
           />
-        </div>
 
         {/* Profile Info */}
-        <div className="w-full md:w-1/2 flex flex-col gap-4">
+        <div className=" flex flex-col gap-4 items-center">
           <div className="flex items-start justify-between">
-            <h1 className="text-xs font-['Balkist',sans-serif] font-extrabold text-[#231f20]">
+            <h1 className="text-6xl font-primary font-extrabold text-[#231f20]">
               {profile.name}
             </h1>
             {isUsersProfile && (
@@ -143,7 +141,7 @@ export default function Layout() {
               </button>
             )}
           </div>
-          <div className="text-[#231f20] text-xl leading-normal pt-10">
+          <div className="text-[#231f20] text-xl leading-normal pl-20 pr-20 ">
             {profile.about?.split('\n').map((line, i) => (
               <p key={i} className="mb-6">
                 {line}
@@ -183,7 +181,7 @@ export default function Layout() {
       <div className="w-full max-w-6xl mx-auto">
         {activeTab === 'projeler' ? (
           <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {projects.map((project, index) => (
                 <Link to={`/user/${user.id}/profile/project/${project.id}`} key={index}>
                   <WriterProfileStoryCard {...project} />
@@ -198,7 +196,7 @@ export default function Layout() {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {works.map((work, index) => (
                 <Link to={`/user/${user.id}/profile/work/${work.id}`} key={index}>
                   <WriterProfileStoryCard {...work} />

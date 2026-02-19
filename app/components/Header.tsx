@@ -13,11 +13,11 @@ export function Header({ user }: HeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <header className="flex items-end justify-between px-10 py-2.5 w-full pb-6 border-b-2 border-b-yo-orange">
+    <header className="flex items-end justify-between px-10 py-2.5 w-full pb-6  border-b-yo-orange">
       {/* Logo */}
       <button 
         onClick={() => navigate('..')}
-        className="h-[133.893px] w-[142.28px] flex-shrink-0 cursor-pointer"
+        className="h-[133.893px] w-[142.28px] flex-shrink-0 cursor-pointer "
       >
         <img
           src="https://cdn.yazarodasi.com/yazar_odasi_logo.svg"
@@ -30,7 +30,7 @@ export function Header({ user }: HeaderProps) {
       <Link 
         to="/user/profile" 
         relative="route"
-        className="inline-flex items-center gap-2.5 text-[#231f20] text-[20px]"
+        className="inline-flex items-center gap-2.5 text-[#231f20] text-[20px] hover:text-yo-orange "
       >
         <WritersIcon className="w-[28.6px] h-[28.69px]" />
         <span>yazarlar</span>
@@ -39,7 +39,7 @@ export function Header({ user }: HeaderProps) {
       {/* Projeler */}
       <Link 
         to="/user/project" 
-        className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
+        className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-yo-orange"
       >
         <ProjectsIcon className="w-[33.8px] h-[27.13px]" />
         <span>projeler</span>
@@ -48,7 +48,7 @@ export function Header({ user }: HeaderProps) {
       {/* Açık Çağrılar */}
       <Link 
         to="/competition" 
-        className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
+        className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-yo-orange"
       >
         <CallsIcon className="w-[27.03px] h-[27.13px]" />
         <span>açık çağrılar</span>
@@ -71,18 +71,18 @@ export function Header({ user }: HeaderProps) {
 
       {/* Giriş Yap / User Menu */}
       {user ? (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 hover:text-yo-orange">
           <Link 
             to={`/user/${user.id}/profile`}
-            className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
+            className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-yo-orange"
           >
             <LoginIcon className="w-[28.54px] h-[27.11px]" />
             <span>profil</span>
           </Link>
-          <Form method="post" action="/auth/sign-out" className="inline">
+          <Form method="post" action="/auth/sign-out" className="inline ">
             <button 
               type="submit"
-              className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-gray-600 transition-colors"
+              className="hover:text-yo-orange inline-flex items-center gap-3 text-[#231f20] text-[20px] transition-colors"
             >
               çıkış yap
             </button>
@@ -91,7 +91,7 @@ export function Header({ user }: HeaderProps) {
       ) : (
         <Link 
           to="/auth/sign-in" 
-          className="inline-flex items-center gap-3 text-[#231f20] text-[20px]"
+          className="hover:text-yo-orange inline-flex items-center gap-3 text-[#231f20] text-[20px]"
         >
           <LoginIcon className="w-[28.54px] h-[27.11px]" />
           <span>giriş yap</span>
