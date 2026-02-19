@@ -28,6 +28,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   if (tab === 'basvurularim') {
     if (!userId) return redirect('/auth/sign-in');
+    const sort = url.searchParams.get('sort') === 'asc' ? 'asc' : 'desc';
     const deliveries = await prisma.competition_delivery.findMany({
       where: { user_id: userId },
       include: {
@@ -35,7 +36,7 @@ export async function loader({ request }: Route.LoaderArgs) {
           include: { company: { include: { company_profile: true } } },
         },
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { created_at: sort },
     });
     return {
       tab: 'basvurularim' as const,
@@ -52,26 +53,41 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   if (tab === 'kaydedilenler') {
     if (!userId) return redirect('/auth/sign-in');
-    const bookmarks = await prisma.competition_bookmark.findMany({
-      where: { user_id: userId },
-      include: {
-        competition: {
-          include: { company: { include: { company_profile: true } } },
+    const contentTypeFilter = url.searchParams.get('contentType') || '';
+    const sort = url.searchParams.get('sort') === 'desc' ? 'desc' : 'asc';
+
+    const [bookmarks, contentTypesRaw] = await Promise.all([
+      prisma.competition_bookmark.findMany({
+        where: {
+          user_id: userId,
+          ...(contentTypeFilter
+            ? { competition: { content_type: contentTypeFilter } }
+            : {}),
         },
-      },
-      orderBy: { created_at: 'desc' },
-    });
-    const competitionIds = bookmarks.map((b) => b.competition_id);
+        include: {
+          competition: {
+            include: { company: { include: { company_profile: true } } },
+          },
+        },
+        orderBy: { competition: { end_date: sort } },
+      }),
+      prisma.competition.findMany({
+        where: { content_type: { not: null } },
+        select: { content_type: true },
+        distinct: ['content_type'],
+      }),
+    ]);
+    const competitionIds = bookmarks.map((b: any) => b.competition_id);
     const submissions = competitionIds.length
       ? await prisma.competition_delivery.findMany({
           where: { user_id: userId, competition_id: { in: competitionIds } },
           select: { competition_id: true },
         })
       : [];
-    const submittedSet = new Set(submissions.map((s) => s.competition_id));
+    const submittedSet = new Set(submissions.map((s: any) => s.competition_id));
     return {
       tab: 'kaydedilenler' as const,
-      bookmarks: bookmarks.map((b) => ({
+      bookmarks: bookmarks.map((b: any) => ({
         id: b.competition.id,
         title: b.competition.title,
         companyName: b.competition.company.company_profile[0]?.name ?? null,
@@ -79,20 +95,24 @@ export async function loader({ request }: Route.LoaderArgs) {
         contentType: b.competition.content_type ?? null,
         isSubmitted: submittedSet.has(b.competition_id),
       })),
+      contentTypes: contentTypesRaw.map((c: any) => c.content_type as string),
       userId,
     };
   }
 
   // default: kesfet
+  const contentTypeFilter = url.searchParams.get('contentType') || '';
+  const sort = url.searchParams.get('sort') === 'desc' ? 'desc' : 'asc';
   const page = Math.max(1, Number(url.searchParams.get('page') || '1'));
   const skip = (page - 1) * PAGE_SIZE;
 
-  const [competitions, bookmarks, submissions] = await Promise.all([
+  const [competitions, bookmarks, submissions, contentTypesRaw] = await Promise.all([
     prisma.competition.findMany({
       skip,
       take: PAGE_SIZE + 1,
+      where: contentTypeFilter ? { content_type: contentTypeFilter } : {},
       include: { company: { include: { company_profile: true } } },
-      orderBy: [{ end_date: 'asc' }],
+      orderBy: [{ end_date: sort }],
     }),
     userId
       ? prisma.competition_bookmark.findMany({
@@ -106,17 +126,22 @@ export async function loader({ request }: Route.LoaderArgs) {
           select: { competition_id: true },
         })
       : ([] as { competition_id: number }[]),
+    prisma.competition.findMany({
+      where: { content_type: { not: null } },
+      select: { content_type: true },
+      distinct: ['content_type'],
+    }),
   ]);
 
-  const bookmarkedSet = new Set(bookmarks.map((b) => b.competition_id));
-  const submittedSet = new Set(submissions.map((s) => s.competition_id));
+  const bookmarkedSet = new Set(bookmarks.map((b: any) => b.competition_id));
+  const submittedSet = new Set(submissions.map((s: any) => s.competition_id));
 
   const hasMore = competitions.length > PAGE_SIZE;
   const items = competitions.slice(0, PAGE_SIZE);
 
   return {
     tab: 'kesfet' as const,
-    competitions: items.map((c) => ({
+    competitions: items.map((c: any) => ({
       id: c.id,
       title: c.title,
       companyName: c.company.company_profile[0]?.name ?? null,
@@ -125,6 +150,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       isBookmarked: bookmarkedSet.has(c.id),
       isSubmitted: submittedSet.has(c.id),
     })),
+    contentTypes: contentTypesRaw.map((c: any) => c.content_type as string),
     hasMore,
     page,
     userId,
@@ -160,31 +186,105 @@ function TabButton({
 function FiltersBar({
   showContentType = false,
   showStatusFilter = false,
+  showSort = false,
+  contentTypes = [],
 }: {
   showContentType?: boolean;
   showStatusFilter?: boolean;
+  showSort?: boolean;
+  contentTypes?: string[];
 }) {
+  const [searchParams] = useSearchParams();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const currentContentType = searchParams.get('contentType') || '';
+  const currentSort = searchParams.get('sort') || 'asc';
+  const tab = searchParams.get('tab') || 'kesfet';
+
+  function buildParams(overrides: Record<string, string>) {
+    const next = new URLSearchParams(searchParams);
+    for (const [k, v] of Object.entries(overrides)) {
+      if (v) next.set(k, v);
+      else next.delete(k);
+    }
+    // reset pagination when filter/sort changes
+    next.delete('page');
+    return next.toString();
+  }
+
+  const nextSort = currentSort === 'asc' ? 'desc' : 'asc';
+
   return (
     <div className="flex items-center justify-between w-full">
-      <div>
+      <div className="relative">
         {showContentType && (
-          <button className="flex items-center gap-2 border border-[#231f20] px-4 py-2 text-[#231f20] text-base rounded-sm">
-            <span>içerik tipi</span>
-            <svg width="14" height="9" viewBox="0 0 14 9" fill="none">
-              <path d="M1 1L7 7L13 1" stroke="#231f20" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
-        )}
+          <>
+            <button
+              type="button"
+              onClick={() => setDropdownOpen((o) => !o)}
+              className={`flex items-center gap-2 border px-4 py-2 text-base rounded-sm transition-colors ${
+                currentContentType
+                  ? 'border-yo-orange text-yo-orange bg-orange-50'
+                  : 'border-[#231f20] text-[#231f20]'
+              }`}
+            >
+              <span>{currentContentType || 'içerik tipi'}</span>
+              <svg
+                width="14"
+                height="9"
+                viewBox="0 0 14 9"
+                fill="none"
+                className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+              >
+                <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
 
+            {dropdownOpen && (
+              <div className="absolute top-full left-0 mt-1 z-20 bg-white border border-gray-200 rounded-sm shadow-md min-w-[160px]">
+                <Link
+                  to={`/competition?${buildParams({ tab, contentType: '' })}`}
+                  onClick={() => setDropdownOpen(false)}
+                  className={`block px-4 py-2 text-sm hover:bg-orange-50 hover:text-yo-orange ${
+                    !currentContentType ? 'text-yo-orange font-semibold' : 'text-[#231f20]'
+                  }`}
+                >
+                  Tümü
+                </Link>
+                {contentTypes.map((ct) => (
+                  <Link
+                    key={ct}
+                    to={`/competition?${buildParams({ tab, contentType: ct })}`}
+                    onClick={() => setDropdownOpen(false)}
+                    className={`block px-4 py-2 text-sm hover:bg-orange-50 hover:text-yo-orange ${
+                      currentContentType === ct ? 'text-yo-orange font-semibold' : 'text-[#231f20]'
+                    }`}
+                  >
+                    {ct}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
-      <button className="flex items-center gap-2 text-[#231f20] text-base">
-        <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
-          <line x1="0" y1="2" x2="18" y2="2" stroke="#231f20" strokeWidth="1.5" />
-          <line x1="3" y1="7" x2="18" y2="7" stroke="#231f20" strokeWidth="1.5" />
-          <line x1="6" y1="12" x2="18" y2="12" stroke="#231f20" strokeWidth="1.5" />
-        </svg>
-        <span>başvuru tarihi</span>
-      </button>
+
+      {showSort && (
+        <Link
+          to={`/competition?${buildParams({ tab, sort: nextSort })}`}
+          className="flex items-center gap-2 text-[#231f20] text-base hover:text-yo-orange transition-colors"
+        >
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+            <line x1="0" y1="2" x2="18" y2="2" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="3" y1="7" x2="18" y2="7" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="6" y1="12" x2="18" y2="12" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+          <span>
+            başvuru tarihi{' '}
+            <span className="text-xs text-gray-400">{currentSort === 'asc' ? '↑' : '↓'}</span>
+          </span>
+        </Link>
+      )}
     </div>
   );
 }
@@ -210,10 +310,28 @@ function CompetitionRow({
   userId: number | null;
 }) {
   const fetcher = useFetcher();
-  const optimisticBookmarked =
+  // Local state is the source of truth; synced from prop on initial mount / revalidation
+  const [bookmarked, setBookmarked] = useState(isBookmarked);
+
+  // While a request is in-flight, show what we submitted (true optimistic UI)
+  const displayed =
     fetcher.state !== 'idle'
       ? fetcher.formData?.get('action') === 'add'
-      : isBookmarked;
+      : bookmarked;
+
+  function toggleBookmark() {
+    const next = !displayed;
+    setBookmarked(next); // commit immediately so state persists after fetcher goes idle
+    fetcher.submit(
+      { competitionId: String(id), action: next ? 'add' : 'remove' },
+      { method: 'post', action: '/api/competition/bookmark' }
+    );
+  }
+
+  // Keep in sync if the loader re-runs (e.g. tab switch)
+  useEffect(() => {
+    setBookmarked(isBookmarked);
+  }, [isBookmarked]);
 
   const formattedDate = endDate
     ? new Date(endDate).toLocaleDateString('tr-TR', {
@@ -226,13 +344,14 @@ function CompetitionRow({
   return (
     <div className="flex items-center gap-4 px-5 py-5 border border-gray-200 rounded-sm w-full">
       {userId ? (
-        <fetcher.Form method="post" action="/api/competition/bookmark">
-          <input type="hidden" name="competitionId" value={id} />
-          <input type="hidden" name="action" value={optimisticBookmarked ? 'remove' : 'add'} />
-          <button type="submit" className="flex-shrink-0 w-5 h-6">
-            <BookmarkIcon className="w-full h-full" filled={optimisticBookmarked} />
-          </button>
-        </fetcher.Form>
+        <button
+          type="button"
+          onClick={toggleBookmark}
+          disabled={fetcher.state !== 'idle'}
+          className="flex-shrink-0 w-5 h-6"
+        >
+          <BookmarkIcon className="w-full h-full" filled={displayed} />
+        </button>
       ) : (
         <Link to="/auth/sign-in" className="flex-shrink-0 w-5 h-6">
           <BookmarkIcon className="w-full h-full" filled={false} />
@@ -256,13 +375,13 @@ function CompetitionRow({
       </span>
 
       {isSubmitted ? (
-        <span className="flex-shrink-0 px-4 py-2 bg-yo-purple text-white font-primary font-semibold text-[10px] rounded-sm min-w-[110px] text-center">
+        <span className="flex-shrink-0 px-4 py-2 bg-yo-purple text-white font-primary font-semibold text-[10px] rounded-sm w-[110px] text-center">
           başvuru yapıldı
         </span>
       ) : (
         <Link
           to={`/competition/${id}`}
-          className="flex-shrink-0 px-4 py-2 bg-yo-orange text-white font-primary font-semibold text-[10px] rounded-sm min-w-[80px] text-center"
+          className="flex-shrink-0 px-4 py-2 bg-yo-orange text-white font-primary font-semibold text-[10px] rounded-sm w-[110px] text-center"
         >
           incele
         </Link>
@@ -346,8 +465,8 @@ function SubmissionRow({
       </span>
 
       <Link
-        to={`/competition/${competitionId}`}
-        className="flex-shrink-0 px-4 py-2 bg-yo-orange text-white font-primary font-semibold text-[10px] rounded-sm min-w-[110px] text-center"
+        to={`/competition/${competitionId}/delivery/${deliveryId}`}
+        className="flex-shrink-0 px-4 py-2 bg-yo-orange text-white font-primary font-semibold text-[10px] rounded-sm w-[110px] text-center"
       >
         başvuru detayı
       </Link>
@@ -401,14 +520,18 @@ export default function CompetitionsRoute() {
           hasMore &&
           fetcher.state === 'idle'
         ) {
-          fetcher.load(`/competition?tab=kesfet&page=${pageRef.current + 1}`);
+          // Preserve current filter/sort params when loading next page
+          const next = new URLSearchParams(searchParams);
+          next.set('tab', 'kesfet');
+          next.set('page', String(pageRef.current + 1));
+          fetcher.load(`/competition?${next.toString()}`);
         }
       },
       { threshold: 0.1 }
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, fetcher]);
+  }, [hasMore, fetcher, searchParams]);
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-100px)]">
@@ -446,7 +569,7 @@ export default function CompetitionsRoute() {
         {/* ── Keşfet ── */}
         {data.tab === 'kesfet' && (
           <div className="flex flex-col gap-4">
-            <FiltersBar showContentType />
+            <FiltersBar showContentType showSort contentTypes={data.contentTypes} />
             <div className="flex flex-col gap-3">
               {competitions.map((c) => (
                 <CompetitionRow
@@ -476,7 +599,7 @@ export default function CompetitionsRoute() {
         {/* ── Başvurularım ── */}
         {data.tab === 'basvurularim' && (
           <div className="flex flex-col gap-4">
-            <FiltersBar showStatusFilter />
+            <FiltersBar showStatusFilter showSort />
             <div className="flex flex-col gap-3">
               {data.deliveries.map((d) => (
                 <SubmissionRow
@@ -498,7 +621,7 @@ export default function CompetitionsRoute() {
         {/* ── Kaydedilenler ── */}
         {data.tab === 'kaydedilenler' && (
           <div className="flex flex-col gap-4">
-            <FiltersBar showContentType />
+            <FiltersBar showContentType showSort contentTypes={'contentTypes' in data ? data.contentTypes : []} />
             <div className="flex flex-col gap-3">
               {data.bookmarks.map((b) => (
                 <CompetitionRow
