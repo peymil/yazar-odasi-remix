@@ -2,7 +2,7 @@ import { prisma } from '~/.server/prisma';
 import { useLoaderData, useNavigate } from 'react-router';
 import { Route } from './+types/route';
 import { ArrowLeftIcon, DocumentIcon, CheckIcon } from '~/components/icons';
-import { DownloadIcon, ListChevronsUpDown } from 'lucide-react';
+import { DownloadIcon, ChevronsUpDown } from 'lucide-react';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const work = await prisma.user_profile_work.findUniqueOrThrow({
