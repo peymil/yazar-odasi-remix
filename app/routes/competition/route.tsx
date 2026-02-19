@@ -1,6 +1,6 @@
 import { redirect } from 'react-router';
 import { Link, useFetcher, useLoaderData, useSearchParams } from 'react-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ShouldRevalidateFunction } from 'react-router';
 import { prisma } from '~/.server/prisma';
 import { getSessionFromRequest } from '~/.server/auth';
@@ -9,7 +9,7 @@ import { Footer } from '~/components/Footer';
 import type { Route } from './+types/route';
 import type { competition_delivery_status } from '@prisma/client';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formAction,
@@ -106,14 +106,17 @@ export async function loader({ request }: Route.LoaderArgs) {
   const page = Math.max(1, Number(url.searchParams.get('page') || '1'));
   const skip = (page - 1) * PAGE_SIZE;
 
-  const [competitions, bookmarks, submissions, contentTypesRaw] = await Promise.all([
+  const where = contentTypeFilter ? { content_type: contentTypeFilter } : {};
+
+  const [competitions, total, bookmarks, submissions, contentTypesRaw] = await Promise.all([
     prisma.competition.findMany({
       skip,
-      take: PAGE_SIZE + 1,
-      where: contentTypeFilter ? { content_type: contentTypeFilter } : {},
+      take: PAGE_SIZE,
+      where,
       include: { company: { include: { company_profile: true } } },
       orderBy: [{ end_date: sort }],
     }),
+    prisma.competition.count({ where }),
     userId
       ? prisma.competition_bookmark.findMany({
           where: { user_id: userId },
@@ -136,12 +139,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   const bookmarkedSet = new Set(bookmarks.map((b: any) => b.competition_id));
   const submittedSet = new Set(submissions.map((s: any) => s.competition_id));
 
-  const hasMore = competitions.length > PAGE_SIZE;
-  const items = competitions.slice(0, PAGE_SIZE);
-
   return {
     tab: 'kesfet' as const,
-    competitions: items.map((c: any) => ({
+    competitions: competitions.map((c: any) => ({
       id: c.id,
       title: c.title,
       companyName: c.company.company_profile[0]?.name ?? null,
@@ -151,7 +151,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       isSubmitted: submittedSet.has(c.id),
     })),
     contentTypes: contentTypesRaw.map((c: any) => c.content_type as string),
-    hasMore,
+    total,
     page,
     userId,
   };
@@ -474,64 +474,82 @@ function SubmissionRow({
   );
 }
 
+// ─── Pagination ──────────────────────────────────────────────────────────────
+function Pagination({ page, total }: { page: number; total: number }) {
+  const [searchParams] = useSearchParams();
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (totalPages <= 1) return null;
+
+  function pageLink(p: number) {
+    const next = new URLSearchParams(searchParams);
+    next.set('page', String(p));
+    return `/competition?${next.toString()}`;
+  }
+
+  // Show at most 7 page buttons: first, last, current ±2, and ellipses
+  const pages: (number | '…')[] = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== '…') {
+      pages.push('…');
+    }
+  }
+
+  return (
+    <div className="flex items-center justify-center gap-1 py-4">
+      <Link
+        to={pageLink(page - 1)}
+        aria-disabled={page === 1}
+        className={`px-3 py-1.5 border rounded-sm text-sm transition-colors ${
+          page === 1
+            ? 'border-gray-200 text-gray-300 pointer-events-none'
+            : 'border-[#231f20] text-[#231f20] hover:border-yo-orange hover:text-yo-orange'
+        }`}
+      >
+        ‹
+      </Link>
+
+      {pages.map((p, i) =>
+        p === '…' ? (
+          <span key={`ellipsis-${i}`} className="px-2 text-gray-400 text-sm select-none">
+            …
+          </span>
+        ) : (
+          <Link
+            key={p}
+            to={pageLink(p as number)}
+            className={`px-3 py-1.5 border rounded-sm text-sm transition-colors ${
+              p === page
+                ? 'bg-yo-orange border-yo-orange text-white'
+                : 'border-[#231f20] text-[#231f20] hover:border-yo-orange hover:text-yo-orange'
+            }`}
+          >
+            {p}
+          </Link>
+        )
+      )}
+
+      <Link
+        to={pageLink(page + 1)}
+        aria-disabled={page === totalPages}
+        className={`px-3 py-1.5 border rounded-sm text-sm transition-colors ${
+          page === totalPages
+            ? 'border-gray-200 text-gray-300 pointer-events-none'
+            : 'border-[#231f20] text-[#231f20] hover:border-yo-orange hover:text-yo-orange'
+        }`}
+      >
+        ›
+      </Link>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function CompetitionsRoute() {
   const data = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const tab = searchParams.get('tab') || 'kesfet';
-
-  const fetcher = useFetcher<typeof loader>();
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  const [competitions, setCompetitions] = useState(() =>
-    data.tab === 'kesfet' ? data.competitions : []
-  );
-  const [hasMore, setHasMore] = useState(() =>
-    data.tab === 'kesfet' ? data.hasMore : false
-  );
-  const pageRef = useRef(data.tab === 'kesfet' ? data.page : 1);
-
-  // Reset list when initial loader data changes (e.g. tab switch)
-  useEffect(() => {
-    if (data.tab === 'kesfet') {
-      setCompetitions(data.competitions);
-      setHasMore(data.hasMore);
-      pageRef.current = data.page;
-    }
-  }, [data]);
-
-  // Append fetcher results
-  useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data?.tab === 'kesfet') {
-      setCompetitions((prev) => [...prev, ...fetcher.data!.competitions]);
-      setHasMore((fetcher.data as { hasMore: boolean }).hasMore);
-      pageRef.current = (fetcher.data as { page: number }).page;
-    }
-  }, [fetcher.state, fetcher.data]);
-
-  // Infinite scroll via IntersectionObserver
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasMore &&
-          fetcher.state === 'idle'
-        ) {
-          // Preserve current filter/sort params when loading next page
-          const next = new URLSearchParams(searchParams);
-          next.set('tab', 'kesfet');
-          next.set('page', String(pageRef.current + 1));
-          fetcher.load(`/competition?${next.toString()}`);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, fetcher, searchParams]);
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-100px)]">
@@ -571,7 +589,7 @@ export default function CompetitionsRoute() {
           <div className="flex flex-col gap-4">
             <FiltersBar showContentType showSort contentTypes={data.contentTypes} />
             <div className="flex flex-col gap-3">
-              {competitions.map((c) => (
+              {data.competitions.map((c: any) => (
                 <CompetitionRow
                   key={c.id}
                   id={c.id}
@@ -584,15 +602,11 @@ export default function CompetitionsRoute() {
                   userId={data.userId}
                 />
               ))}
-              {competitions.length === 0 && (
+              {data.competitions.length === 0 && (
                 <p className="text-center text-gray-500 py-10">Yarışma bulunamadı.</p>
               )}
             </div>
-            {/* Infinite scroll sentinel */}
-            <div ref={sentinelRef} className="h-4" />
-            {fetcher.state !== 'idle' && (
-              <p className="text-center text-gray-400 py-4 text-sm">Yükleniyor...</p>
-            )}
+            <Pagination page={data.page} total={data.total} />
           </div>
         )}
 
