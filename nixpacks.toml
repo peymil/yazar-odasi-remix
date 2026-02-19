@@ -2,5 +2,5 @@
 cmd = 'pnpm run start'
 
 [phases.build]
-cmds = ['pnpm run prisma:generate', 'pnpm run prisma:generate:sql', 'pnpm run build']
+cmds = ['pnpm run prisma:migrate:deploy','pnpm run prisma:generate', 'pnpm run prisma:generate:sql', 'pnpm run build']
 

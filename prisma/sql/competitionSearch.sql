@@ -11,8 +11,8 @@ FROM competition c
 LEFT JOIN company_profile cp ON c.company_id = cp.company_id
 LEFT JOIN competition_delivery cd ON c.id = cd.competition_id
 WHERE 
-    c.title ILIKE $1 OR 
-    c.description ILIKE $1
+    c.title ILIKE '%' || $1 || '%' OR 
+    c.description ILIKE '%' || $1 || '%'
 GROUP BY c.id, cp.name
 ORDER BY 
     CASE 
