@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "dev": "react-router dev --profile",
+    "dev": "docker compose up -d && wait-on tcp:5433 && prisma migrate deploy && tsx ./prisma/seed/dev.ts && react-router dev --profile",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "format": "prettier --write .",
     "start": "react-router-serve ./build/server/index.js",
@@ -85,7 +85,8 @@
     "typescript": "^5.7.2",
     "vite": "^5.4.21",
     "vite-plugin-terminal": "^1.4.0",
-    "vite-tsconfig-paths": "^4.3.2"
+    "vite-tsconfig-paths": "^4.3.2",
+    "wait-on": "^9.0.4"
   },
   "engines": {
     "node": ">=20.0.0"

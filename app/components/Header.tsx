@@ -1,11 +1,12 @@
 import { Link, Form, useNavigate } from 'react-router';
 import { WritersIcon, ProjectsIcon, CallsIcon, SearchIcon, LoginIcon } from './icons';
-import { company_user } from '@prisma/client';
+import { company_user, user_profile } from '@prisma/client';
 
 interface HeaderProps {
   user?: {
     id: string;
-    company_user: company_user
+    company_user: company_user[]
+    user_profile: user_profile[]
   } | null;
 }
 
@@ -76,8 +77,7 @@ export function Header({ user }: HeaderProps) {
             to={`/user/${user.id}/profile`}
             className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-yo-orange"
           >
-            <LoginIcon className="w-[28.54px] h-[27.11px]" />
-            <span>profil</span>
+            <span>{user.user_profile[0]?.name || 'profil'}</span>
           </Link>
           <Form method="post" action="/auth/sign-out" className="inline ">
             <button 

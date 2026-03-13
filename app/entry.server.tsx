@@ -13,6 +13,19 @@ import { isbot } from 'isbot';
 import { renderToPipeableStream } from 'react-dom/server';
 const ABORT_DELAY = 5_000;
 
+export function handleError(error: unknown) {
+  if (error instanceof Error) {
+    console.error('[SSR Error]', error.message);
+    console.error(error.stack);
+  } else {
+    try {
+      console.error('[SSR Error]', JSON.stringify(error));
+    } catch {
+      console.error('[SSR Error] (non-serializable)', String(error));
+    }
+  }
+}
+
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,
