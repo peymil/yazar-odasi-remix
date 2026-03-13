@@ -3,6 +3,7 @@ import {
   createMockCompany,
   createMockUserWithProfileExperienceAndProjects,
   createCompetition,
+  ensureGenresAndTags,
 } from './model-mocks';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
@@ -69,28 +70,36 @@ async function main() {
     })
   );
   console.log(competitions);
+
+  // Ensure genres and tags exist
+  const { genres, tags } = await ensureGenresAndTags(prismaClient);
+
   // Users
-  Array.from({ length: 100 }, async () => {
-    const user = await createMockUserWithProfileExperienceAndProjects(
-      prismaClient,
-      {
-        company_id: faker.helpers.maybe(() => {
-          return companies[
-            faker.number.int({ min: 0, max: companies.length - 1 })
-          ].id;
-        }),
-        // pick multipler values
-        createCompetitionApplicationCount: Array.from(
-          { length: faker.number.int({ min: 0, max: 3 }) },
-          () => {
-            return competitions[
-              faker.number.int({ min: 0, max: competitions.length - 1 })
+  await Promise.all(
+    Array.from({ length: 100 }, () => {
+      return createMockUserWithProfileExperienceAndProjects(
+        prismaClient,
+        {
+          company_id: faker.helpers.maybe(() => {
+            return companies[
+              faker.number.int({ min: 0, max: companies.length - 1 })
             ].id;
-          }
-        ),
-      }
-    );
-  });
+          }),
+          // pick multipler values
+          createCompetitionApplicationCount: Array.from(
+            { length: faker.number.int({ min: 0, max: 3 }) },
+            () => {
+              return competitions[
+                faker.number.int({ min: 0, max: competitions.length - 1 })
+              ].id;
+            }
+          ),
+          genres,
+          tags,
+        }
+      );
+    })
+  );
 }
 
 main();

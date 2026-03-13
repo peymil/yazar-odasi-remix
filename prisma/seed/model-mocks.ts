@@ -5,27 +5,107 @@ import {
   user_profile,
   user_profile_experience,
   user_profile_project,
+  user_profile_work,
   company,
   company_user,
+  project_genre,
+  project_tag,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+
+const AVAILABLE_GENRES = [
+  'Drama',
+  'Comedy',
+  'Thriller',
+  'Action',
+  'Romance',
+  'Horror',
+  'Science Fiction',
+  'Fantasy',
+  'Mystery',
+  'Documentary',
+  'Animation',
+  'Historical',
+  'Adventure',
+  'Crime',
+  'Suspense',
+];
+
+const AVAILABLE_TAGS = [
+  'Adaptation',
+  'Original',
+  'Character-Driven',
+  'Plot-Driven',
+  'Dialogue-Heavy',
+  'Visual-Storytelling',
+  'Emotional',
+  'Dark',
+  'Light-Hearted',
+  'Philosophical',
+  'Coming-of-Age',
+  'Ensemble',
+  'Solo-Protagonist',
+  'International',
+  'Indie',
+  'Experimental',
+  'Narrative-Driven',
+  'Non-Linear',
+];
+
+export async function ensureGenresAndTags(prisma: PrismaClient) {
+  // Create or get genres
+  const genres = await Promise.all(
+    AVAILABLE_GENRES.map((genreName) =>
+      prisma.project_genre.upsert({
+        where: { genre_name: genreName },
+        update: {},
+        create: { genre_name: genreName },
+      })
+    )
+  );
+
+  // Create or get tags
+  const tags = await Promise.all(
+    AVAILABLE_TAGS.map((tagName) =>
+      prisma.project_tag.upsert({
+        where: { tag_name: tagName },
+        update: {},
+        create: { tag_name: tagName },
+      })
+    )
+  );
+
+  return { genres, tags };
+}
+
+function selectRandomItems<T>(arr: T[], count: number): T[] {
+  const shuffled = [...arr].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
+export interface MockUserResult {
+  user: user;
+  profile: user_profile;
+  experiences: user_profile_experience[];
+  projects: user_profile_project[];
+  works: user_profile_work[];
+  company_user?: company_user;
+}
 
 export async function createMockUserWithProfileExperienceAndProjects(
   prisma: PrismaClient,
   {
     company_id,
     createCompetitionApplicationCount,
+    genres,
+    tags,
   }: {
     company_id?: number;
     createCompetitionApplicationCount?: number[];
+    genres: project_genre[];
+    tags: project_tag[];
   }
-): Promise<{
-  user: user;
-  profile: user_profile;
-  experiences: user_profile_experience[];
-  projects: user_profile_project[];
-  company_user?: company_user;
-}> {
+): Promise<MockUserResult> {
   return await prisma.$transaction(async (tx) => {
     // Create user
     const mockUser = await tx.user.create({
@@ -67,29 +147,116 @@ export async function createMockUserWithProfileExperienceAndProjects(
       )
     );
 
-    // Create projects
+    // Create projects with genres and tags
     const projectCount = faker.number.int({ min: 1, max: 3 });
     const mockProjects = await Promise.all(
       Array.from({ length: projectCount }, () =>
-        tx.user_profile_project.create({
-          data: {
-            profile_id: mockProfile.id,
-            plot_title: faker.lorem.words({ min: 2, max: 5 }),
-            synopsis: faker.lorem.paragraph(),
-            logline: faker.lorem.sentence(),
-            type: faker.helpers.arrayElement([
-              'Feature Film',
-              'TV Series',
-              'Short Film',
-              'Web Series',
-            ]),
-            hook: faker.lorem.sentence(),
-            similar_works: faker.lorem.words({ min: 2, max: 4 }),
-            setting: `${faker.location.city()}, ${faker.date
-              .future()
-              .getFullYear()}`,
-          },
-        })
+        (async () => {
+          const project = await tx.user_profile_project.create({
+            data: {
+              profile_id: mockProfile.id,
+              plot_title: faker.lorem.words({ min: 2, max: 5 }),
+              synopsis: faker.lorem.paragraph(),
+              logline: faker.lorem.sentence(),
+              type: faker.helpers.arrayElement([
+                'Feature Film',
+                'TV Series',
+                'Short Film',
+                'Web Series',
+              ]),
+              hook: faker.lorem.sentence(),
+              similar_works: faker.lorem.words({ min: 2, max: 4 }),
+              setting: `${faker.location.city()}, ${faker.date
+                .future()
+                .getFullYear()}`,
+            },
+          });
+
+          // Add at least 3 genres to the project
+          const projectGenres = selectRandomItems(genres, Math.max(3, faker.number.int({ min: 3, max: 5 })));
+          await Promise.all(
+            projectGenres.map((genre) =>
+              tx.project_projectgenre.create({
+                data: {
+                  project_id: project.id,
+                  project_genre_id: genre.id,
+                },
+              })
+            )
+          );
+
+          // Add at least 3 tags to the project
+          const projectTags = selectRandomItems(tags, Math.max(3, faker.number.int({ min: 3, max: 5 })));
+          await Promise.all(
+            projectTags.map((tag) =>
+              tx.project_projecttag.create({
+                data: {
+                  project_id: project.id,
+                  project_tag_id: tag.id,
+                },
+              })
+            )
+          );
+
+          return project;
+        })()
+      )
+    );
+
+    // Create jobs (works) with genres and tags
+    const workCount = faker.number.int({ min: 1, max: 3 });
+    const mockWorks = await Promise.all(
+      Array.from({ length: workCount }, () =>
+        (async () => {
+          const work = await tx.user_profile_work.create({
+            data: {
+              profile_id: mockProfile.id,
+              plot_title: faker.lorem.words({ min: 2, max: 5 }),
+              synopsis: faker.lorem.paragraph(),
+              logline: faker.lorem.sentence(),
+              type: faker.helpers.arrayElement([
+                'Feature Film',
+                'TV Series',
+                'Short Film',
+                'Web Series',
+                'Documentary',
+              ]),
+              hook: faker.lorem.sentence(),
+              similar_works: faker.lorem.words({ min: 2, max: 4 }),
+              setting: `${faker.location.city()}, ${faker.date
+                .future()
+                .getFullYear()}`,
+            },
+          });
+
+          // Add at least 3 genres to the work
+          const workGenres = selectRandomItems(genres, Math.max(3, faker.number.int({ min: 3, max: 5 })));
+          await Promise.all(
+            workGenres.map((genre) =>
+              tx.work_projectgenre.create({
+                data: {
+                  work_id: work.id,
+                  project_genre_id: genre.id,
+                },
+              })
+            )
+          );
+
+          // Add at least 3 tags to the work
+          const workTags = selectRandomItems(tags, Math.max(3, faker.number.int({ min: 3, max: 5 })));
+          await Promise.all(
+            workTags.map((tag) =>
+              tx.work_projecttag.create({
+                data: {
+                  work_id: work.id,
+                  project_tag_id: tag.id,
+                },
+              })
+            )
+          );
+
+          return work;
+        })()
       )
     );
 
@@ -108,6 +275,7 @@ export async function createMockUserWithProfileExperienceAndProjects(
       profile: mockProfile,
       experiences: mockExperiences,
       projects: mockProjects,
+      works: mockWorks,
       company_user: mockCompanyUser,
     };
   });
