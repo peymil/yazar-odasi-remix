@@ -85,21 +85,30 @@ export function SearchResultItem({ item, type, onClick }: SearchResultItemProps)
       )}
 
       {type === 'competitions' && (
-        <div className="flex flex-col gap-1">
-          <h3 className="font-semibold text-gray-900 truncate">{item.title}</h3>
-          <div className="flex items-center gap-2">
-            {item.company_name && (
-              <span className="text-sm text-gray-600">{item.company_name}</span>
-            )}
-            {item.delivery_count !== undefined && (
-              <span className="text-sm text-gray-500">
-                • {item.delivery_count} doğru
-              </span>
+        <div className="flex items-start gap-3">
+          <div className="w-16 h-20 flex-shrink-0 overflow-hidden rounded-md bg-white border border-yo-orange">
+            {item.avatar ? (
+              <img src={item.avatar} alt={item.title} className="h-full w-full object-cover" />
+            ) : (
+              <div className="w-full h-full" />
             )}
           </div>
-          {item.description && (
-            <p className="text-sm text-gray-600 line-clamp-1">{item.description}</p>
-          )}
+          <div className="flex flex-col gap-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 truncate">{item.title}</h3>
+            <div className="flex items-center gap-2 min-w-0">
+              {item.company_name && (
+                <span className="text-sm text-gray-600 truncate">{item.company_name}</span>
+              )}
+              {item.delivery_count !== undefined && (
+                <span className="text-sm text-gray-500 shrink-0">
+                  • {item.delivery_count} doğru
+                </span>
+              )}
+            </div>
+            {item.description && (
+              <p className="text-sm text-gray-600 line-clamp-1">{item.description}</p>
+            )}
+          </div>
         </div>
       )}
     </button>

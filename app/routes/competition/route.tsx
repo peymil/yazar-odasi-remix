@@ -1,5 +1,4 @@
-import { redirect } from 'react-router';
-import { Link, useFetcher, useLoaderData, useSearchParams } from 'react-router';
+import { Link, redirect, useFetcher, useLoaderData, useSearchParams } from 'react-router';
 import { useEffect, useState } from 'react';
 import type { ShouldRevalidateFunction } from 'react-router';
 import { prisma } from '~/.server/prisma';
@@ -7,8 +6,6 @@ import { getSessionFromRequest } from '~/.server/auth';
 import { BookmarkIcon } from '~/components/icons/BookmarkIcon';
 import { Footer } from '~/components/Footer';
 import type { Route } from './+types/route';
-import type { competition_delivery_status } from '@prisma/client';
-
 const PAGE_SIZE = 5;
 
 export const shouldRevalidate: ShouldRevalidateFunction = ({
@@ -45,6 +42,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         competitionId: d.competition_id,
         title: d.competition.title,
         companyName: d.competition.company.company_profile[0]?.name ?? null,
+        avatar: d.competition.avatar ?? null,
         status: d.status,
       })),
       userId,
@@ -93,6 +91,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         companyName: b.competition.company.company_profile[0]?.name ?? null,
         endDate: b.competition.end_date.toISOString(),
         contentType: b.competition.content_type ?? null,
+        avatar: b.competition.avatar ?? null,
         isSubmitted: submittedSet.has(b.competition_id),
       })),
       contentTypes: contentTypesRaw.map((c: any) => c.content_type as string),
@@ -147,6 +146,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       companyName: c.company.company_profile[0]?.name ?? null,
       endDate: c.end_date.toISOString(),
       contentType: c.content_type ?? null,
+      avatar: c.avatar ?? null,
       isBookmarked: bookmarkedSet.has(c.id),
       isSubmitted: submittedSet.has(c.id),
     })),
@@ -296,6 +296,7 @@ function CompetitionRow({
   companyName,
   endDate,
   contentType,
+  avatar,
   isBookmarked,
   isSubmitted,
   userId,
@@ -305,6 +306,7 @@ function CompetitionRow({
   companyName: string | null;
   endDate: Date | string;
   contentType: string | null;
+  avatar: string | null;
   isBookmarked: boolean;
   isSubmitted: boolean;
   userId: number | null;
@@ -342,7 +344,7 @@ function CompetitionRow({
     : 'Süresiz';
 
   return (
-    <div className="flex items-center gap-4 px-5 py-5 border border-gray-200 rounded-sm w-full">
+    <div className="flex items-center gap-4 px-4 py-3 border border-gray-200 rounded-sm w-full">
       {userId ? (
         <button
           type="button"
@@ -357,6 +359,10 @@ function CompetitionRow({
           <BookmarkIcon className="w-full h-full" filled={false} />
         </Link>
       )}
+
+      <div className="w-20 h-24 flex-shrink-0 overflow-hidden rounded-sm bg-white border border-yo-orange">
+        {avatar ? <img src={avatar} alt={title} className="h-full w-full object-cover" /> : <div className="w-full h-full" />}
+      </div>
 
       <span className="w-28 flex-shrink-0 text-[#231f20] text-base leading-tight">
         {companyName ?? '—'}
@@ -439,18 +445,24 @@ function SubmissionRow({
   competitionId,
   title,
   companyName,
+  avatar,
   status,
 }: {
   deliveryId: number;
   competitionId: number;
   title: string;
   companyName: string | null;
+  avatar: string | null;
   status: string;
 }) {
   const s = (status as DeliveryStatus) ?? 'SUBMITTED';
   return (
-    <div className="flex items-center gap-4 px-5 py-5 border border-gray-200 rounded-sm w-full">
+    <div className="flex items-center gap-4 px-4 py-3 border border-gray-200 rounded-sm w-full">
       <StatusIcon status={s} />
+
+      <div className="w-20 h-24 flex-shrink-0 overflow-hidden rounded-sm bg-white border border-yo-orange">
+        {avatar ? <img src={avatar} alt={title} className="h-full w-full object-cover" /> : <div className="w-full h-full" />}
+      </div>
 
       <span className="w-28 flex-shrink-0 text-[#231f20] text-base leading-tight">
         {companyName ?? '—'}
@@ -597,6 +609,7 @@ export default function CompetitionsRoute() {
                   companyName={c.companyName}
                   endDate={c.endDate}
                   contentType={c.contentType}
+                  avatar={c.avatar}
                   isBookmarked={c.isBookmarked}
                   isSubmitted={c.isSubmitted}
                   userId={data.userId}
@@ -622,6 +635,7 @@ export default function CompetitionsRoute() {
                   competitionId={d.competitionId}
                   title={d.title}
                   companyName={d.companyName}
+                  avatar={d.avatar}
                   status={d.status}
                 />
               ))}
@@ -645,6 +659,7 @@ export default function CompetitionsRoute() {
                   companyName={b.companyName}
                   endDate={b.endDate}
                   contentType={b.contentType}
+                  avatar={b.avatar}
                   isBookmarked={true}
                   isSubmitted={b.isSubmitted}
                   userId={data.userId}

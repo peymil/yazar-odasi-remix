@@ -1,4 +1,3 @@
-import { type LoaderFunctionArgs } from 'react-router';
 import { Link, useLoaderData } from 'react-router';
 import { prisma } from '~/.server/prisma';
 import { Button } from '~/components/ui/button';
@@ -52,44 +51,54 @@ export default function CompetitionDetailsRoute() {
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{competition.title}</h1>
-            <div className="text-yo-text-secondary">
-              {companyProfile?.name || competition.company.name} tarafından
+        <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] mb-6">
+          <div className="space-y-6">
+            <div className="aspect-[4/5] overflow-hidden rounded-lg bg-white border border-yo-orange flex items-center justify-center">
+              {competition.avatar ? (
+                <img src={competition.avatar} alt={competition.title} className="h-full w-full object-cover" />
+              ) : (
+                <div className="w-full h-full" />
+              )}
             </div>
-          </div>
-          {isActive && !isCompanyUser && (
-            <Link to={`/competition/${competition.id}/submit`}>
-              <Button className="bg-yo-orange hover:bg-yo-orange/90">
-                Başvuru Gönder
-              </Button>
-            </Link>
-          )}
-        </div>
 
-        <div className="grid grid-cols-2 gap-8 mb-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Detaylar</h2>
-            <div className="space-y-4">
-              <div>
-                <div className="text-yo-text-secondary">Son Tarih</div>
-                <div>{new Date(competition.end_date).toLocaleDateString()}</div>
-              </div>
-              <div>
-                <div className="text-yo-text-secondary">Durum</div>
-                <div className={isActive ? 'text-green-600' : 'text-red-600'}>
-                  {isActive ? 'Aktif' : 'Kapalı'}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Detaylar</h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="text-yo-text-secondary">Son Tarih</div>
+                  <div>{new Date(competition.end_date).toLocaleDateString()}</div>
+                </div>
+                <div>
+                  <div className="text-yo-text-secondary">Durum</div>
+                  <div className={isActive ? 'text-green-600' : 'text-red-600'}>
+                    {isActive ? 'Aktif' : 'Kapalı'}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Hakkında</h2>
-            <p className="text-yo-text-secondary whitespace-pre-wrap">
-              {competition.description}
-            </p>
+          <div className="flex flex-col justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{competition.title}</h1>
+              <div className="text-yo-text-secondary">
+                {companyProfile?.name || competition.company.name} tarafından
+              </div>
+            </div>
+            {isActive && !isCompanyUser && (
+              <Link to={`/competition/${competition.id}/submit`}>
+                <Button className="bg-yo-orange hover:bg-yo-orange/90">
+                  Başvuru Gönder
+                </Button>
+              </Link>
+            )}
+
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Hakkında</h2>
+              <p className="text-yo-text-secondary whitespace-pre-wrap">
+                {competition.description}
+              </p>
+            </div>
           </div>
         </div>
 

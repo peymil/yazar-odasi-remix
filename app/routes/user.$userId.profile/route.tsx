@@ -18,6 +18,7 @@ import { getSessionFromRequest } from '~/.server/auth';
 import { PostFeed } from '~/components/PostFeed';
 import { Route } from './+types/route';
 import { EditIcon } from '~/components/icons';
+import { Share2 } from 'lucide-react';
 export async function loader({ params, request }: Route.ActionArgs) {
   invariant(params.userId, 'userId is required');
   const { userId } = params;
@@ -111,6 +112,32 @@ export default function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'projeler';
 
+  const handleShare = async () => {
+    const profileUrl = `${window.location.origin}/user/${user.id}/profile`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: profile.name,
+          text: `${profile.name} adlı yazarın profilini ziyaret et`,
+          url: profileUrl,
+        });
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(profileUrl);
+        alert('Profil linki kopyalandı!');
+      } catch {
+        alert('Paylaşım başarısız oldu.');
+      }
+    }
+  };
+
   return (
     <div className="bg-white min-h-screen flex flex-col gap-7 px-10 pt-10 w-full">
       {/* Profile Section */}
@@ -127,19 +154,31 @@ export default function Layout() {
 
         {/* Profile Info */}
         <div className=" flex flex-col gap-4 items-center">
-          <div className="flex items-start justify-between">
+          <div className="flex items-center justify-center gap-4">
             <h1 className="text-6xl font-primary font-extrabold text-[#231f20]">
               {profile.name}
             </h1>
-            {isUsersProfile && (
+            <div
+              className={isUsersProfile ? 'flex flex-col items-start gap-2' : 'flex items-center'}
+            >
+              {isUsersProfile && (
+                <button
+                  onClick={() => navigate('./edit')}
+                  className="text-[#231f20] hover:text-[#F36D31] transition-colors"
+                  aria-label="Düzenle"
+                >
+                  <EditIcon className="w-7 h-7" />
+                </button>
+              )}
               <button
-                onClick={() => navigate('./edit')}
-                className="text-[#231f20] hover:text-[#F36D31] transition-colors ml-2"
-                aria-label="Düzenle"
+                onClick={handleShare}
+                className="text-[#F36D31] hover:text-[#d95f2a] transition-colors"
+                aria-label="Profili paylaş"
+                title="Profili paylaş"
               >
-                <EditIcon className="w-7 h-7" />
+                <Share2 className="w-7 h-7" />
               </button>
-            )}
+            </div>
           </div>
           <div className="text-[#231f20] text-xl leading-normal pl-20 pr-20 ">
             {profile.about?.split('\n').map((line, i) => (

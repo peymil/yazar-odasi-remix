@@ -72,6 +72,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       companyName: c.company?.company_profile[0]?.name ?? null,
       endDate: c.end_date ? c.end_date.toISOString() : null,
       contentType: c.content_type ?? null,
+      avatar: c.avatar ?? null,
       isBookmarked: bookmarkedIds.has(c.id),
       isSubmitted: submittedIds.has(c.id),
     })),
@@ -86,6 +87,7 @@ type CompetitionItem = {
   companyName: string | null;
   endDate: string | null;
   contentType: string | null;
+  avatar: string | null;
   isBookmarked: boolean;
   isSubmitted: boolean;
 };
@@ -113,7 +115,7 @@ function CompetitionRow({
     : 'Süresiz';
 
   return (
-    <div className="flex items-center gap-4 px-5 py-5 border border-gray-200 rounded-sm w-full">
+    <div className="flex items-start gap-4 px-5 py-5 border border-gray-200 rounded-sm w-full">
       {userId ? (
         <fetcher.Form method="post" action="/api/competition/bookmark">
           <input type="hidden" name="competitionId" value={item.id} />
@@ -127,6 +129,10 @@ function CompetitionRow({
           <BookmarkIcon className="w-full h-full" filled={false} />
         </Link>
       )}
+
+      <div className="w-16 h-20 flex-shrink-0 overflow-hidden rounded-sm bg-white border border-yo-orange">
+        {item.avatar ? <img src={item.avatar} alt={item.title} className="h-full w-full object-cover" /> : <div className="w-full h-full" />}
+      </div>
 
       <span className="w-28 flex-shrink-0 text-[#231f20] text-base leading-tight">
         {item.companyName ?? '—'}

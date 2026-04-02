@@ -4,7 +4,7 @@ import { validateSessionToken } from '~/.server/auth';
 import { authTokenCookie } from '~/.server/cookies';
 import { randomUUID } from 'crypto';
 
-export type S3FolderNames = "competition-applications" | "profile-pictures"
+export type S3FolderNames = "competition-applications" | "competition-images" | "profile-pictures"
 
 export async function action({ request }: ActionFunctionArgs) {
   const cookieHeader = request.headers.get('Cookie');
