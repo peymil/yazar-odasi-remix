@@ -29,10 +29,10 @@ export function Header({ user }: HeaderProps) {
         {/* Logo */}
         <button 
           onClick={() => navigate('..')}
-          className="h-[133.893px] w-[142.28px] flex-shrink-0 cursor-pointer "
+          className="h-[77px] w-[220px] flex-shrink-0 cursor-pointer -mb-3"
         >
           <img
-            src="https://cdn.yazarodasi.com/yazar_odasi_logo.svg"
+            src="/yo-wide.svg"
             alt="Yazar Odası Logo"
             className="w-full h-full object-contain"
           />
