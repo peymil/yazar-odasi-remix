@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Form, useNavigate } from 'react-router';
+import { Link, Form, useLocation, useNavigate } from 'react-router';
 import { WritersIcon, ProjectsIcon, CallsIcon, SearchIcon, LoginIcon } from './icons';
 import { SearchModal } from './SearchModal';
 import { company_user, user_profile } from '@prisma/client';
@@ -14,7 +14,14 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const { pathname } = useLocation();
   const navigate = useNavigate();
+  const isProjectsActive = pathname === '/user/project' || pathname.startsWith('/user/project/');
+  const isCallsActive = pathname === '/competition' || pathname.startsWith('/competition/');
+  const isWritersActive = pathname.startsWith('/user/') && !isProjectsActive;
+  const isProfileActive =
+    !!user &&
+    (pathname === `/user/${user.id}/profile` || pathname.startsWith(`/user/${user.id}/profile/`));
 
   return (
     <>
@@ -35,7 +42,7 @@ export function Header({ user }: HeaderProps) {
         <Link 
           to="/user/profile" 
           relative="route"
-          className="inline-flex items-center gap-2.5 text-[#231f20] text-[20px] hover:text-yo-orange "
+          className={`inline-flex items-center gap-2.5 text-[20px] hover:text-yo-orange ${isWritersActive ? 'text-yo-orange' : 'text-[#231f20]'}`}
         >
           <WritersIcon className="w-[28.6px] h-[28.69px]" />
           <span>yazarlar</span>
@@ -44,7 +51,7 @@ export function Header({ user }: HeaderProps) {
         {/* Projeler */}
         <Link 
           to="/user/project" 
-          className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-yo-orange"
+          className={`inline-flex items-center gap-3 text-[20px] hover:text-yo-orange ${isProjectsActive ? 'text-yo-orange' : 'text-[#231f20]'}`}
         >
           <ProjectsIcon className="w-[33.8px] h-[27.13px]" />
           <span>projeler</span>
@@ -53,7 +60,7 @@ export function Header({ user }: HeaderProps) {
         {/* Açık Çağrılar */}
         <Link 
           to="/competition" 
-          className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-yo-orange"
+          className={`inline-flex items-center gap-3 text-[20px] hover:text-yo-orange ${isCallsActive ? 'text-yo-orange' : 'text-[#231f20]'}`}
         >
           <CallsIcon className="w-[27.03px] h-[27.13px]" />
           <span>açık çağrılar</span>
@@ -76,7 +83,7 @@ export function Header({ user }: HeaderProps) {
           <div className="flex items-center gap-4 hover:text-yo-orange">
             <Link 
               to={`/user/${user.id}/profile`}
-              className="inline-flex items-center gap-3 text-[#231f20] text-[20px] hover:text-yo-orange"
+              className={`inline-flex items-center gap-3 text-[20px] hover:text-yo-orange ${isProfileActive ? 'text-yo-orange' : 'text-[#231f20]'}`}
             >
               <span>{user.user_profile[0]?.name || 'profil'}</span>
             </Link>
