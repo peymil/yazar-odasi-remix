@@ -123,7 +123,6 @@ export async function createMockUserWithProfileExperienceAndProjects(
         contact_email: faker.internet.email(),
         about: faker.lorem.paragraph(),
         current_title: faker.person.jobTitle(),
-        background_image: faker.image.url(),
       },
     });
 

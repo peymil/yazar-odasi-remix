@@ -45,7 +45,6 @@ export async function action({ request, params }: Route.ActionArgs) {
     data: {
       about: formData.get('about') as string,
       image: formData.get('profileImageUrl') as string,
-      background_image: formData.get('backgroundImageUrl') as string,
     },
   });
 
@@ -59,7 +58,6 @@ export default function Layout() {
   const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement>(null);
   const [profilePreview, setProfilePreview] = useState<string | null>(profile.image || null);
-  const [backgroundPreview, setBackgroundPreview] = useState<string | null>(profile.background_image || null);
 
   // Cleanup preview URLs when component unmounts
   useEffect(() => {
@@ -67,23 +65,16 @@ export default function Layout() {
       if (profilePreview && !profilePreview.startsWith('http')) {
         URL.revokeObjectURL(profilePreview);
       }
-      if (backgroundPreview && !backgroundPreview.startsWith('http')) {
-        URL.revokeObjectURL(backgroundPreview);
-      }
     };
-  }, [profilePreview, backgroundPreview]);
+  }, [profilePreview]);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, urlFieldName: string) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Create temporary preview URL
     const previewUrl = URL.createObjectURL(file);
-    if (urlFieldName === 'profileImageUrl') {
-      setProfilePreview(previewUrl);
-    } else {
-      setBackgroundPreview(previewUrl);
-    }
+    setProfilePreview(previewUrl);
 
     const formData = new FormData();
     formData.append('filename', file.name);
@@ -113,7 +104,7 @@ export default function Layout() {
 
     
     // Set the URL in a hidden input
-    const hiddenInput = formRef.current?.querySelector(`[name="${urlFieldName}"]`) as HTMLInputElement;
+    const hiddenInput = formRef.current?.querySelector('[name="profileImageUrl"]') as HTMLInputElement;
     if (hiddenInput) {
       hiddenInput.value = publicFileUrl;
     }
@@ -139,7 +130,7 @@ export default function Layout() {
             <div className="mt-2 space-y-2">
               <Input
                 type="file"
-                onChange={(e) => handleFileChange(e, 'profileImageUrl')}
+                onChange={(e) => handleFileChange(e)}
                 accept="image/*"
               />
               {profilePreview && (
@@ -152,27 +143,6 @@ export default function Layout() {
                 </div>
               )}
               <input type="hidden" name="profileImageUrl" />
-            </div>
-          </div>
-
-          <div>
-            <Label>Arkaplan Fotoğrafı</Label>
-            <div className="mt-2 space-y-2">
-              <Input
-                type="file"
-                onChange={(e) => handleFileChange(e, 'backgroundImageUrl')}
-                accept="image/*"
-              />
-              {backgroundPreview && (
-                <div className="w-full h-32 rounded overflow-hidden">
-                  <img
-                    src={backgroundPreview}
-                    alt="Background Preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <input type="hidden" name="backgroundImageUrl" />
             </div>
           </div>
 

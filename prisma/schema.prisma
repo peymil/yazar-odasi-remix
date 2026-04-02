@@ -147,7 +147,6 @@ model user_profile {
   current_title           String?
   name                    String
   user_id                 Int
-  background_image        String?
   image                  String?
   user                    user                      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   user_profile_experience user_profile_experience[]
