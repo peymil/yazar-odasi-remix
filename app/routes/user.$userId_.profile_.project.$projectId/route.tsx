@@ -1,8 +1,17 @@
 import { prisma } from '~/.server/prisma';
-import { useLoaderData, useNavigate } from 'react-router';
+import { Link, useLoaderData, useNavigate } from 'react-router';
 import { Route } from './+types/route';
-import { ArrowLeftIcon, DocumentIcon, CheckIcon } from '~/components/icons';
+import { ArrowLeftIcon } from '~/components/icons';
 import { DownloadIcon, ListChevronsUpDown } from 'lucide-react';
+
+function buildProjectsHref(overrides: { genre?: string | null; type?: string | null }) {
+  const searchParams = new URLSearchParams();
+
+  if (overrides.genre) searchParams.set('genre', overrides.genre);
+  if (overrides.type) searchParams.set('type', overrides.type);
+
+  return `/user/project?${searchParams.toString()}`;
+}
 
 export async function loader({ params }: Route.LoaderArgs) {
   const project = await prisma.user_profile_project.findUniqueOrThrow({
@@ -101,15 +110,24 @@ export default function ProjectDetailPage() {
             {project.user_profile.name}
           </div>
 
-          <div className="text-[#231f20] text-xl">{project.type}</div>
+          <Link
+            to={buildProjectsHref({ type: project.type })}
+            className="inline-flex w-fit px-3 py-1 bg-yo-orange/10 text-[#231f20] text-xl rounded-sm hover:bg-yo-orange hover:text-white transition-colors"
+          >
+            {project.type}
+          </Link>
 
           <div className="flex gap-8 items-center content-center">
             <h3 className="w-20 font-bold text-xl text-[#231f20]">Tür</h3>
             <div className="flex flex-wrap gap-4">
-              {project.genres.map((genre, index) => (
-                <span key={index} className=" text-xl text-[#231f20]">
+              {project.genres.map((genre) => (
+                <Link
+                  key={genre}
+                  to={buildProjectsHref({ genre })}
+                  className="px-3 py-1 bg-gray-100 text-xl text-[#231f20] rounded-sm hover:bg-yo-orange hover:text-white transition-colors"
+                >
                   {genre}
-                </span>
+                </Link>
               ))}
             </div>
           </div>
