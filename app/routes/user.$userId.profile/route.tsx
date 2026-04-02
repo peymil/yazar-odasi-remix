@@ -134,7 +134,7 @@ export default function Layout() {
             {isUsersProfile && (
               <button
                 onClick={() => navigate('./edit')}
-                className="text-[#231f20] hover:text-[#F36D31] transition-colors"
+                className="text-[#231f20] hover:text-[#F36D31] transition-colors ml-2"
                 aria-label="Düzenle"
               >
                 <EditIcon className="w-7 h-7" />
