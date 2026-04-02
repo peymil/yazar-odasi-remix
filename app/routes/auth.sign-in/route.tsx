@@ -4,6 +4,7 @@ import { authSignInSchema } from '~/.server/schemas/auth-sign-in.schema';
 import {
   createSession,
   generateSessionToken,
+  getSessionFromRequest,
   verifyPassowrd,
 } from '~/.server/auth';
 import { authTokenCookie } from '~/.server/cookies';
@@ -13,6 +14,16 @@ import { EmailVerification } from '~/emails/email-verification';
 import crypto from 'crypto';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const session = await getSessionFromRequest(request);
+
+  if (session?.user) {
+    return redirect(`/user/${session.user.id}/profile`);
+  }
+
+  return null;
+}
 
 export async function action({ request }: Route.ActionArgs) {
   const body = Object.fromEntries(await request.formData());
@@ -57,7 +68,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
   const sessionToken = generateSessionToken();
   const session = await createSession(sessionToken, user.id);
-  return redirect('/', {
+  return redirect(`/user/${user.id}/profile`, {
     headers: {
       'Set-Cookie': await authTokenCookie.serialize(sessionToken, {
         expires: session.expiresAt,
@@ -92,7 +103,7 @@ export default function SignInPage() {
     <div className="flex items-center justify-center gap-8 lg:gap-16 px-4 sm:px-8 md:px-16 lg:px-32 py-8 md:py-16 min-h-[480px]">
       <div className="flex flex-col gap-3 items-center justify-center max-w-xs">
         <h1 className="font-primary font-extrabold text-[22px] text-[#231f20] text-center">
-          Yazar Odası'na hoş geldin!
+          Yazar Odası&apos;na hoş geldin!
         </h1>
         <p className="font-normal text-[20px] text-[#231f20] text-center">
           Herkes senin hikayeni bekliyor.
