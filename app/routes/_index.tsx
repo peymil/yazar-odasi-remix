@@ -179,23 +179,8 @@ export default function Index() {
     window.location.reload();
   };
 
-  // If authenticated, show the old feed view
   if (isAuthenticated) {
-    return (
-      <div className="container mx-auto py-8 space-y-8">
-        <ClientOnly>
-          {() => <PostEditor companies={companies} onSubmit={handleSubmit} />}
-        </ClientOnly>
-        <PostFeed
-          posts={posts.map((post) => ({
-            ...post,
-            likes: getOptimisticLikeCount(post),
-          }))}
-          likedPostIds={posts.map((post) => post.id).filter(isPostLiked)}
-          onLike={handleLike}
-        />
-      </div>
-    );
+    return null;
   }
 
   // Landing page for non-authenticated users
