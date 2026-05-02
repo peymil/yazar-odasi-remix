@@ -10,6 +10,8 @@ type ProjectFilterOverrides = {
   addGenre?: string | null;
   removeGenre?: string | null;
   replaceGenres?: string[] | null;
+  addTag?: string | null;
+  removeTag?: string | null;
   type?: string | null;
   page?: number | null;
 };
@@ -37,6 +39,19 @@ function buildProjectsHref(searchParams: URLSearchParams, overrides: ProjectFilt
     }
   }
 
+  if (overrides.removeTag) {
+    const tags = next.getAll('tag').filter((tag) => tag !== overrides.removeTag);
+    next.delete('tag');
+    for (const tag of tags) next.append('tag', tag);
+  }
+
+  if (overrides.addTag) {
+    const tags = next.getAll('tag');
+    if (!tags.includes(overrides.addTag)) {
+      next.append('tag', overrides.addTag);
+    }
+  }
+
   if ('type' in overrides) {
     if (overrides.type) next.set('type', overrides.type);
     else next.delete('type');
@@ -54,6 +69,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const page = Math.max(1, Number(url.searchParams.get('page') || '1'));
   const genreFilter = Array.from(new Set(url.searchParams.getAll('genre').filter(Boolean))).slice(0, 3);
+  const tagFilter = Array.from(new Set(url.searchParams.getAll('tag').filter(Boolean))).slice(0, 3);
   const typeFilter = url.searchParams.get('type') || '';
 
   const where = {
@@ -64,6 +80,17 @@ export async function loader({ request }: Route.LoaderArgs) {
             some: {
               project_genre: {
                 genre_name: { in: genreFilter },
+              },
+            },
+          },
+        }
+      : {}),
+    ...(tagFilter.length > 0
+      ? {
+          project_projecttag: {
+            some: {
+              project_tag: {
+                tag_name: { in: tagFilter },
               },
             },
           },
@@ -202,12 +229,15 @@ function ProjectRow({
           </Link>
         ))}
         {tags.map((tag) => (
-          <span
+          <Link
             key={tag}
-            className="px-2.5 py-1 bg-yo-orange/5 text-[#231f20] text-xs rounded-sm whitespace-nowrap"
+            to={searchParams.getAll('tag').includes(tag)
+              ? buildProjectsHref(searchParams, { removeTag: tag, page: null })
+              : buildProjectsHref(searchParams, { addTag: tag, page: null })}
+            className="px-2.5 py-1 bg-yo-orange/5 text-[#231f20] text-xs rounded-sm whitespace-nowrap hover:bg-yo-orange hover:text-white transition-colors"
           >
             {tag}
-          </span>
+          </Link>
         ))}
       </div>
     </article>
@@ -288,6 +318,7 @@ export default function ProjectsRoute() {
   const { projects, total, page, availableGenres, availableTypes } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const selectedGenres = searchParams.getAll('genre').filter(Boolean);
+  const selectedTags = searchParams.getAll('tag').filter(Boolean);
   const selectedType = searchParams.get('type') || '';
   const [genreOpen, setGenreOpen] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false);
@@ -347,7 +378,7 @@ export default function ProjectsRoute() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <h2 className="text-[#231f20] text-lg font-semibold">Filtreler</h2>
-                {(selectedGenres.length > 0 || selectedType) && (
+                {(selectedGenres.length > 0 || selectedTags.length > 0 || selectedType) && (
                   <Link
                     to="/user/project"
                     className="px-3 py-1 rounded-sm border border-gray-300 text-[#231f20] hover:border-yo-orange hover:text-yo-orange transition-colors text-sm"
@@ -510,8 +541,21 @@ export default function ProjectsRoute() {
                     </Link>
                   ))}
                 </div>
-              </div>
 
+                {selectedTags.length > 0 && (
+                  <div className="flex items-start gap-2 flex-wrap">
+                    {selectedTags.map((tag) => (
+                      <Link
+                        key={tag}
+                        to={buildProjectsHref(searchParams, { removeTag: tag, page: null })}
+                        className="px-3 py-2 text-sm rounded-sm border border-yo-orange/80 bg-yo-orange/10 text-[#231f20] hover:bg-yo-orange hover:text-white transition-colors"
+                      >
+                        {tag} ×
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 

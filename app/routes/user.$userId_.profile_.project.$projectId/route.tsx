@@ -4,11 +4,12 @@ import { Route } from './+types/route';
 import { ArrowLeftIcon } from '~/components/icons';
 import { DownloadIcon, ListChevronsUpDown } from 'lucide-react';
 
-function buildProjectsHref(overrides: { genre?: string | null; type?: string | null }) {
+function buildProjectsHref(overrides: { genre?: string | null; type?: string | null; tag?: string | null }) {
   const searchParams = new URLSearchParams();
 
   if (overrides.genre) searchParams.set('genre', overrides.genre);
   if (overrides.type) searchParams.set('type', overrides.type);
+  if (overrides.tag) searchParams.set('tag', overrides.tag);
 
   return `/user/project?${searchParams.toString()}`;
 }
@@ -135,9 +136,13 @@ export default function ProjectDetailPage() {
             <h3 className="w-20 font-bold text-xl text-[#231f20]">Etiketler</h3>
             <div className="flex flex-wrap gap-4">
               {project.tags.map((tag, index) => (
-                <span key={index} className=" text-xl text-[#231f20]">
+                <Link
+                  key={index}
+                  to={buildProjectsHref({ tag })}
+                  className="px-3 py-1 bg-gray-100 text-xl text-[#231f20] rounded-sm hover:bg-yo-orange hover:text-white transition-colors"
+                >
                   {tag}
-                </span>
+                </Link>
               ))}
             </div>
           </div>
