@@ -200,21 +200,16 @@ export default function Index() {
 
   // Landing page for non-authenticated users
   return (
-    <div className="bg-white flex flex-col gap-10 items-center px-10 py-10 min-h-screen">
-      <div className="flex flex-col gap-10 w-full max-w-[1055.931px] mx-auto">
-        {/* Section 1 */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+    <div className="h-screen overflow-y-scroll snap-y snap-mandatory bg-white">
+
+      {/* Section 1 */}
+      <section className="snap-start h-screen flex items-center justify-center px-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center w-full max-w-[1056px]">
           <div className="flex flex-col gap-6">
-            <h1
-              className="text-[#231f20] font-extrabold text-[25px] leading-normal"
-              style={{ fontFamily: 'Balkist, sans-serif' }}
-            >
+            <h1 className="text-[#231f20] font-extrabold text-2xl leading-normal font-balkist">
               Herkes senin hikayeni bekliyor!
             </h1>
-            <p
-              className="text-[#231f20] text-[20px] leading-normal font-normal"
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
+            <p className="text-[#231f20] text-xl leading-normal font-normal font-secondary">
               Özgün hikayeleriyle yüzlerce yazar ve doğru projeyi arayan onlarca
               yapımcı ve yayıncı Yazar Odası'nda buluşuyor.
             </p>
@@ -223,50 +218,42 @@ export default function Index() {
             <img
               src="/images/writer-illustration.png"
               alt="Illustration of a writer"
-              className="w-full max-w-[256.69px] h-auto object-contain transform rotate-180 scale-y-[-1]"
+              className="w-full max-w-[257px] h-auto object-contain rotate-180 -scale-y-100"
             />
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Section 2 */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+      {/* Section 2 */}
+      <section className="snap-start h-screen flex items-center justify-center px-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center w-full max-w-[1056px]">
           <div className="flex justify-center lg:justify-start">
             <img
               src="/images/boxer-illustration.png"
               alt="Illustration of a boxer"
-              className="w-full max-w-[266.197px] h-auto object-contain"
+              className="w-full max-w-[266px] h-auto object-contain"
             />
           </div>
           <div className="flex flex-col gap-6">
-            <h2
-              className="text-[#231f20] font-extrabold text-[25px] leading-normal"
-              style={{ fontFamily: 'Balkist, sans-serif' }}
-            >
+            <h2 className="text-[#231f20] font-extrabold text-2xl leading-normal font-balkist">
               Keşfedilmek için yapabileceğiniz yazmaktan başka şeyler de var.
             </h2>
-            <p
-              className="text-[#231f20] text-[20px] leading-normal font-normal"
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
+            <p className="text-[#231f20] text-xl leading-normal font-normal font-secondary">
               Yazar Odası'nda kendinize ait bir oda oluşturun, proje ve
               hikayeleriniz doğru kişilere ulaşsın.
             </p>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Section 3 */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+      {/* Section 3 */}
+      <section className="snap-start h-screen flex items-center justify-center px-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center w-full max-w-[1056px]">
           <div className="flex flex-col gap-6">
-            <h2
-              className="text-[#231f20] font-extrabold text-[25px] leading-normal"
-              style={{ fontFamily: 'Balkist, sans-serif' }}
-            >
+            <h2 className="text-[#231f20] font-extrabold text-2xl leading-normal font-balkist">
               Bir hikaye, birilerine ulaşana kadar bitmez.
             </h2>
-            <p
-              className="text-[#231f20] text-[20px] leading-normal font-normal"
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
+            <p className="text-[#231f20] text-xl leading-normal font-normal font-secondary">
               Yayıncı ve yapımcıların açık çağrılarını inceleyin, hikaye ve
               projelerinizi gönderin.
             </p>
@@ -275,38 +262,39 @@ export default function Index() {
             <img
               src="/images/elderly-illustration.png"
               alt="Illustration of an elderly person"
-              className="w-full max-w-[281.027px] h-auto object-contain"
+              className="w-full max-w-[281px] h-auto object-contain"
             />
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Section 4 */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+      {/* Section 4 */}
+      <section className="snap-start h-screen flex items-center justify-center px-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center w-full max-w-[1056px]">
           <div className="flex justify-center lg:justify-start">
             <img
               src="/images/documents-illustration.png"
               alt="Illustration of a person with documents"
-              className="w-full max-w-[217.151px] h-auto object-contain"
+              className="w-full max-w-[217px] h-auto object-contain"
             />
           </div>
           <div className="flex flex-col gap-6">
-            <h2
-              className="text-[#231f20] font-extrabold text-[25px] leading-normal"
-              style={{ fontFamily: 'Balkist, sans-serif' }}
-            >
+            <h2 className="text-[#231f20] font-extrabold text-2xl leading-normal font-balkist">
               Tüm hikayelerinizi koruma altına alın.
             </h2>
-            <p
-              className="text-[#231f20] text-[20px] leading-normal font-normal"
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
+            <p className="text-[#231f20] text-xl leading-normal font-normal font-secondary">
               Proje ve hikayelerinizi Yazar Odası'nda tasdikleyerek zaman
               damgasıyla koruma altına alın.
             </p>
           </div>
-        </section>
-      </div>
-      <Footer />
+        </div>
+      </section>
+
+      {/* Footer */}
+      <section className="snap-start flex items-center justify-center px-10 py-10">
+        <Footer />
+      </section>
+
     </div>
   );
 }

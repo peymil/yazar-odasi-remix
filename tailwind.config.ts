@@ -8,6 +8,7 @@ export default {
       fontFamily: {
         primary: ['Playfair Display', 'serif'],
         secondary: ['IBM Plex Sans', 'sans-serif'],
+        balkist: ['Balkist', 'sans-serif'],
       },
       colors: {
         'yo-orange': '#FF6D2B',
