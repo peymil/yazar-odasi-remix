@@ -15,6 +15,7 @@ interface MultiSelectProps
   name: string;
   placeholder?: string;
   required?: boolean;
+  max?: number;
 }
 
 export function MultiSelect({
@@ -25,6 +26,7 @@ export function MultiSelect({
   name,
   placeholder = 'Seçiniz...',
   required = false,
+  max,
   ...props
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -46,6 +48,7 @@ export function MultiSelect({
   );
 
   const handleSelect = (optionValue: string | number) => {
+    if (!value.includes(optionValue) && max !== undefined && value.length >= max) return;
     const newValue = value.includes(optionValue)
       ? value.filter((v) => v !== optionValue)
       : [...value, optionValue];

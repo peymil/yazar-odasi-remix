@@ -18,7 +18,7 @@ export const DEFAULT_LOCALE: SupportedLocale = 'tr';
 export function getLocaleFromRequest(request: Request): SupportedLocale {
   const acceptLanguage = request.headers.get('Accept-Language') ?? '';
   if (acceptLanguage.toLowerCase().startsWith('en')) return 'en';
-  return 'tr';
+  return DEFAULT_LOCALE;
 }
 
 /**

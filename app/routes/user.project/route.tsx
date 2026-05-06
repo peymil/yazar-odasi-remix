@@ -149,6 +149,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     total,
     page: currentPage,
     availableGenres: allGenres.map((g) => ({ slug: g.slug, name: g.name })),
+    availableTags: allTags.map((t) => ({ slug: t.slug, name: t.name })),
     availableTypes: availableTypes.map((project) => project.type),
   } as const;
 }
@@ -317,23 +318,31 @@ function Pagination({ page, total }: { page: number; total: number }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ProjectsRoute() {
-  const { projects, total, page, availableGenres, availableTypes } = useLoaderData<typeof loader>();
+  const { projects, total, page, availableGenres, availableTags, availableTypes } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const selectedGenres = searchParams.getAll('genre').filter(Boolean);
   const selectedTags = searchParams.getAll('tag').filter(Boolean);
   const selectedType = searchParams.get('type') || '';
   const [genreOpen, setGenreOpen] = useState(false);
+  const [tagOpen, setTagOpen] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false);
   const [genreSearch, setGenreSearch] = useState('');
+  const [tagSearch, setTagSearch] = useState('');
   const [typeSearch, setTypeSearch] = useState('');
   const genreSlugToName = new Map(availableGenres.map((g) => [g.slug, g.name]));
+  const tagSlugToName = new Map(availableTags.map((t) => [t.slug, t.name]));
   const genreMenuRef = useRef<HTMLDivElement>(null);
+  const tagMenuRef = useRef<HTMLDivElement>(null);
   const typeMenuRef = useRef<HTMLDivElement>(null);
   const genreInputRef = useRef<HTMLInputElement>(null);
+  const tagInputRef = useRef<HTMLInputElement>(null);
   const typeInputRef = useRef<HTMLInputElement>(null);
 
   const filteredGenres = availableGenres.filter((genre) =>
     genre.name.toLowerCase().includes(genreSearch.toLowerCase())
+  );
+  const filteredTags = availableTags.filter((tag) =>
+    tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
   const filteredTypes = availableTypes.filter((type) =>
     type.toLowerCase().includes(typeSearch.toLowerCase())
@@ -344,6 +353,9 @@ export default function ProjectsRoute() {
       const target = event.target as Node;
       if (genreMenuRef.current && !genreMenuRef.current.contains(target)) {
         setGenreOpen(false);
+      }
+      if (tagMenuRef.current && !tagMenuRef.current.contains(target)) {
+        setTagOpen(false);
       }
       if (typeMenuRef.current && !typeMenuRef.current.contains(target)) {
         setTypeOpen(false);
@@ -365,6 +377,12 @@ export default function ProjectsRoute() {
       genreInputRef.current?.focus();
     }
   }, [genreOpen]);
+
+  useEffect(() => {
+    if (tagOpen) {
+      tagInputRef.current?.focus();
+    }
+  }, [tagOpen]);
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-100px)]">
@@ -406,7 +424,7 @@ export default function ProjectsRoute() {
                           : 'border-gray-300 text-[#231f20] hover:border-yo-orange hover:text-yo-orange'
                       }`}
                     >
-                      <span>{selectedType || 'Tür'}</span>
+                      <span>{selectedType || 'Tip'}</span>
                       <svg width="14" height="9" viewBox="0 0 14 9" fill="none" className={`transition-transform ${typeOpen ? 'rotate-180' : ''}`}>
                         <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                       </svg>
@@ -545,19 +563,87 @@ export default function ProjectsRoute() {
                   ))}
                 </div>
 
-                {selectedTags.length > 0 && (
-                  <div className="flex items-start gap-2 flex-wrap">
-                    {selectedTags.map((tag) => (
-                      <Link
-                        key={tag}
-                        to={buildProjectsHref(searchParams, { removeTag: tag, page: null })}
-                        className="px-3 py-2 text-sm rounded-sm border border-yo-orange/80 bg-yo-orange/10 text-[#231f20] hover:bg-yo-orange hover:text-white transition-colors"
-                      >
-                        {tag} ×
-                      </Link>
-                    ))}
+                <div className="flex items-start gap-2 flex-wrap">
+                  <div ref={tagMenuRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTagOpen((value) => !value);
+                        setGenreOpen(false);
+                        setTypeOpen(false);
+                      }}
+                      className="min-w-[160px] flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-sm border border-gray-300 text-[#231f20] hover:border-yo-orange hover:text-yo-orange transition-colors"
+                    >
+                      <span>Etiketler</span>
+                      <svg width="14" height="9" viewBox="0 0 14 9" fill="none" className={`transition-transform ${tagOpen ? 'rotate-180' : ''}`}>
+                        <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      </svg>
+                    </button>
+
+                    {tagOpen && (
+                      <div className="absolute left-0 top-full z-20 mt-1 min-w-[200px] overflow-hidden rounded-sm border border-gray-200 bg-white shadow-md">
+                        <div className="border-b border-gray-100 p-2">
+                          <input
+                            ref={tagInputRef}
+                            type="text"
+                            value={tagSearch}
+                            onChange={(event) => setTagSearch(event.target.value)}
+                            placeholder="Ara"
+                            className="w-full rounded-sm border border-gray-200 px-2 py-1 text-sm text-[#231f20] outline-none focus:border-yo-orange"
+                          />
+                        </div>
+                        {filteredTags.map((tag) => {
+                          const isSelected = selectedTags.includes(tag.slug);
+                          const canSelectMore = selectedTags.length < 3;
+                          const href = isSelected
+                            ? buildProjectsHref(searchParams, { removeTag: tag.slug, page: null })
+                            : canSelectMore
+                              ? buildProjectsHref(searchParams, { addTag: tag.slug, page: null })
+                              : null;
+
+                          if (!href) {
+                            return (
+                              <span
+                                key={tag.slug}
+                                className="block cursor-not-allowed px-3 py-2 text-sm text-gray-300"
+                                aria-disabled="true"
+                              >
+                                {tag.name}
+                              </span>
+                            );
+                          }
+
+                          return (
+                            <Link
+                              key={tag.slug}
+                              to={href}
+                              onClick={() => {
+                                setTagOpen(false);
+                                setTagSearch('');
+                              }}
+                              className={`block px-3 py-2 text-sm hover:bg-orange-50 hover:text-yo-orange ${isSelected ? 'bg-orange-50 text-yo-orange font-medium' : 'text-[#231f20]'}`}
+                            >
+                              {tag.name}
+                            </Link>
+                          );
+                        })}
+                        {filteredTags.length === 0 && (
+                          <span className="block px-3 py-2 text-sm text-gray-400">Sonuç yok</span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {selectedTags.map((tag) => (
+                    <Link
+                      key={tag}
+                      to={buildProjectsHref(searchParams, { removeTag: tag, page: null })}
+                      className="px-3 py-2 text-sm rounded-sm border border-gray-900 bg-gray-900 text-white hover:bg-white hover:text-gray-900 transition-colors"
+                    >
+                      {tagSlugToName.get(tag) ?? tag} ×
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </section>

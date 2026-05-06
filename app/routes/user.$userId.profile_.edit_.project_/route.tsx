@@ -313,9 +313,9 @@ export default function Layout() {
               />
             </div>
 
-            {/* Tür (Genres) */}
+            {/* Tip (Genres) */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Tür</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Tip</Label>
               <MultiSelect
                 name="genres"
                 required
@@ -327,7 +327,7 @@ export default function Layout() {
                 }
                 value={selectedGenres}
                 onChange={setSelectedGenres}
-                placeholder="Tür seçiniz..."
+                placeholder="Tip seçiniz..."
               />
             </div>
 
