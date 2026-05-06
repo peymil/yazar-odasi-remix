@@ -5,6 +5,7 @@ import { workSearch } from '@prisma/client/sql';
 import { project_genre, project_tag } from '@prisma/client';
 import { Pagination } from '~/components/ui/pagination';
 import { Route } from './+types/route';
+import { getLocaleFromRequest, getLocalizedGenres, getLocalizedTags } from '~/lib/i18n.server';
 
 export async function loader({ request }: Route.ActionArgs) {
   const url = new URL(request.url);
@@ -14,6 +15,7 @@ export async function loader({ request }: Route.ActionArgs) {
   const limit = limitParam ? parseInt(limitParam) : 50;
   const take = takeParam ? parseInt(takeParam) : 0;
 
+  const locale = getLocaleFromRequest(request);
   if (!searchQuery || searchQuery.length < 2) {
     return {
       works: [] as workSearch.Result[],
@@ -21,19 +23,25 @@ export async function loader({ request }: Route.ActionArgs) {
     };
   }
 
-  const works = await prisma.$queryRawTyped(
-    workSearch(searchQuery, limit, take)
-  );
+  const [works, allGenres, allTags] = await Promise.all([
+    prisma.$queryRawTyped(workSearch(searchQuery, limit, take)),
+    getLocalizedGenres(locale),
+    getLocalizedTags(locale),
+  ]);
+  const genreNameMap = new Map(allGenres.map((g) => [g.id, g.name]));
+  const tagNameMap = new Map(allTags.map((t) => [t.id, t.name]));
   const total = works.length;
 
   return {
     works,
     total,
+    genreNames: Object.fromEntries(genreNameMap),
+    tagNames: Object.fromEntries(tagNameMap),
   };
 }
 
 export default function WorkSearch() {
-  const { works, total } = useLoaderData<typeof loader>();
+  const { works, total, genreNames, tagNames } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const limitParam = searchParams.get('limit');
   const takeParam = searchParams.get('take');
@@ -66,23 +74,23 @@ export default function WorkSearch() {
               <h2 className="text-xl font-bold mb-2">{work.plot_title}</h2>
               <div className="flex flex-wrap gap-2">
                 {(work.genres as project_genre[])
-                  .filter((genre) => genre.genre_name)
+                  .filter((genre) => genre.slug)
                   .map((genre) => (
                     <span
                       key={genre.id}
                       className="px-2 py-1 bg-gray-100 text-sm rounded"
                     >
-                      {genre.genre_name}
+                      {genreNames[genre.id] ?? genre.slug}
                     </span>
                   ))}
                 {(work.tags as project_tag[])
-                  .filter((tag) => tag.tag_name)
+                  .filter((tag) => tag.slug)
                   .map((tag) => (
                     <span
                       key={tag.id}
                       className="px-2 py-1 bg-yo-orange/10 text-sm rounded"
                     >
-                      {tag.tag_name}
+                      {tagNames[tag.id] ?? tag.slug}
                     </span>
                   ))}
               </div>

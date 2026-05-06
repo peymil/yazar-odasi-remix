@@ -13,66 +13,80 @@ import {
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
-const AVAILABLE_GENRES = [
-  'Drama',
-  'Comedy',
-  'Thriller',
-  'Action',
-  'Romance',
-  'Horror',
-  'Science Fiction',
-  'Fantasy',
-  'Mystery',
-  'Documentary',
-  'Animation',
-  'Historical',
-  'Adventure',
-  'Crime',
-  'Suspense',
+const AVAILABLE_GENRES: { slug: string; tr: string; en: string }[] = [
+  { slug: 'drama',           tr: 'Drama',           en: 'Drama' },
+  { slug: 'comedy',          tr: 'Komedi',          en: 'Comedy' },
+  { slug: 'thriller',        tr: 'Gerilim',         en: 'Thriller' },
+  { slug: 'action',          tr: 'Aksiyon',         en: 'Action' },
+  { slug: 'romance',         tr: 'Romantik',        en: 'Romance' },
+  { slug: 'horror',          tr: 'Korku',           en: 'Horror' },
+  { slug: 'science_fiction', tr: 'Bilim Kurgu',     en: 'Science Fiction' },
+  { slug: 'fantasy',         tr: 'Fantastik',       en: 'Fantasy' },
+  { slug: 'mystery',         tr: 'Gizem',           en: 'Mystery' },
+  { slug: 'documentary',     tr: 'Belgesel',        en: 'Documentary' },
+  { slug: 'animation',       tr: 'Animasyon',       en: 'Animation' },
+  { slug: 'historical',      tr: 'Tarihi',          en: 'Historical' },
+  { slug: 'adventure',       tr: 'Macera',          en: 'Adventure' },
+  { slug: 'crime',           tr: 'Suç',             en: 'Crime' },
+  { slug: 'suspense',        tr: 'Süspans',         en: 'Suspense' },
 ];
 
-const AVAILABLE_TAGS = [
-  'Adaptation',
-  'Original',
-  'Character-Driven',
-  'Plot-Driven',
-  'Dialogue-Heavy',
-  'Visual-Storytelling',
-  'Emotional',
-  'Dark',
-  'Light-Hearted',
-  'Philosophical',
-  'Coming-of-Age',
-  'Ensemble',
-  'Solo-Protagonist',
-  'International',
-  'Indie',
-  'Experimental',
-  'Narrative-Driven',
-  'Non-Linear',
+const AVAILABLE_TAGS: { slug: string; tr: string; en: string }[] = [
+  { slug: 'adaptation',      tr: 'Uyarlama',            en: 'Adaptation' },
+  { slug: 'original',        tr: 'Özgün',               en: 'Original' },
+  { slug: 'character_driven',tr: 'Karakter Odaklı',     en: 'Character-Driven' },
+  { slug: 'plot_driven',     tr: 'Olay Örgüsü Odaklı',  en: 'Plot-Driven' },
+  { slug: 'dialogue_heavy',  tr: 'Diyalog Ağırlıklı',   en: 'Dialogue-Heavy' },
+  { slug: 'visual_storytelling', tr: 'Görsel Anlatım', en: 'Visual Storytelling' },
+  { slug: 'emotional',       tr: 'Duygusal',            en: 'Emotional' },
+  { slug: 'dark',            tr: 'Karanlık',            en: 'Dark' },
+  { slug: 'light_hearted',   tr: 'Neşeli',              en: 'Light-Hearted' },
+  { slug: 'philosophical',   tr: 'Felsefi',             en: 'Philosophical' },
+  { slug: 'coming_of_age',   tr: 'Büyüme Hikayesi',     en: 'Coming-of-Age' },
+  { slug: 'ensemble',        tr: 'Topluluk',            en: 'Ensemble' },
+  { slug: 'solo_protagonist',tr: 'Tek Kahraman',        en: 'Solo Protagonist' },
+  { slug: 'international',   tr: 'Uluslararası',        en: 'International' },
+  { slug: 'indie',           tr: 'Bağımsız',            en: 'Indie' },
+  { slug: 'experimental',    tr: 'Deneysel',            en: 'Experimental' },
+  { slug: 'narrative_driven',tr: 'Anlatı Odaklı',       en: 'Narrative-Driven' },
+  { slug: 'non_linear',      tr: 'Doğrusal Olmayan',    en: 'Non-Linear' },
 ];
 
 export async function ensureGenresAndTags(prisma: PrismaClient) {
-  // Create or get genres
   const genres = await Promise.all(
-    AVAILABLE_GENRES.map((genreName) =>
-      prisma.project_genre.upsert({
-        where: { genre_name: genreName },
+    AVAILABLE_GENRES.map(async (g) => {
+      const genre = await prisma.project_genre.upsert({
+        where: { slug: g.slug },
         update: {},
-        create: { genre_name: genreName },
-      })
-    )
+        create: { slug: g.slug },
+      });
+      for (const [language, genre_name] of [['tr', g.tr], ['en', g.en]] as const) {
+        await prisma.genre_translation.upsert({
+          where: { genre_id_language: { genre_id: genre.id, language } },
+          update: { genre_name },
+          create: { genre_id: genre.id, language, genre_name },
+        });
+      }
+      return genre;
+    })
   );
 
-  // Create or get tags
   const tags = await Promise.all(
-    AVAILABLE_TAGS.map((tagName) =>
-      prisma.project_tag.upsert({
-        where: { tag_name: tagName },
+    AVAILABLE_TAGS.map(async (t) => {
+      const tag = await prisma.project_tag.upsert({
+        where: { slug: t.slug },
         update: {},
-        create: { tag_name: tagName },
-      })
-    )
+        create: { slug: t.slug },
+      });
+      for (const [language, tag_name] of [['tr', t.tr], ['en', t.en]] as const) {
+        await prisma.tag_translation.upsert({
+          where: { tag_id_language: { tag_id: tag.id, language } },
+          update: { tag_name },
+          create: { tag_id: tag.id, language, tag_name },
+        });
+      }
+      return tag;
+    })
   );
 
   return { genres, tags };

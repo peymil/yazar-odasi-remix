@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLoaderData, useSearchParams } from 'react-router';
 import { Footer } from '~/components/Footer';
 import type { Route } from './+types/route';
+import { getLocaleFromRequest, getLocalizedGenres, getLocalizedTags } from '~/lib/i18n.server';
 
 const PAGE_SIZE = 10;
 
@@ -79,7 +80,7 @@ export async function loader({ request }: Route.LoaderArgs) {
           project_projectgenre: {
             some: {
               project_genre: {
-                genre_name: { in: genreFilter },
+                slug: { in: genreFilter },
               },
             },
           },
@@ -90,7 +91,7 @@ export async function loader({ request }: Route.LoaderArgs) {
           project_projecttag: {
             some: {
               project_tag: {
-                tag_name: { in: tagFilter },
+                slug: { in: tagFilter },
               },
             },
           },
@@ -98,12 +99,11 @@ export async function loader({ request }: Route.LoaderArgs) {
       : {}),
   };
 
-  const [total, availableGenres, availableTypes] = await Promise.all([
+  const locale = getLocaleFromRequest(request);
+  const [total, allGenres, allTags, availableTypes] = await Promise.all([
     prisma.user_profile_project.count({ where }),
-    prisma.project_genre.findMany({
-      select: { genre_name: true },
-      orderBy: { genre_name: 'asc' },
-    }),
+    getLocalizedGenres(locale),
+    getLocalizedTags(locale),
     prisma.user_profile_project.findMany({
       distinct: ['type'],
       where: { type: { not: '' } },
@@ -111,6 +111,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       orderBy: { type: 'asc' },
     }),
   ]);
+  const genreNameMap = new Map(allGenres.map((g) => [g.id, g.name]));
+  const tagNameMap = new Map(allTags.map((t) => [t.id, t.name]));
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const skip = (currentPage - 1) * PAGE_SIZE;
@@ -138,15 +140,15 @@ export async function loader({ request }: Route.LoaderArgs) {
     synopsis: project.synopsis,
     type: project.type,
     image: project.image ?? null,
-    genres: (project.project_projectgenre.map((g) => g.project_genre?.genre_name).filter(Boolean) as string[]),
-    tags: (project.project_projecttag.map((t) => t.project_tag?.tag_name).filter(Boolean) as string[]),
+    genres: (project.project_projectgenre.map((g) => g.project_genre ? genreNameMap.get(g.project_genre.id) ?? g.project_genre.slug : null).filter(Boolean) as string[]),
+    tags: (project.project_projecttag.map((t) => t.project_tag ? tagNameMap.get(t.project_tag.id) ?? t.project_tag.slug : null).filter(Boolean) as string[]),
   }));
 
   return {
     projects: mappedProjects,
     total,
     page: currentPage,
-    availableGenres: availableGenres.map((genre) => genre.genre_name),
+    availableGenres: allGenres.map((g) => ({ slug: g.slug, name: g.name })),
     availableTypes: availableTypes.map((project) => project.type),
   } as const;
 }
@@ -324,13 +326,14 @@ export default function ProjectsRoute() {
   const [typeOpen, setTypeOpen] = useState(false);
   const [genreSearch, setGenreSearch] = useState('');
   const [typeSearch, setTypeSearch] = useState('');
+  const genreSlugToName = new Map(availableGenres.map((g) => [g.slug, g.name]));
   const genreMenuRef = useRef<HTMLDivElement>(null);
   const typeMenuRef = useRef<HTMLDivElement>(null);
   const genreInputRef = useRef<HTMLInputElement>(null);
   const typeInputRef = useRef<HTMLInputElement>(null);
 
   const filteredGenres = availableGenres.filter((genre) =>
-    genre.toLowerCase().includes(genreSearch.toLowerCase())
+    genre.name.toLowerCase().includes(genreSearch.toLowerCase())
   );
   const filteredTypes = availableTypes.filter((type) =>
     type.toLowerCase().includes(typeSearch.toLowerCase())
@@ -490,29 +493,29 @@ export default function ProjectsRoute() {
                           />
                         </div>
                         {filteredGenres.map((genre) => {
-                          const isSelected = selectedGenres.includes(genre);
+                          const isSelected = selectedGenres.includes(genre.slug);
                           const canSelectMore = selectedGenres.length < 3;
                           const href = isSelected
-                            ? buildProjectsHref(searchParams, { removeGenre: genre, page: null })
+                            ? buildProjectsHref(searchParams, { removeGenre: genre.slug, page: null })
                             : canSelectMore
-                              ? buildProjectsHref(searchParams, { addGenre: genre, page: null })
+                              ? buildProjectsHref(searchParams, { addGenre: genre.slug, page: null })
                               : null;
 
                           if (!href) {
                             return (
                               <span
-                                key={genre}
+                                key={genre.slug}
                                 className="block cursor-not-allowed px-3 py-2 text-sm text-gray-300"
                                 aria-disabled="true"
                               >
-                                {genre}
+                                {genre.name}
                               </span>
                             );
                           }
 
                           return (
                             <Link
-                              key={genre}
+                              key={genre.slug}
                               to={href}
                               onClick={() => {
                                 setGenreOpen(false);
@@ -520,7 +523,7 @@ export default function ProjectsRoute() {
                               }}
                               className={`block px-3 py-2 text-sm hover:bg-orange-50 hover:text-yo-orange ${isSelected ? 'bg-orange-50 text-yo-orange font-medium' : 'text-[#231f20]'}`}
                             >
-                              {genre}
+                              {genre.name}
                             </Link>
                           );
                         })}
@@ -537,7 +540,7 @@ export default function ProjectsRoute() {
                       to={buildProjectsHref(searchParams, { removeGenre: genre, page: null })}
                       className="px-3 py-2 text-sm rounded-sm border border-gray-900 bg-gray-900 text-white hover:bg-white hover:text-gray-900 transition-colors"
                     >
-                      {genre} ×
+                      {genreSlugToName.get(genre) ?? genre} ×
                     </Link>
                   ))}
                 </div>

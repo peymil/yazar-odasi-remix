@@ -33,9 +33,9 @@ export function SearchResultItem({ item, type, onClick }: SearchResultItemProps)
   const genres = useMemo(() => {
     if (!item.genres || !Array.isArray(item.genres)) return [];
     return item.genres
-      .filter((g: any) => g && g.genre_name)
+      .filter((g: any) => g && (g.name || g.genre_name))
       .slice(0, 2)
-      .map((g: any) => g.genre_name);
+      .map((g: any) => g.name ?? g.genre_name);
   }, [item.genres]);
 
   return (

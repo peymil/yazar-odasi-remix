@@ -19,6 +19,7 @@ import { PostFeed } from '~/components/PostFeed';
 import { Route } from './+types/route';
 import { EditIcon } from '~/components/icons';
 import { Share2 } from 'lucide-react';
+import { getLocaleFromRequest, getLocalizedGenres, getLocalizedTags } from '~/lib/i18n.server';
 export async function loader({ params, request }: Route.ActionArgs) {
   invariant(params.userId, 'userId is required');
   const { userId } = params;
@@ -34,7 +35,14 @@ export async function loader({ params, request }: Route.ActionArgs) {
     },
   });
 
-  const projects = await getProject(profile.id);
+  const locale = getLocaleFromRequest(request);
+  const [projects, allGenres, allTags] = await Promise.all([
+    getProject(profile.id, locale),
+    getLocalizedGenres(locale),
+    getLocalizedTags(locale),
+  ]);
+  const genreNameMap = new Map(allGenres.map((g) => [g.id, g.name]));
+  const tagNameMap = new Map(allTags.map((t) => [t.id, t.name]));
 
   const works = await prisma.user_profile_work
     .findMany({
@@ -56,9 +64,9 @@ export async function loader({ params, request }: Route.ActionArgs) {
           return {
             ...work,
             genres: work_projectgenre.map(
-              (genre) => genre.project_genre!.genre_name
+              (genre) => genreNameMap.get(genre.project_genre!.id) ?? genre.project_genre!.slug
             ),
-            tags: work_projecttag.map((tag) => tag.project_tag!.tag_name),
+            tags: work_projecttag.map((tag) => tagNameMap.get(tag.project_tag!.id) ?? tag.project_tag!.slug),
           };
         }
       );

@@ -3,8 +3,10 @@ import { useLoaderData, useNavigate } from 'react-router';
 import { Route } from './+types/route';
 import { ArrowLeftIcon, DocumentIcon, CheckIcon } from '~/components/icons';
 import { DownloadIcon, ChevronsUpDown } from 'lucide-react';
+import { getLocaleFromRequest, getLocalizedGenres, getLocalizedTags } from '~/lib/i18n.server';
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const locale = getLocaleFromRequest(request);
   const work = await prisma.user_profile_work.findUniqueOrThrow({
     where: {
       id: Number(params.workId),
@@ -16,9 +18,17 @@ export async function loader({ params }: Route.LoaderArgs) {
     },
   });
 
-  const tags = work.work_projecttag.map((item) => item.project_tag!.tag_name);
+  const [allGenres, allTags] = await Promise.all([
+    getLocalizedGenres(locale),
+    getLocalizedTags(locale),
+  ]);
+  const genreNameMap = new Map(allGenres.map((g) => [g.id, g.name]));
+  const tagNameMap = new Map(allTags.map((t) => [t.id, t.name]));
+  const tags = work.work_projecttag.map(
+    (item) => tagNameMap.get(item.project_tag!.id) ?? item.project_tag!.slug,
+  );
   const genres = work.work_projectgenre.map(
-    (item) => item.project_genre!.genre_name,
+    (item) => genreNameMap.get(item.project_genre!.id) ?? item.project_genre!.slug,
   );
 
   return {

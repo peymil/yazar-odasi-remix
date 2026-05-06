@@ -7,11 +7,11 @@ SELECT
     up.user_id,
     array_agg(DISTINCT jsonb_build_object(
         'id', pg.id,
-        'genre_name', pg.genre_name
+        'slug', pg.slug
     )) FILTER (WHERE pg.id IS NOT NULL) as genres,
     array_agg(DISTINCT jsonb_build_object(
         'id', pt.id,
-        'tag_name', pt.tag_name
+        'slug', pt.slug
     )) FILTER (WHERE pt.id IS NOT NULL) as tags,
     COUNT(*) OVER() as total_count
 FROM user_profile_work w

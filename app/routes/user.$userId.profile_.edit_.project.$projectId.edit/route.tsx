@@ -19,6 +19,7 @@ import { Plus, Minus, X, ChevronDown } from 'lucide-react';
 import { getSessionFromRequest } from '~/.server/auth';
 import { MultiSelect } from '~/components/ui/multi-select';
 import { Route } from './+types/route';
+import { getLocalizedGenres, getLocalizedTags, getLocaleFromRequest } from '~/lib/i18n.server';
 
 export async function action({ request, params }: Route.ActionArgs) {
   const formQueryString = await request.text();
@@ -120,8 +121,11 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   const projectId = Number(params.projectId);
 
-  const tags = await prisma.project_tag.findMany();
-  const genres = await prisma.project_genre.findMany();
+  const locale = getLocaleFromRequest(request);
+  const [tags, genres] = await Promise.all([
+    getLocalizedTags(locale),
+    getLocalizedGenres(locale),
+  ]);
 
   const profile = await prisma.user_profile.findFirstOrThrow({
     where: {
@@ -402,7 +406,7 @@ export default function Layout() {
                 options={
                   data?.genres?.map((genre) => ({
                     value: genre.id,
-                    label: genre.genre_name,
+                    label: genre.name,
                   })) || []
                 }
                 value={selectedGenres}
@@ -420,7 +424,7 @@ export default function Layout() {
                 options={
                   data?.tags?.map((tag) => ({
                     value: tag.id,
-                    label: tag.tag_name,
+                    label: tag.name,
                   })) || []
                 }
                 value={selectedTags}

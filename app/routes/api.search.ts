@@ -1,6 +1,7 @@
 import { prisma } from '~/.server/prisma';
 import { profileSearch, projectSearch, workSearch, competitionSearch } from '@prisma/client/sql';
 import { Route } from './+types/api.search';
+import { getLocaleFromRequest, getLocalizedGenres, getLocalizedTags } from '~/lib/i18n.server';
 
 interface SearchResults {
   users: any[];
@@ -43,6 +44,7 @@ async function executeSearchWithTimeout<T>(fn: () => Promise<T[]>, timeoutMs: nu
 }
 
 export async function loader({ request }: Route.LoaderArgs): Promise<SearchResults> {
+  const locale = getLocaleFromRequest(request);
   const url = new URL(request.url);
   const query = url.searchParams.get('q') || '';
   const type = url.searchParams.get('type') || 'all';
@@ -105,6 +107,24 @@ export async function loader({ request }: Route.LoaderArgs): Promise<SearchResul
     ]);
 
     // Process results
+    const [allGenres, allTags] = await Promise.all([
+      getLocalizedGenres(locale),
+      getLocalizedTags(locale),
+    ]);
+    const genreNameMap = new Map(allGenres.map((g) => [g.id, g.name]));
+    const tagNameMap = new Map(allTags.map((t) => [t.id, t.name]));
+
+    function localizeGenresInItem(item: any): any {
+      if (!item) return item;
+      const genres = Array.isArray(item.genres)
+        ? item.genres.map((g: any) => (g && g.id ? { ...g, name: genreNameMap.get(g.id) ?? g.slug } : g))
+        : item.genres;
+      const tags = Array.isArray(item.tags)
+        ? item.tags.map((t: any) => (t && t.id ? { ...t, name: tagNameMap.get(t.id) ?? t.slug } : t))
+        : item.tags;
+      return { ...item, genres, tags };
+    }
+
     if (userResults.length > 0) {
       results.totals.users = Number(userResults[0].total_count) || 0;
       results.users = userResults;
@@ -112,12 +132,12 @@ export async function loader({ request }: Route.LoaderArgs): Promise<SearchResul
 
     if (projectResults.length > 0) {
       results.totals.projects = Number(projectResults[0].total_count) || 0;
-      results.projects = projectResults;
+      results.projects = projectResults.map(localizeGenresInItem);
     }
 
     if (workResults.length > 0) {
       results.totals.works = Number(workResults[0].total_count) || 0;
-      results.works = workResults;
+      results.works = workResults.map(localizeGenresInItem);
     }
 
     if (competitionResults.length > 0) {

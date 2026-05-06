@@ -102,9 +102,19 @@ model post_like {
 
 model project_genre {
   id                   Int                    @id @default(autoincrement())
-  genre_name           String                 @unique
+  slug                 String                 @unique
+  translations         genre_translation[]
   project_projectgenre project_projectgenre[]
   work_projectgenre    work_projectgenre[]
+}
+
+model genre_translation {
+  genre_id   Int
+  language   String
+  genre_name String
+  genre      project_genre @relation(fields: [genre_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([genre_id, language])
 }
 
 model project_projectgenre {
@@ -128,9 +138,19 @@ model project_projecttag {
 
 model project_tag {
   id                 Int                  @id @default(autoincrement())
-  tag_name           String               @unique
+  slug               String               @unique
+  translations       tag_translation[]
   project_projecttag project_projecttag[]
   work_projecttag    work_projecttag[]
+}
+
+model tag_translation {
+  tag_id   Int
+  language String
+  tag_name String
+  tag      project_tag @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tag_id, language])
 }
 
 model sessions {
