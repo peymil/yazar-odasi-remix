@@ -12,6 +12,9 @@ export async function getProject(
         where: {
           profile_id: profileId,
         },
+        orderBy: {
+          index: 'asc',
+        },
         include: {
           project_projectgenre: {
             include: {

@@ -5,6 +5,22 @@ import { prisma } from '~/.server/prisma';
 import { getProject } from '../user.$userId.profile/service.server';
 import { getSessionFromRequest } from '~/.server/auth';
 import { EditIcon } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useState, useCallback } from 'react';
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   invariant(params.userId, 'userId is required');
@@ -37,17 +53,45 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   };
 }
 
-function EditableItem({
+function SortableProjectItem({
+  id,
   title,
   type,
   onEdit,
 }: {
+  id: number;
   title: string;
   type: string;
   onEdit: () => void;
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   return (
-    <div className="flex w-full py-2">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex w-full py-2 items-center gap-2"
+    >
+      <button
+        {...listeners}
+        {...attributes}
+        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-[#F36D31] transition-colors flex-shrink-0 touch-none"
+        aria-label="Sırala"
+        type="button"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="3" width="12" height="1.5" rx="0.75" fill="currentColor" />
+          <rect x="2" y="7.25" width="12" height="1.5" rx="0.75" fill="currentColor" />
+          <rect x="2" y="11.5" width="12" height="1.5" rx="0.75" fill="currentColor" />
+        </svg>
+      </button>
       <div className="flex-1">
         <p className="text-lg inline-block w-36">{title}</p>
         <p className="text-lg inline-block">{type}</p>
@@ -56,6 +100,7 @@ function EditableItem({
         onClick={onEdit}
         className="text-gray-400 hover:text-[#F36D31] transition-colors"
         aria-label="Düzenle"
+        type="button"
       >
         <EditIcon className="w-6 h-6" />
       </button>
@@ -64,8 +109,31 @@ function EditableItem({
 }
 
 export default function ProfileEdit() {
-  const { profile, projects } = useLoaderData<typeof loader>();
+  const { profile, projects: initialProjects } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+
+  const [projects, setProjects] = useState(initialProjects);
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = projects.findIndex((p) => p.id === active.id);
+      const newIndex = projects.findIndex((p) => p.id === over.id);
+      const reordered = arrayMove(projects, oldIndex, newIndex);
+      setProjects(reordered);
+
+      await fetch('/api/projects/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds: reordered.map((p) => p.id) }),
+      });
+    },
+    [projects]
+  );
 
   return (
     <div className="bg-white min-h-screen flex flex-col gap-7 px-10 py-8">
@@ -157,16 +225,26 @@ export default function ProfileEdit() {
       {/* Projects Section */}
       <div className="w-full max-w-6xl mx-auto">
         <div className="flex flex-col gap-4 border-2 border-[#231f20] p-6">
-          {projects.map((project) => (
-            <EditableItem
-              title={project.plot_title}
-              type={project.type}
-              key={project.id}
-              onEdit={() => {
-                navigate(`./project/${project.id}/edit`);
-              }}
-            />
-          ))}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={projects.map((p) => p.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {projects.map((project) => (
+                <SortableProjectItem
+                  key={project.id}
+                  id={project.id}
+                  title={project.plot_title}
+                  type={project.type}
+                  onEdit={() => navigate(`./project/${project.id}/edit`)}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
           {projects.length === 0 && (
             <p className="text-center text-gray-400 py-12">
               Henüz proje eklenmedi.

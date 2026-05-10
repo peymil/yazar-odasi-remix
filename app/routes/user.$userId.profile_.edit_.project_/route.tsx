@@ -61,10 +61,15 @@ export async function action({ request }: Route.ActionArgs) {
       },
     });
 
+    const projectCount = await prisma.user_profile_project.count({
+      where: { profile_id: profile.id },
+    });
+
     const project = await prisma.user_profile_project.create({
       data: {
         ...payload,
         profile_id: profile.id,
+        index: projectCount,
         user_profile_project_characters: {
           createMany: { data: user_profile_project_characters },
         },
