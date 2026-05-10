@@ -4,7 +4,7 @@ import invariant from 'tiny-invariant';
 import { prisma } from '~/.server/prisma';
 import { getProject } from '../user.$userId.profile/service.server';
 import { getSessionFromRequest } from '~/.server/auth';
-import { EditIcon } from 'lucide-react';
+import { ArrowLeft, EditIcon } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -64,8 +64,14 @@ function SortableProjectItem({
   type: string;
   onEdit: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -86,10 +92,37 @@ function SortableProjectItem({
         aria-label="Sırala"
         type="button"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="3" width="12" height="1.5" rx="0.75" fill="currentColor" />
-          <rect x="2" y="7.25" width="12" height="1.5" rx="0.75" fill="currentColor" />
-          <rect x="2" y="11.5" width="12" height="1.5" rx="0.75" fill="currentColor" />
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            x="2"
+            y="3"
+            width="12"
+            height="1.5"
+            rx="0.75"
+            fill="currentColor"
+          />
+          <rect
+            x="2"
+            y="7.25"
+            width="12"
+            height="1.5"
+            rx="0.75"
+            fill="currentColor"
+          />
+          <rect
+            x="2"
+            y="11.5"
+            width="12"
+            height="1.5"
+            rx="0.75"
+            fill="currentColor"
+          />
         </svg>
       </button>
       <div className="flex-1">
@@ -132,7 +165,7 @@ export default function ProfileEdit() {
         body: JSON.stringify({ orderedIds: reordered.map((p) => p.id) }),
       });
     },
-    [projects]
+    [projects],
   );
 
   return (
@@ -143,14 +176,7 @@ export default function ProfileEdit() {
         relative="path"
         className="flex items-center gap-3 text-[#231f20] text-xl hover:text-[#F36D31] transition-colors w-fit"
       >
-        <svg width="32" height="29" viewBox="0 0 32 29" fill="none">
-          <path
-            d="M14.5 1C14.5 1 1 7.5 1 14.5C1 21.5 14.5 28 14.5 28"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <path d="M3 14.5H31" stroke="currentColor" strokeWidth="2" />
-        </svg>
+        <ArrowLeft className="w-7 h-7" />
         <span className="font-primary">Profile dön</span>
       </Link>
 

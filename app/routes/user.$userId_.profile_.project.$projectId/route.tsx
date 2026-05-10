@@ -2,7 +2,7 @@ import { prisma } from '~/.server/prisma';
 import { Link, useLoaderData, useNavigate } from 'react-router';
 import { Route } from './+types/route';
 import { ArrowLeftIcon } from '~/components/icons';
-import { DownloadIcon, ListChevronsUpDown } from 'lucide-react';
+import { ArrowLeft, DownloadIcon, ListChevronsUpDown } from 'lucide-react';
 import { getLocaleFromRequest, getLocalizedGenres, getLocalizedTags } from '~/lib/i18n.server';
 
 function buildProjectsHref(overrides: { genre?: string | null; type?: string | null; tag?: string | null }) {
@@ -80,7 +80,7 @@ export default function ProjectDetailPage() {
         onClick={() => navigate(-1)}
         className="flex items-center gap-4 text-[#231f20] hover:text-[#F36D31] transition-colors max-w-7xl mx-auto w-full"
       >
-        <ArrowLeftIcon className="w-7 h-7" />
+        <ArrowLeft className="w-7 h-7" />
         <span className="text-xl">Profile Dön</span>
       </button>
 

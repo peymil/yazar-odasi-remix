@@ -16,11 +16,15 @@ import {
   Select,
 } from '~/components/ui/select';
 import React, { useState } from 'react';
-import { Plus, Minus, X, ChevronDown } from 'lucide-react';
+import { Plus, Minus, X, ChevronDown, ArrowLeft } from 'lucide-react';
 import { getSessionFromRequest } from '~/.server/auth';
 import { MultiSelect } from '~/components/ui/multi-select';
 import { Route } from './+types/route';
-import { getLocalizedGenres, getLocalizedTags, getLocaleFromRequest } from '~/lib/i18n.server';
+import {
+  getLocalizedGenres,
+  getLocalizedTags,
+  getLocaleFromRequest,
+} from '~/lib/i18n.server';
 
 export async function action({ request }: Route.ActionArgs) {
   const formQueryString = await request.text();
@@ -133,7 +137,7 @@ export default function Layout() {
     });
 
     const { presignedUrl } = await response.json();
-    
+
     await fetch(presignedUrl, {
       method: 'PUT',
       body: file,
@@ -143,9 +147,12 @@ export default function Layout() {
     });
 
     const publicUrl = presignedUrl.split('?')[0];
-    const publicFileUrl = "https://cdn.yazarodasi.com/project-images/" + publicUrl.split('/').pop();
+    const publicFileUrl =
+      'https://cdn.yazarodasi.com/project-images/' + publicUrl.split('/').pop();
 
-    const hiddenInput = formRef.current?.querySelector('[name="image"]') as HTMLInputElement;
+    const hiddenInput = formRef.current?.querySelector(
+      '[name="image"]',
+    ) as HTMLInputElement;
     if (hiddenInput) {
       hiddenInput.value = publicFileUrl;
     }
@@ -159,14 +166,7 @@ export default function Layout() {
         relative="path"
         className="flex items-center gap-3 text-[#231f20] text-xl hover:text-[#F36D31] transition-colors w-fit mb-8"
       >
-        <svg width="32" height="29" viewBox="0 0 32 29" fill="none">
-          <path
-            d="M14.5 1C14.5 1 1 7.5 1 14.5C1 21.5 14.5 28 14.5 28"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <path d="M3 14.5H31" stroke="currentColor" strokeWidth="2" />
-        </svg>
+        <ArrowLeft className="w-7 h-7" />
         <span className="font-ibm-plex-sans">Profile Dön</span>
       </Link>
 
@@ -177,11 +177,13 @@ export default function Layout() {
             {/* Photo Upload */}
             <div className="w-full h-[470px] bg-gray-200 mb-4 relative overflow-hidden flex items-center justify-center">
               {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <div className="text-gray-400 text-lg">
-                  Resim Önizlemesi
-                </div>
+                <div className="text-gray-400 text-lg">Resim Önizlemesi</div>
               )}
             </div>
             <Input
@@ -202,7 +204,9 @@ export default function Layout() {
 
             {/* Synopsis Section */}
             <div className="mb-12">
-              <h3 className="font-inter text-xl text-[#231f20] mb-3">Kısa Özet</h3>
+              <h3 className="font-inter text-xl text-[#231f20] mb-3">
+                Kısa Özet
+              </h3>
               <Textarea
                 name="synopsis"
                 className="border border-[#231f20] rounded p-4 h-40 font-inter text-[15px] text-[#231f20]"
@@ -213,7 +217,9 @@ export default function Layout() {
 
             {/* Similar Works Section */}
             <div className="mb-12">
-              <h3 className="font-inter text-xl text-[#231f20] mb-3">Benzer İşler</h3>
+              <h3 className="font-inter text-xl text-[#231f20] mb-3">
+                Benzer İşler
+              </h3>
               <Input
                 name="similar_works"
                 className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]"
@@ -260,7 +266,9 @@ export default function Layout() {
           <div>
             {/* İş Adı */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">İş Adı</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                İş Adı
+              </Label>
               <Input
                 name="plot_title"
                 className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]"
@@ -272,7 +280,9 @@ export default function Layout() {
 
             {/* İş Tipi */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">İş Tipi</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                İş Tipi
+              </Label>
               <div className="relative">
                 <Select name="type" required>
                   <SelectTrigger className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]">
@@ -292,7 +302,9 @@ export default function Layout() {
 
             {/* Hook */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Hook</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                Hook
+              </Label>
               <Input
                 name="hook"
                 className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20]"
@@ -304,7 +316,9 @@ export default function Layout() {
 
             {/* Logline */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Logline</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                Logline
+              </Label>
               <Textarea
                 name="logline"
                 className="border border-[#231f20] rounded px-4 py-2 font-inter text-[15px] text-[#231f20] min-h-[64px]"
@@ -315,7 +329,9 @@ export default function Layout() {
 
             {/* Tür (Genres) */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Tür</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                Tür
+              </Label>
               <MultiSelect
                 name="genres"
                 required
@@ -333,7 +349,9 @@ export default function Layout() {
 
             {/* Etiketler (Tags) */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Etiketler</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                Etiketler
+              </Label>
               <MultiSelect
                 name="tags"
                 required

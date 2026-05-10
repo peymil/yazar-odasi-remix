@@ -15,18 +15,22 @@ import {
   Select,
 } from '~/components/ui/select';
 import React, { useState, useEffect } from 'react';
-import { Plus, Minus, X, ChevronDown } from 'lucide-react';
+import { Plus, Minus, X, ChevronDown, ArrowLeft } from 'lucide-react';
 import { getSessionFromRequest } from '~/.server/auth';
 import { MultiSelect } from '~/components/ui/multi-select';
 import { Route } from './+types/route';
-import { getLocalizedGenres, getLocalizedTags, getLocaleFromRequest } from '~/lib/i18n.server';
+import {
+  getLocalizedGenres,
+  getLocalizedTags,
+  getLocaleFromRequest,
+} from '~/lib/i18n.server';
 
 export async function action({ request, params }: Route.ActionArgs) {
   const formQueryString = await request.text();
   const method = request.method;
   const body = qs.parse(formQueryString);
   const currentUser = await getSessionFromRequest(request);
-  
+
   if (!currentUser?.user) {
     throw new Error('Unauthorized');
   }
@@ -42,7 +46,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         user_id: currentUser.user.id,
       },
     });
- 
+
     // Verify the project belongs to the user
     const existingProject = await prisma.user_profile_project.findFirstOrThrow({
       where: {
@@ -79,7 +83,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       await prisma.project_projectgenre.deleteMany({
         where: { project_id: projectId },
       });
-      const validGenres = genres.filter(id => id && !isNaN(Number(id)));
+      const validGenres = genres.filter((id) => id && !isNaN(Number(id)));
       if (validGenres.length > 0) {
         await prisma.project_projectgenre.createMany({
           data: validGenres.map((genre_id) => ({
@@ -95,7 +99,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       await prisma.project_projecttag.deleteMany({
         where: { project_id: projectId },
       });
-      const validTags = tags.filter(id => id && !isNaN(Number(id)));
+      const validTags = tags.filter((id) => id && !isNaN(Number(id)));
       if (validTags.length > 0) {
         await prisma.project_projecttag.createMany({
           data: validTags.map((tag_id) => ({
@@ -114,7 +118,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const currentUser = await getSessionFromRequest(request);
-  
+
   if (!currentUser?.user) {
     throw new Error('Unauthorized');
   }
@@ -162,12 +166,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
 export default function Layout() {
   const data = useLoaderData<typeof loader>();
-  const [characters, setCharacters] = React.useState<Array<{ id: number; name?: string; description?: string }>>([
-    { id: Date.now() },
-  ]);
+  const [characters, setCharacters] = React.useState<
+    Array<{ id: number; name?: string; description?: string }>
+  >([{ id: Date.now() }]);
   const [selectedTags, setSelectedTags] = useState<(string | number)[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<(string | number)[]>([]);
-  const [imagePreview, setImagePreview] = useState<string | null>(data.project.image || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    data.project.image || null,
+  );
   const formRef = React.useRef<HTMLFormElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -189,7 +195,7 @@ export default function Layout() {
     });
 
     const { presignedUrl } = await response.json();
-    
+
     await fetch(presignedUrl, {
       method: 'PUT',
       body: file,
@@ -199,9 +205,12 @@ export default function Layout() {
     });
 
     const publicUrl = presignedUrl.split('?')[0];
-    const publicFileUrl = "https://cdn.yazarodasi.com/project-images/" + publicUrl.split('/').pop();
+    const publicFileUrl =
+      'https://cdn.yazarodasi.com/project-images/' + publicUrl.split('/').pop();
 
-    const hiddenInput = formRef.current?.querySelector('[name="image"]') as HTMLInputElement;
+    const hiddenInput = formRef.current?.querySelector(
+      '[name="image"]',
+    ) as HTMLInputElement;
     if (hiddenInput) {
       hiddenInput.value = publicFileUrl;
     }
@@ -216,16 +225,20 @@ export default function Layout() {
             id: char.id,
             name: char.name,
             description: char.description,
-          }))
+          })),
         );
       }
-      
+
       if (data.project.project_projectgenre) {
-        setSelectedGenres(data.project.project_projectgenre.map((pg) => pg.project_genre_id));
+        setSelectedGenres(
+          data.project.project_projectgenre.map((pg) => pg.project_genre_id),
+        );
       }
-      
+
       if (data.project.project_projecttag) {
-        setSelectedTags(data.project.project_projecttag.map((pt) => pt.project_tag_id));
+        setSelectedTags(
+          data.project.project_projecttag.map((pt) => pt.project_tag_id),
+        );
       }
     }
   }, [data.project]);
@@ -238,14 +251,8 @@ export default function Layout() {
         relative="path"
         className="flex items-center gap-3 text-[#231f20] text-xl hover:text-[#F36D31] transition-colors w-fit mb-8"
       >
-        <svg width="32" height="29" viewBox="0 0 32 29" fill="none">
-          <path
-            d="M14.5 1C14.5 1 1 7.5 1 14.5C1 21.5 14.5 28 14.5 28"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <path d="M3 14.5H31" stroke="currentColor" strokeWidth="2" />
-        </svg>
+        <ArrowLeft className="w-7 h-7" />
+
         <span className="font-ibm-plex-sans">Profile Dön</span>
       </Link>
 
@@ -256,11 +263,13 @@ export default function Layout() {
             {/* Photo Upload */}
             <div className="w-full h-[470px] bg-gray-200 mb-4 relative overflow-hidden flex items-center justify-center">
               {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <div className="text-gray-400 text-lg">
-                  Resim Önizlemesi
-                </div>
+                <div className="text-gray-400 text-lg">Resim Önizlemesi</div>
               )}
             </div>
             <Input
@@ -277,11 +286,17 @@ export default function Layout() {
             >
               Resim Yükle
             </Button>
-            <Input type="hidden" name="image" defaultValue={data.project.image || ''} />
+            <Input
+              type="hidden"
+              name="image"
+              defaultValue={data.project.image || ''}
+            />
 
             {/* Synopsis Section */}
             <div className="mb-12">
-              <h3 className="font-inter text-xl text-[#231f20] mb-3">Kısa Özet</h3>
+              <h3 className="font-inter text-xl text-[#231f20] mb-3">
+                Kısa Özet
+              </h3>
               <Textarea
                 name="synopsis"
                 defaultValue={data.project.synopsis || ''}
@@ -293,7 +308,9 @@ export default function Layout() {
 
             {/* Similar Works Section */}
             <div className="mb-12">
-              <h3 className="font-inter text-xl text-[#231f20] mb-3">Benzer İşler</h3>
+              <h3 className="font-inter text-xl text-[#231f20] mb-3">
+                Benzer İşler
+              </h3>
               <Input
                 name="similar_works"
                 defaultValue={data.project.similar_works || ''}
@@ -341,7 +358,9 @@ export default function Layout() {
           <div>
             {/* İş Adı */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">İş Adı</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                İş Adı
+              </Label>
               <Input
                 name="plot_title"
                 defaultValue={data.project.plot_title || ''}
@@ -354,9 +373,15 @@ export default function Layout() {
 
             {/* İş Tipi */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">İş Tipi</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                İş Tipi
+              </Label>
               <div className="relative">
-                <Select name="type" defaultValue={data.project.type || undefined} required>
+                <Select
+                  name="type"
+                  defaultValue={data.project.type || undefined}
+                  required
+                >
                   <SelectTrigger className="border border-[#231f20] rounded px-4 py-2 font-ibm-plex-sans text-[15px]">
                     <SelectValue placeholder="İş tipini seçiniz" />
                   </SelectTrigger>
@@ -375,7 +400,9 @@ export default function Layout() {
 
             {/* Hook */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Hook</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                Hook
+              </Label>
               <Input
                 name="hook"
                 defaultValue={data.project.hook || ''}
@@ -388,7 +415,9 @@ export default function Layout() {
 
             {/* Logline */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Logline</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                Logline
+              </Label>
               <Textarea
                 name="logline"
                 defaultValue={data.project.logline || ''}
@@ -400,7 +429,9 @@ export default function Layout() {
 
             {/* Tip (Genres) */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Tip</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                Tip
+              </Label>
               <MultiSelect
                 name="genres"
                 required
@@ -418,7 +449,9 @@ export default function Layout() {
 
             {/* Etiketler (Tags) */}
             <div className="mb-8">
-              <Label className="font-inter text-xl text-[#231f20] mb-2 block">Etiketler</Label>
+              <Label className="font-inter text-xl text-[#231f20] mb-2 block">
+                Etiketler
+              </Label>
               <MultiSelect
                 name="tags"
                 required
@@ -486,7 +519,7 @@ export default function Layout() {
             <Input
               type="hidden"
               name="setting"
-              defaultValue={data.project.setting || 'İstanbul, 90\'lar'}
+              defaultValue={data.project.setting || "İstanbul, 90'lar"}
             />
           </div>
         </div>
