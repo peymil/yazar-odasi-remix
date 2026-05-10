@@ -192,12 +192,28 @@ export default function ProjectDetailPage() {
             </div>
           </div>
           <div className="flex gap-[20px] max-w-7xl mx-auto w-full pt-9">
-            <button className="bg-[#F36D31] text-white px-8 py-2.5 flex items-center gap-3 hover:bg-[#E05520] transition-colors">
-              <DownloadIcon className="w-4 h-5 text-white" />
-              <span className="font-primary font-semibold text-sm">
-                Tam Metin
-              </span>
-            </button>
+            {project.pdf_url ? (
+              <a
+                href={project.pdf_url}
+                download
+                className="bg-[#F36D31] text-white px-8 py-2.5 flex items-center gap-3 hover:bg-[#E05520] transition-colors"
+              >
+                <DownloadIcon className="w-4 h-5 text-white" />
+                <span className="font-primary font-semibold text-sm">
+                  Tam Metin
+                </span>
+              </a>
+            ) : (
+              <button
+                disabled
+                className="bg-[#F36D31]/50 text-white px-8 py-2.5 flex items-center gap-3 cursor-not-allowed"
+              >
+                <DownloadIcon className="w-4 h-5 text-white" />
+                <span className="font-primary font-semibold text-sm">
+                  Tam Metin
+                </span>
+              </button>
+            )}
             <button className="bg-[#6B4E9F] text-white px-8 py-2.5 flex items-center gap-3 hover:bg-[#5A3E8F] transition-colors">
               <DownloadIcon className="w-4 h-5 text-white" />
               <span className="font-primary font-semibold text-sm">Tasdik</span>

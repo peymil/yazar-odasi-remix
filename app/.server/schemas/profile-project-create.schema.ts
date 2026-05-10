@@ -11,6 +11,7 @@ export const profileProjectCreateSchema = z.strictObject({
   genres: z.array(z.string()),
   setting: z.string(),
   image: z.string().optional(),
+  pdf_url: z.string().optional(),
   user_profile_project_characters: z.array(
     z.strictObject({
       name: z.string(),

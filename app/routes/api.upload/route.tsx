@@ -23,14 +23,14 @@ export async function action({ request }: Route.ActionArgs) {
 
   try {
     const command = new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET!,
+      Bucket: process.env.S3_BUCKET_NAME!,
       Key: key,
       Body: buffer,
       ContentType: file.type,
     });
 
     await s3Client.send(command);
-    const url = `${process.env.S3_PUBLIC_URL}/${key}`;
+    const url = `https://cdn.yazarodasi.com/${key}`;
 
     return { url };
   } catch (error) {

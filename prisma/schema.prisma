@@ -180,6 +180,7 @@ model user_profile_project {
   similar_works                   String
   setting                         String
   image                           String?
+  pdf_url                         String?
   profile_id                      Int?
   index                           Int                              @default(0)
   project_projectgenre            project_projectgenre[]

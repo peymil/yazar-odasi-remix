@@ -12,7 +12,9 @@ export const s3Client = new S3Client({
   credentials: {
     accessKeyId: process.env.S3_ACCESS_KEY_ID!,
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-  }
+  },
+  requestChecksumCalculation: 'when_required',
+  responseChecksumValidation: 'when_required',
 });
 
 export async function generatePresignedUrl(

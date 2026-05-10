@@ -121,8 +121,11 @@ export default function Layout() {
   const [selectedTags, setSelectedTags] = useState<(string | number)[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<(string | number)[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [pdfName, setPdfName] = useState<string | null>(null);
+  const [pdfUploading, setPdfUploading] = useState(false);
   const formRef = React.useRef<HTMLFormElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const pdfInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -160,6 +163,57 @@ export default function Layout() {
     ) as HTMLInputElement;
     if (hiddenInput) {
       hiddenInput.value = publicFileUrl;
+    }
+  };
+
+  const handlePdfChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPdfUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('filename', file.name);
+      formData.append('contentType', file.type);
+      formData.append('folder', 'project-documents');
+
+      const response = await fetch('/api/presigned-url', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const json = await response.json();
+      const presignedUrl: string | undefined = json.presignedUrl;
+
+      if (!response.ok || !presignedUrl) {
+        console.error('PDF presigned URL error:', json.error);
+        if (pdfInputRef.current) pdfInputRef.current.value = '';
+        return;
+      }
+
+      const putResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+
+      if (!putResponse.ok) {
+        console.error('PDF S3 upload failed:', putResponse.status);
+        if (pdfInputRef.current) pdfInputRef.current.value = '';
+        return;
+      }
+
+      const publicUrl = presignedUrl.split('?')[0];
+      const publicFileUrl =
+        'https://cdn.yazarodasi.com/project-documents/' + publicUrl.split('/').pop();
+
+      const hiddenInput = formRef.current?.querySelector(
+        '[name="pdf_url"]',
+      ) as HTMLInputElement;
+      if (hiddenInput) hiddenInput.value = publicFileUrl;
+      setPdfName(file.name);
+    } finally {
+      setPdfUploading(false);
     }
   };
 
@@ -233,20 +287,38 @@ export default function Layout() {
             </div>
 
             {/* Document Upload Buttons */}
-            <div className="flex gap-7 mb-12">
+            <div className="flex gap-7 mb-12 items-center">
+              <Input
+                ref={pdfInputRef}
+                type="file"
+                name="pdf_url"
+                onChange={handlePdfChange}
+                accept="application/pdf"
+                className="hidden"
+              />
               <Button
                 type="button"
-                className="bg-[#F36D31] hover:bg-[#E05520] text-white font-playfair-display font-semibold text-xs rounded px-6 py-2"
+                disabled={pdfUploading}
+                className="bg-[#F36D31] hover:bg-[#E05520] text-white font-playfair-display font-semibold text-xs rounded px-6 py-2 disabled:opacity-60"
+                onClick={() => pdfInputRef.current?.click()}
               >
-                leopoldun_sabunu.pdf
+                {pdfUploading ? 'Yükleniyor...' : (pdfName ?? 'PDF Yükle')}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="border border-[#F36D31] text-[#F36D31] hover:bg-[#F36D31] hover:text-white font-playfair-display font-semibold text-xs rounded px-6 py-2"
-              >
-                linki güncelle
-              </Button>
+              {pdfName && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border border-[#F36D31] text-[#F36D31] hover:bg-[#F36D31] hover:text-white font-playfair-display font-semibold text-xs rounded px-6 py-2"
+                  onClick={() => {
+                    setPdfName(null);
+                    const hiddenInput = formRef.current?.querySelector('[name="pdf_url"]') as HTMLInputElement;
+                    if (hiddenInput) hiddenInput.value = '';
+                    if (pdfInputRef.current) pdfInputRef.current.value = '';
+                  }}
+                >
+                  kaldır
+                </Button>
+              )}
             </div>
 
             {/* Save Button */}
