@@ -217,6 +217,7 @@ model user {
   password             String
   emailVerified        Boolean                  @default(false)
   email_verification   email_verification[]
+  admin                admin?
 }
 
 model email_verification {
@@ -233,4 +234,10 @@ model session {
   userId    Int
   expiresAt DateTime
   user      user     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model admin {
+  id      Int  @id @default(autoincrement())
+  user_id Int  @unique
+  user    user @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }

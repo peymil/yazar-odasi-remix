@@ -4,6 +4,43 @@ import { Route } from './+types/route';
 import { ArrowLeftIcon } from '~/components/icons';
 import { ArrowLeft, DownloadIcon, ListChevronsUpDown } from 'lucide-react';
 import { getLocaleFromRequest, getLocalizedGenres, getLocalizedTags } from '~/lib/i18n.server';
+import { useRef, useState, useLayoutEffect } from 'react';
+
+const COLLAPSED_MAX_HEIGHT = 160;
+
+function ExpandableCard({ title, children }: { title: string; children: React.ReactNode }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  useLayoutEffect(() => {
+    if (contentRef.current) {
+      setIsOverflowing(contentRef.current.scrollHeight > COLLAPSED_MAX_HEIGHT);
+    }
+  }, [children]);
+
+  return (
+    <div className="border-2 border-[#bcbec0] p-10 flex flex-col gap-4">
+      <h3 className="font-bold text-xl text-[#231f20]">{title}</h3>
+      <div
+        ref={contentRef}
+        style={isOverflowing && !expanded ? { maxHeight: COLLAPSED_MAX_HEIGHT, overflow: 'hidden' } : undefined}
+      >
+        {children}
+      </div>
+      {isOverflowing && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="self-center text-[#231f20] hover:text-yo-orange transition-colors"
+          aria-label={expanded ? 'Daralt' : 'Genişlet'}
+        >
+          <ListChevronsUpDown className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
+        </button>
+      )}
+    </div>
+  );
+}
 
 function buildProjectsHref(overrides: { genre?: string | null; type?: string | null; tag?: string | null }) {
   const searchParams = new URLSearchParams();
@@ -186,49 +223,40 @@ export default function ProjectDetailPage() {
           </p>
         </div>
         {/* Kısa Özet Card */}
-        <div className="border-2 border-[#bcbec0] p-10 flex flex-col gap-4">
-          <h3 className=" font-bold text-xl text-[#231f20]">Kısa Özet</h3>
-          <p className=" text-xl text-[#231f20] leading-normal whitespace-pre-line">
+        <ExpandableCard title="Kısa Özet">
+          <p className="text-xl text-[#231f20] leading-normal whitespace-pre-line">
             {project.synopsis}
           </p>
-          <ListChevronsUpDown />
-          </div>
-        <div className="border-2 border-[#bcbec0] p-10 flex flex-col gap-4">
-          <h3 className=" font-bold text-xl text-[#231f20]">
-            Yazar Odası&apos;nın Yorumu
-          </h3>
-          <p className=" text-xl text-[#231f20] leading-normal">
+        </ExpandableCard>
+
+        <ExpandableCard title="Yazar Odası'nın Yorumu">
+          <p className="text-xl text-[#231f20] leading-normal">
             Bu proje hakkında henüz bir değerlendirme yapılmamıştır.
           </p>
-          <ListChevronsUpDown />
-        </div>
+        </ExpandableCard>
 
         {/* Karakterler Card */}
-        <div className="border-2 border-[#bcbec0] p-10 flex flex-col gap-4">
-          <h3 className=" font-bold text-xl text-[#231f20]">Karakterler</h3>
+        <ExpandableCard title="Karakterler">
           <div className="flex flex-col gap-2">
             {project.user_profile_project_characters.map((character) => (
               <p
                 key={character.id}
-                className=" text-xl text-[#231f20] leading-normal"
+                className="text-xl text-[#231f20] leading-normal"
               >
                 {character.name} ({character.description})
               </p>
             ))}
           </div>
-          <ListChevronsUpDown />
-        </div>
+        </ExpandableCard>
 
         {/* Benzer İşler Card */}
-        <div className="border-2 border-[#bcbec0] p-10 flex flex-col gap-4 relative">
-          <h3 className=" font-bold text-xl text-[#231f20]">Benzer İşler</h3>
+        <ExpandableCard title="Benzer İşler">
           <div className="flex gap-4">
             {project.similar_works && (
-              <p className=" text-xl text-[#231f20]">{project.similar_works}</p>
+              <p className="text-xl text-[#231f20]">{project.similar_works}</p>
             )}
           </div>
-          <ListChevronsUpDown />
-        </div>
+        </ExpandableCard>
       </div>
     </div>
   );
