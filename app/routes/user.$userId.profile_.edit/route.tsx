@@ -30,17 +30,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   const projects = await getProject(profile.id);
 
-  const works = await prisma.user_profile_work.findMany({
-    where: {
-      profile_id: profile.id,
-    },
-  });
-
   return {
     user,
     profile,
     projects,
-    works,
   };
 }
 
@@ -71,7 +64,7 @@ function EditableItem({
 }
 
 export default function ProfileEdit() {
-  const { profile, projects, works } = useLoaderData<typeof loader>();
+  const { profile, projects } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
   return (
@@ -161,32 +154,8 @@ export default function ProfileEdit() {
         </div>
       </div>
 
-      {/* Works and Projects Section - Side by Side */}
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Works List */}
-        <div className="flex flex-col gap-4 border-2 border-[#231f20] p-6">
-          {works.map((work) => (
-            <EditableItem
-              key={work.id}
-              title={work.plot_title}
-              type={work.type}
-              onEdit={() => navigate(`./work/${work.id}/edit`)}
-            />
-          ))}
-          {works.length === 0 && (
-            <p className="text-center text-gray-400 py-12">
-              Henüz iş eklenmedi.
-            </p>
-          )}
-          <button
-            onClick={() => navigate('./work')}
-            className="w-full bg-[#F36D31] text-white text-[10px] font-['Playfair_Display',sans-serif] font-semibold py-3 hover:bg-[#E05520] transition-colors mt-4"
-          >
-            yeni iş ekle
-          </button>
-        </div>
-
-        {/* Projects List */}
+      {/* Projects Section */}
+      <div className="w-full max-w-6xl mx-auto">
         <div className="flex flex-col gap-4 border-2 border-[#231f20] p-6">
           {projects.map((project) => (
             <EditableItem

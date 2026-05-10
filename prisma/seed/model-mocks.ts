@@ -3,9 +3,7 @@ import {
   competition,
   user,
   user_profile,
-  user_profile_experience,
   user_profile_project,
-  user_profile_work,
   company,
   company_user,
   project_genre,
@@ -100,9 +98,7 @@ function selectRandomItems<T>(arr: T[], count: number): T[] {
 export interface MockUserResult {
   user: user;
   profile: user_profile;
-  experiences: user_profile_experience[];
   projects: user_profile_project[];
-  works: user_profile_work[];
   company_user?: company_user;
 }
 
@@ -139,26 +135,6 @@ export async function createMockUserWithProfileExperienceAndProjects(
         current_title: faker.person.jobTitle(),
       },
     });
-
-    // Create experiences
-    const experienceCount = faker.number.int({ min: 1, max: 4 });
-    const mockExperiences = await Promise.all(
-      Array.from({ length: experienceCount }, () =>
-        tx.user_profile_experience.create({
-          data: {
-            profile_id: mockProfile.id,
-            title: faker.person.jobTitle(),
-            company_name: faker.company.name(),
-            location: `${faker.location.city()}, ${faker.location.state()}`,
-            description: faker.lorem.paragraph(),
-            start_date: faker.date.past(),
-            end_date: faker.helpers.maybe(() => faker.date.recent(), {
-              probability: 0.7,
-            }),
-          },
-        })
-      )
-    );
 
     // Create projects with genres and tags
     const projectCount = faker.number.int({ min: 1, max: 3 });
@@ -216,63 +192,6 @@ export async function createMockUserWithProfileExperienceAndProjects(
       )
     );
 
-    // Create jobs (works) with genres and tags
-    const workCount = faker.number.int({ min: 1, max: 3 });
-    const mockWorks = await Promise.all(
-      Array.from({ length: workCount }, () =>
-        (async () => {
-          const work = await tx.user_profile_work.create({
-            data: {
-              profile_id: mockProfile.id,
-              plot_title: faker.lorem.words({ min: 2, max: 5 }),
-              synopsis: faker.lorem.paragraph(),
-              logline: faker.lorem.sentence(),
-              type: faker.helpers.arrayElement([
-                'Feature Film',
-                'TV Series',
-                'Short Film',
-                'Web Series',
-                'Documentary',
-              ]),
-              hook: faker.lorem.sentence(),
-              similar_works: faker.lorem.words({ min: 2, max: 4 }),
-              setting: `${faker.location.city()}, ${faker.date
-                .future()
-                .getFullYear()}`,
-            },
-          });
-
-          // Add at least 3 genres to the work
-          const workGenres = selectRandomItems(genres, Math.max(3, faker.number.int({ min: 3, max: 5 })));
-          await Promise.all(
-            workGenres.map((genre) =>
-              tx.work_projectgenre.create({
-                data: {
-                  work_id: work.id,
-                  project_genre_id: genre.id,
-                },
-              })
-            )
-          );
-
-          // Add at least 3 tags to the work
-          const workTags = selectRandomItems(tags, Math.max(3, faker.number.int({ min: 3, max: 5 })));
-          await Promise.all(
-            workTags.map((tag) =>
-              tx.work_projecttag.create({
-                data: {
-                  work_id: work.id,
-                  project_tag_id: tag.id,
-                },
-              })
-            )
-          );
-
-          return work;
-        })()
-      )
-    );
-
     let mockCompanyUser: company_user | undefined;
     if (company_id) {
       mockCompanyUser = await tx.company_user.create({
@@ -286,9 +205,7 @@ export async function createMockUserWithProfileExperienceAndProjects(
     return {
       user: mockUser,
       profile: mockProfile,
-      experiences: mockExperiences,
       projects: mockProjects,
-      works: mockWorks,
       company_user: mockCompanyUser,
     };
   });

@@ -30,15 +30,7 @@ async function main() {
           contact_email: 'test@test.local',
           about: 'This is a test account.',
           current_title: 'Senarист',
-          user_profile_experience: {
-            create: {
-              title: 'Senarист',
-              company_name: 'Test Studio',
-              location: 'İstanbul, Türkiye',
-              description: 'Test experience entry.',
-              start_date: new Date('2020-01-01'),
-            },
-          },
+
           user_profile_project: {
             create: {
               plot_title: 'Test Projesi',

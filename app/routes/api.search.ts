@@ -1,17 +1,15 @@
 import { prisma } from '~/.server/prisma';
-import { profileSearch, projectSearch, workSearch, competitionSearch } from '@prisma/client/sql';
+import { profileSearch, projectSearch, competitionSearch } from '@prisma/client/sql';
 import { Route } from './+types/api.search';
 import { getLocaleFromRequest, getLocalizedGenres, getLocalizedTags } from '~/lib/i18n.server';
 
 interface SearchResults {
   users: any[];
   projects: any[];
-  works: any[];
   competitions: any[];
   totals: {
     users: number;
     projects: number;
-    works: number;
     competitions: number;
   };
 }
@@ -59,12 +57,10 @@ export async function loader({ request }: Route.LoaderArgs): Promise<SearchResul
   const results: SearchResults = {
     users: [],
     projects: [],
-    works: [],
     competitions: [],
     totals: {
       users: 0,
       projects: 0,
-      works: 0,
       competitions: 0,
     },
   };
@@ -79,7 +75,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<SearchResul
   try {
     // Execute all searches in parallel with timeout protection
     // Each search is wrapped to not fail the entire request
-    const [userResults, projectResults, workResults, competitionResults] = await Promise.all([
+    const [userResults, projectResults, competitionResults] = await Promise.all([
       (type === 'all' || type === 'users')
         ? executeSearchWithTimeout(
             () => prisma.$queryRawTyped(profileSearch(trimmedQuery, limit, offset)),
@@ -89,12 +85,6 @@ export async function loader({ request }: Route.LoaderArgs): Promise<SearchResul
       (type === 'all' || type === 'projects')
         ? executeSearchWithTimeout(
             () => prisma.$queryRawTyped(projectSearch(trimmedQuery, limit, offset)),
-            TIMEOUT_MS
-          )
-        : Promise.resolve([]),
-      (type === 'all' || type === 'works')
-        ? executeSearchWithTimeout(
-            () => prisma.$queryRawTyped(workSearch(trimmedQuery, limit, offset)),
             TIMEOUT_MS
           )
         : Promise.resolve([]),
@@ -133,11 +123,6 @@ export async function loader({ request }: Route.LoaderArgs): Promise<SearchResul
     if (projectResults.length > 0) {
       results.totals.projects = Number(projectResults[0].total_count) || 0;
       results.projects = projectResults.map(localizeGenresInItem);
-    }
-
-    if (workResults.length > 0) {
-      results.totals.works = Number(workResults[0].total_count) || 0;
-      results.works = workResults.map(localizeGenresInItem);
     }
 
     if (competitionResults.length > 0) {

@@ -6,7 +6,7 @@ import { SearchIcon } from './icons';
 import { Button } from './ui/button';
 import { SearchResultItem } from './SearchResultItem';
 
-export type SearchType = 'all' | 'users' | 'projects' | 'works' | 'competitions';
+export type SearchType = 'all' | 'users' | 'projects' | 'competitions';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -23,7 +23,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     all: 0,
     users: 0,
     projects: 0,
-    works: 0,
     competitions: 0,
   });
 
@@ -50,7 +49,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         all: 0,
         users: 0,
         projects: 0,
-        works: 0,
         competitions: 0,
       });
     }
@@ -94,16 +92,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         all: 0,
         users: 0,
         projects: 0,
-        works: 0,
         competitions: 0,
       });
-    }, DEBOUNCE_DELAY);
-
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
+    }, 300);
   }, [searchQuery]);
 
   // Fetch search results whenever debounced query or type changes
@@ -126,7 +117,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       all: 0,
       users: 0,
       projects: 0,
-      works: 0,
       competitions: 0,
     });
   };
@@ -146,32 +136,25 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const data = fetcher.data || {
     users: [],
     projects: [],
-    works: [],
     competitions: [],
-    totals: { users: 0, projects: 0, works: 0, competitions: 0 },
+    totals: { users: 0, projects: 0, competitions: 0 },
   };
 
   let displayResults = {
     users: data.users,
     projects: data.projects,
-    works: data.works,
     competitions: data.competitions,
     totals: data.totals,
   };
 
   if (selectedType !== 'all') {
-    const typedResults = {
-      [selectedType]: data[selectedType] || [],
-    } as any;
     displayResults = {
       users: selectedType === 'users' ? data.users : [],
       projects: selectedType === 'projects' ? data.projects : [],
-      works: selectedType === 'works' ? data.works : [],
       competitions: selectedType === 'competitions' ? data.competitions : [],
       totals: {
         users: selectedType === 'users' ? data.totals?.users || 0 : 0,
         projects: selectedType === 'projects' ? data.totals?.projects || 0 : 0,
-        works: selectedType === 'works' ? data.totals?.works || 0 : 0,
         competitions: selectedType === 'competitions' ? data.totals?.competitions || 0 : 0,
       },
     };
@@ -231,14 +214,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             Projeler
           </Button>
           <Button
-            variant={selectedType === 'works' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleTypeChange('works')}
-            className="text-sm"
-          >
-            Çalışmalar
-          </Button>
-          <Button
             variant={selectedType === 'competitions' ? 'default' : 'outline'}
             size="sm"
             onClick={() => handleTypeChange('competitions')}
@@ -255,7 +230,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               <SearchIcon className="w-12 h-12 mb-4 text-gray-300" />
               <p className="text-center">Arama yapmak için yazı yazın...</p>
             </div>
-          ) : fetcher.state === 'loading' && !displayResults.users.length && !displayResults.projects.length && !displayResults.works.length && !displayResults.competitions.length ? (
+          ) : fetcher.state === 'loading' && !displayResults.users.length && !displayResults.projects.length && !displayResults.competitions.length ? (
             <div className="flex items-center justify-center h-full text-gray-500">
               <p>Aranıyor...</p>
             </div>
@@ -329,40 +304,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 </div>
               )}
 
-              {/* Works Section */}
-              {(selectedType === 'all' || selectedType === 'works') && (
-                <div>
-                  {displayResults.works.length > 0 && (
-                    <>
-                      <div className="px-4 py-2 bg-gray-50 text-sm font-semibold text-gray-700">
-                        Çalışmalar ({displayResults.totals.works})
-                      </div>
-                      <div className="divide-y">
-                        {displayResults.works.map((work) => (
-                          <SearchResultItem
-                            key={`work-${work.id}`}
-                            item={work}
-                            type="works"
-                            onClick={handleResultClick}
-                          />
-                        ))}
-                      </div>
-                      {displayResults.totals.works > displayResults.works.length && (
-                        <div className="px-4 py-2 text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleLoadMore('works')}
-                          >
-                            Daha fazla yükle
-                          </Button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-
               {/* Competitions Section */}
               {(selectedType === 'all' || selectedType === 'competitions') && (
                 <div>
@@ -401,7 +342,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               {searchQuery.trim().length >= 2 &&
                 !displayResults.users.length &&
                 !displayResults.projects.length &&
-                !displayResults.works.length &&
                 !displayResults.competitions.length && (
                   <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
                     <p className="text-center">No results found for "{searchQuery}"</p>

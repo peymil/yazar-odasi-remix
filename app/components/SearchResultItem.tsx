@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 interface SearchResultItemProps {
   item: any;
-  type: 'users' | 'projects' | 'works' | 'competitions';
+  type: 'users' | 'projects' | 'competitions';
   onClick: (href: string) => void;
 }
 
@@ -18,9 +18,6 @@ export function SearchResultItem({ item, type, onClick }: SearchResultItemProps)
         break;
       case 'projects':
         href = `/user/${item.user_id}/profile/project/${item.id}/about`;
-        break;
-      case 'works':
-        href = `/user/${item.user_id}/profile/work/${item.id}/about`;
         break;
       case 'competitions':
         href = `/competition/${item.id}`;
@@ -61,7 +58,7 @@ export function SearchResultItem({ item, type, onClick }: SearchResultItemProps)
         </div>
       )}
 
-      {(type === 'projects' || type === 'works') && (
+      {(type === 'projects') && (
         <div className="flex flex-col gap-2">
           <h3 className="font-semibold text-gray-900 truncate">{item.plot_title}</h3>
           <div className="flex items-center gap-2">

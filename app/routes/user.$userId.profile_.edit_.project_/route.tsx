@@ -279,6 +279,7 @@ export default function Layout() {
                     <SelectValue placeholder="İş tipini seçiniz" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="belirtilmemiş">belirtilmemiş</SelectItem>
                     <SelectItem value="roman">roman</SelectItem>
                     <SelectItem value="öykü">öykü</SelectItem>
                     <SelectItem value="şiir">şiir</SelectItem>
