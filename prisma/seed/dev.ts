@@ -19,7 +19,7 @@ async function main() {
   }
 
   // Test user
-  await prismaClient.user.create({
+  const testUser = await prismaClient.user.create({
     data: {
       email: 'test@test.local',
       password: await bcrypt.hash('testtest', 14),
@@ -43,6 +43,9 @@ async function main() {
             },
           },
         },
+      },
+      admin: {
+        create: {},
       },
     },
   });
